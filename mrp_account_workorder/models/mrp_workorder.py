@@ -1,0 +1,170 @@
+# -*- coding: utf-8 -*-
+# © 2020 Morwi Encoders Consulting SA DE CV
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
+
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+
+
+class MrpWorkorder(models.Model):
+    _inherit = 'mrp.workorder'
+
+    def button_start(self):
+        """Method Overriden to avoid the activity creation
+           when start the workorder"""
+
+        self.ensure_one()
+        TimeLine = self.env['mrp.workcenter.productivity']
+        if self.state in ('done', 'cancel'):
+            return True
+
+        # As button_start is automatically called in the new view
+        if self.state in ('done', 'cancel'):
+            return True
+
+        if self.production_id.state != 'progress':
+            self.production_id.write({
+                'state': 'progress',
+                'date_start': fields.Datetime.now(),
+            })
+        if self.state == 'progress':
+            return True
+        else:
+            start_date = fields.Datetime.now()
+            vals = {
+                'state': 'progress',
+                'date_start': start_date,
+                'date_planned_start': start_date,
+            }
+            if self.date_planned_finished < start_date:
+                vals['date_planned_finished'] = start_date
+            return self.write(vals)
+
+    def _compute_working_users(self):
+        for order in self:
+            order.is_user_working = True
+
+    def open_tablet_view(self):
+        res = super(MrpWorkorder, self).open_tablet_view()
+        self.button_start()
+        return res
+
+
+class MrpWorkcenterProductivity(models.Model):
+    _inherit = "mrp.workcenter.productivity"
+
+    workforce_entry_id = fields.Many2one(
+        comodel_name='account.move',
+        string='Workforce Journal Entry',
+    )
+
+    @api.multi
+    def get_account_move(self):
+        self.ensure_one()
+        action = self.env.ref('account.action_move_journal_line').read()[0]
+        action.update({
+            'context': {
+                'create': False,
+                'delete': False,
+            },
+            'domain': [('id', '=', self.workforce_entry_id.id)],
+        })
+        return action
+
+    @api.model
+    def get_operation_amount(self):
+        cost_hour = self.workcenter_id.costs_hour
+        duration = self.duration / 60.0
+        return duration * cost_hour
+
+    @api.model
+    def _prepare_workforce_lines(self, journal_id,
+                                 main_account_id, accounts_data):
+        lines = []
+        amount = self.get_operation_amount()
+        # Create balance lines
+        aml_name = (_('WorkForce ') + self.workorder_id.display_name)
+        # Main journal Entry
+        lines.append((0, 0, {
+            'name': aml_name,
+            'debit': amount,
+            'credit': 0.0,
+            'amount_currency': 0.0,
+            'currency_id': False,
+            'journal_id': journal_id.id,
+            'account_id': main_account_id.id,
+            'mrp_timeline_id': self.id,
+        }))
+        for aml_line in accounts_data:
+            lines.append((0, 0, {
+                'name': aml_name,
+                'debit': 0.0,
+                'credit': amount * (aml_line.percentage / 100),
+                'amount_currency': 0.0,
+                'currency_id': False,
+                'journal_id': journal_id.id,
+                'account_id': aml_line.account_id.id,
+                'mrp_timeline_id': self.id,
+            }))
+        return lines
+
+    @api.model
+    def create_workforce_entry(self):
+        AccountMove = self.env['account.move']
+
+        # Validates the data needed to make the account move
+        mrp_warehouse = self.env['stock.warehouse'].search([
+            ('manu_type_id', '=',
+                self.workorder_id.production_id.picking_type_id.id)])
+        main_account_id = mrp_warehouse.workforce_account_id
+        accounts_data = mrp_warehouse.workforce_account_ids
+        journal_id = mrp_warehouse.workforce_cost_journal_id
+        if not main_account_id or not accounts_data or not journal_id:
+            raise ValidationError(
+                _('Error! You must configure the workforce'
+                    ' accounts and journal on the Warehouse'))
+
+        lines = self. _prepare_workforce_lines(
+            journal_id, main_account_id, accounts_data)
+        # If the user edits the time
+        # line we only modify the existing journal entry
+        if self._context.get('is_edition'):
+            lines.extend([
+                (2, line.id) for line in self.workforce_entry_id.line_ids])
+            self.workforce_entry_id.button_cancel()
+            self.workforce_entry_id.write({
+                'date': fields.Date.context_today(self),
+                'line_ids': lines,
+            })
+            self.workforce_entry_id.post()
+            return self.workforce_entry_id
+
+        # Create the new move
+        move = AccountMove.create({
+            'journal_id': journal_id.id,
+            'date': fields.Date.context_today(self),
+            'state': 'draft',
+            'line_ids': lines,
+            'ref': self.workorder_id.display_name,
+            'mrp_timeline_id': self.id,
+        })
+        self.workforce_entry_id = move.id
+        move.post()
+
+    @api.model
+    def create(self, vals):
+        res = super(MrpWorkcenterProductivity, self).create(vals)
+        if vals.get('date_start') and vals.get('date_end'):
+            res.create_workforce_entry()
+        return res
+
+    @api.multi
+    def write(self, vals):
+        res = super(MrpWorkcenterProductivity, self).write(vals)
+        if vals.get('workforce_entry_id'):
+            return res
+
+        for rec in self.filtered('workforce_entry_id'):
+            # Update the data
+            rec.with_context(is_edition=True).create_workforce_entry()
+        return res
