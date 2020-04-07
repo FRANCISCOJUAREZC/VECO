@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-extend="BillsListView.upload_button">
+        <t t-jquery="button.o_button_upload_bill" t-operation="after">
+            <button icon="fa-cloud-download" type="button" class="btn btn-secondary o_button_xunnel_sync">
+                Xunnel sync
+            </button>
+        </t>
+    </t>
+    <t t-extend="DocumentViewer.Content">
+        <t t-jquery=".o_viewer_pdf" t-operation="after">
+            <div
+                class="mt32 o_viewer_xml" t-if="widget.activeAttachment.mimetype == 'application/xml'" 
+                t-attf-data-src="/web/content/#{widget.activeAttachment.id}?raw_html=1" />
+        </t>
+    </t>
+    <t t-name="invoice_xunnel.xml_preview">
+        <pre class="prettyprint">
+            <t t-esc="view" />
+        </pre>
+        <input type="text" id="copy" />
+    </t>
+</templates>
