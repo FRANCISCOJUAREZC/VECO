@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="view_attachment_search">
+        <field name="name">ir.attachment search inherit</field>
+        <field name="model">ir.attachment</field>
+        <field name="inherit_id" ref="base.view_attachment_search"/>
+        <field name="priority">16</field>
+        <field name="arch" type="xml">
+            <xpath expr="//search/group" position="before">
+                <field name="emitter_partner_id" string="Emitter"/>
+                <field name="invoice_total_amount" string="Total Amount"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
