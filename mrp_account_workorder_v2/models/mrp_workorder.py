@@ -59,6 +59,16 @@ class MrpWorkcenterProductivity(models.Model):
     )
 
     @api.multi
+    @api.constrains('date_start', 'date_end')
+    def _validate_date_range(self):
+        for rec in self:
+            if (rec.date_start and rec.date_end and
+                    rec.date_start > rec.date_end):
+                raise ValidationError(
+                    _('Error! The start date must be lower than the date end.')
+                )
+
+    @api.multi
     def get_account_move(self):
         self.ensure_one()
         action = self.env.ref('account.action_move_journal_line').read()[0]
@@ -75,7 +85,7 @@ class MrpWorkcenterProductivity(models.Model):
     def get_operation_amount(self):
         cost_hour = self.workcenter_id.costs_hour
         duration = self.duration / 60.0
-        return duration * cost_hour
+        return round(duration * cost_hour, 2)
 
     @api.model
     def _prepare_workforce_lines(self, journal_id,
@@ -163,8 +173,16 @@ class MrpWorkcenterProductivity(models.Model):
             })
         except Exception as e:
             raise ValidationError(
-                e.name + _('The mo with the problem is: %s') % (
-                    self.workorder_id.production_id.name))
+                msg + _('\n The MO with the problem is: %s \n'
+                        'Workorder: %s \n'
+                        'Time Record: Date Start: %s - Date End: %s \n'
+                        'User: %s') % (
+                    self.workorder_id.production_id.name,
+                    self.workorder_id.display_name,
+                    self.date_start,
+                    self.date_end,
+                    self.user_id.name)
+                )
 
         self.workforce_entry_id = move.id
         move.post()
