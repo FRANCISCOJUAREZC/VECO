@@ -141,7 +141,7 @@ class MrpWorkcenterProductivity(models.Model):
             raise ValidationError(
                 _('Error! You must configure the workforce'
                     ' accounts and journal on the Warehouse'))
-
+        date = self.date_end.date()
         lines = self. _prepare_workforce_lines(
             journal_id, main_account_id, accounts_data)
         # If the user edits the time
@@ -152,7 +152,7 @@ class MrpWorkcenterProductivity(models.Model):
             self.workforce_entry_id.button_cancel()
             try:
                 self.workforce_entry_id.write({
-                    'date': fields.Date.context_today(self),
+                    'date': date,
                     'line_ids': lines,
                 })
             except Exception as e:
@@ -165,7 +165,7 @@ class MrpWorkcenterProductivity(models.Model):
         try:
             move = AccountMove.create({
                 'journal_id': journal_id.id,
-                'date': fields.Date.context_today(self),
+                'date': date,
                 'state': 'draft',
                 'line_ids': lines,
                 'ref': self.workorder_id.display_name,
