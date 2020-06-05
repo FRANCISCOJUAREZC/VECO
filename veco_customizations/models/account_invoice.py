@@ -27,7 +27,7 @@ class AccountInvoice(models.Model):
                 res = 'PUE'
             else:
                 res = 'PPD'
-        elif len(term_ids > 1):
+        elif len(term_ids) > 1:
             res = 'PPD'
         else:
             res = ''
