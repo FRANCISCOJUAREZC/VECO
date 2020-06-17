@@ -25,10 +25,15 @@ class ProductProduct(models.Model):
             wrong_locations.append(warehouse.sam_loc_id.id)
             # Post-Production
             wrong_locations.append(warehouse.pbm_loc_id.id)
+            # Do not take care of output, pack & input locations in
+            # quant domain
+            wrong_locations.append(warehouse.wh_input_stock_loc_id.id)
+            wrong_locations.append(warehouse.wh_output_stock_loc_id.id)
+            wrong_locations.append(warehouse.wh_pack_stock_loc_id.id)
         domain_quant_loc.append(
             ('location_id', 'not in', wrong_locations))
-        domain_move_in_loc.append(
-            ('location_dest_id', 'not in', wrong_locations))
-        domain_move_out_loc.append(
-            ('location_id', 'not in', wrong_locations))
+        # domain_move_in_loc.append(
+        #     ('location_dest_id', 'not in', wrong_locations))
+        # domain_move_out_loc.append(
+        #     ('location_id', 'not in', wrong_locations))
         return (domain_quant_loc, domain_move_in_loc, domain_move_out_loc)
