@@ -64,7 +64,6 @@ class ProductProduct(models.Model):
                     'location_dest_id': move.location_dest_id.id,
                     'state': move.state,
                     'picking_id': move.picking_id.id,
-                    'lot_id': quant.lot_id.id,
                 })
             if not items.get('moves_out'):
                 to_create.append({
@@ -85,7 +84,6 @@ class ProductProduct(models.Model):
                     'location_dest_id': move.location_dest_id.id,
                     'state': move.state,
                     'picking_id': move.picking_id.id,
-                    'lot_id': quant.lot_id.id,
                 })
         report_lines = ProductForecastReport.create(to_create)
 
