@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record model="ir.ui.view" id="view_account_partner_budget_form">
+        <field name="name">view.account.partner.budget.form</field>
+        <field name="model">crossovered.budget</field>
+        <field name="inherit_id" ref="account_budget.crossovered_budget_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='analytic_account_id']" position="after">
+                <field name="partner_id"/>
+            </xpath>
+            <xpath expr="//field[@name='crossovered_budget_line']/form/group/group/field[@name='analytic_account_id']" position="after">
+                <field name="partner_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
