@@ -11,6 +11,7 @@
     'summary': 'Specific customizations for Veco',
     'depends': [
         'l10n_mx_edi',
-        'hr_expense'
+        'hr_expense',
+        'sale',
     ],
 }

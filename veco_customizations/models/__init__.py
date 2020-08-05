@@ -4,3 +4,4 @@
 
 from . import account_invoice
 from . import analytic
+from . import sale
