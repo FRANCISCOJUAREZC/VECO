@@ -214,6 +214,11 @@
                     </div>
           <!--TERMINA DATOS DE NOMINA-->
             </div>
+            <t t-if="o.company_id.modo_prueba == True">
+                        <div style="position:absolute;opacity:0.2;z-index:99;width:100%;text-align:center;margin:auto;">
+                            <center><span style="font-size:100px;color:red;">NÓMINA DE PRUEBA</span></center>
+                        </div>
+                      </t>
             <div class="row mt32 mb32" style="padding-top: 1px;" >
                     <div  class="col-6" font-size="10px;">
                     <table width="100%" border="5" frame="rhs">

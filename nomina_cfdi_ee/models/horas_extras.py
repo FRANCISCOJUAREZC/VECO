@@ -39,3 +39,8 @@ class HorasNomina(models.Model):
     @api.multi
     def unlink(self):
         raise UserError("Los registros no se pueden borrar, solo cancelar.")
+
+    def action_change_state(self):
+        for horasextras in self:
+            if horasextras.state == 'draft':
+                horasextras.action_validar()

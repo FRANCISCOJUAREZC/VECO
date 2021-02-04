@@ -227,6 +227,7 @@ class HrPayslip(models.Model):
                    ],
         string=_('No. Periodo'),)
     dias_infonavit = fields.Float('Días INFONAVIT')
+    cumpleanos = fields.Boolean(string=_('Cumpleaños'), compute='_get_cumpleanos', default = False)
 
     @api.model
     def get_worked_day_lines(self, contracts, date_from, date_to):
@@ -1619,6 +1620,22 @@ class HrPayslip(models.Model):
             self.pat_cesantia_vejez = 0
             self.pat_infonavit = 0
             self.pat_total = 0
+
+    @api.onchange('date_to')
+    def _get_cumpleanos(self):
+        if self.employee_id.birthday:
+          date_cumple = fields.Date.from_string(self.employee_id.birthday)
+          date_cumple = date_cumple.replace(self.date_to.year)
+          d_from = fields.Date.from_string(self.date_from)
+          #d_from = d_from.replace(date_cumple.year)
+          d_to = fields.Date.from_string(self.date_to)
+          #d_to = d_to.replace(date_cumple.year)
+          if d_from <= date_cumple <= d_to:
+              self.cumpleanos = True
+          else:
+              self.cumpleanos = False
+        else:
+          self.cumpleanos = False
 
 class HrPayslipMail(models.Model):
     _name = "hr.payslip.mail"
