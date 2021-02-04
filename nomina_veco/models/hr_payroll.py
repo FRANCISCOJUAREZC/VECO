@@ -136,6 +136,7 @@ class HrPayslip(models.Model):
 
             if contract.periodicidad_pago == '04':
                 dias_pagar = 15.2083
+                factor = 1.16 #7.0192/6.0
             elif contract.periodicidad_pago == '02':
                 dias_pagar = 7.0192
                 factor = 7.0192/6.0
@@ -181,11 +182,24 @@ class HrPayslip(models.Model):
                                     leave_days += hours / work_hours
                                 current_leave_struct['number_of_days'] += hours / work_hours
                 elif work_hours and contract.periodicidad_pago == '04':
-                           if holiday.holiday_status_id.name != 'DFES' and holiday.holiday_status_id.name != 'DFES_3':
-                              leave_days += hours / work_hours
-                           current_leave_struct['number_of_days'] += hours / work_hours
-                           if holiday.holiday_status_id.name == 'VAC':
-                              vac_days += 1
+                            if holiday.holiday_status_id.name == 'FJS' or holiday.holiday_status_id.name == 'FI' or holiday.holiday_status_id.name == 'FR':
+                                leave_days += (hours / work_hours)*factor
+                                current_leave_struct['number_of_days'] += (hours / work_hours)*factor
+                                if leave_days > dias_pagar:
+                                    leave_days = dias_pagar
+                                if current_leave_struct['number_of_days'] > dias_pagar:
+                                    current_leave_struct['number_of_days'] = dias_pagar
+                            elif holiday.holiday_status_id.name == 'VAC':
+                                leave_days += (hours / work_hours)
+                                current_leave_struct['number_of_days'] += (hours / work_hours)
+                                if leave_days > dias_pagar:
+                                    leave_days = dias_pagar
+                                if current_leave_struct['number_of_days'] > dias_pagar:
+                                    current_leave_struct['number_of_days'] = dias_pagar
+                            else:
+                                if holiday.holiday_status_id.name != 'DFES' and holiday.holiday_status_id.name != 'DFES_3':
+                                    leave_days += hours / work_hours
+                                current_leave_struct['number_of_days'] += hours / work_hours
 
             # compute worked days
             work_data = contract.employee_id.get_work_days_data(day_from, day_to, calendar=contract.resource_calendar_id)
