@@ -139,7 +139,7 @@ class HrPayslip(models.Model):
                 factor = 1.1667 #7.0192/6.0
             elif contract.periodicidad_pago == '02':
                 dias_pagar = 7.0192
-                factor = 7.0192/6.0
+                factor = 1.1667
             else:
                 dias_pagar = (date_to - date_from).days + 1
 
