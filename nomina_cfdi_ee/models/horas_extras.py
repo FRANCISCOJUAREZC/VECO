@@ -15,11 +15,28 @@ class HorasNomina(models.Model):
                                       ('3', 'Triple')], string='Tipo de hora extra')
     state = fields.Selection([('draft', 'Borrador'), ('done', 'Hecho'), ('cancel', 'Cancelado')], string='Estado', default='draft')
     horas = fields.Char("Horas")
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('horas.nomina'))
+
+    @api.model
+    def init(self):
+        company_id = self.env['res.company'].search([])
+        for company in company_id:
+            horas_nomina_sequence = self.env['ir.sequence'].search([('code', '=', 'horas.nomina'), ('company_id', '=', company.id)])
+            if not horas_nomina_sequence:
+                horas_nomina_sequence.create({
+                        'name': 'Horas Extras nomina',
+                        'code': 'horas.nomina',
+                        'padding': 4,
+                        'company_id': company.id,
+                    })
 
     @api.model
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('horas.nomina') or _('New')
+            if 'company_id' in vals:
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('horas.nomina') or _('New')
+            else:
+                vals['name'] = self.env['ir.sequence'].next_by_code('horas.nomina') or _('New')
         result = super(HorasNomina, self).create(vals)
         return result
 

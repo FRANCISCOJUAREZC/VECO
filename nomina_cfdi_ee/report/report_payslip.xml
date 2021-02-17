@@ -8,12 +8,12 @@
             <field name="page_height">0</field>
             <field name="page_width">0</field>
             <field name="orientation">Portrait</field>
-            <field name="margin_top">5</field>
+            <field name="margin_top">20</field>
             <field name="margin_bottom">20</field>
             <field name="margin_left">7</field>
             <field name="margin_right">7</field>
             <field name="header_line" eval="False" />
-            <field name="header_spacing">5</field>
+            <field name="header_spacing">15</field>
             <field name="dpi">90</field>
         </record>
 
@@ -69,17 +69,12 @@
     <t t-call="nomina_cfdi_ee.cfdi_payroll_layout">
         <t t-set="o" t-value="o.with_context({'lang':'es_MX'})" />
             <div class="page" style="padding-top: 1px;">
-		       <div class="row">
-
-          <!--INICIA LOGO DE LA EMPRESA-->
-					     <div class="col-4">
-						           <img t-if="o.company_id.logo" t-att-src="'data:image/png;base64,%s' % to_text(o.company_id.logo)"
-							                  style="max-height: 130px;max-width: 130px;" />
-					     </div>
-          <!--TERMINA LOGO DE LA EMPRESA-->
-
-          <!--EMPIEZA DATOS DEL EMISOR-->
-                       <div class="col-4" font-size="20px;">
+		       <div class="row" font-size="10px;" >
+					<div class="col-2">
+						<img t-if="o.company_id.logo" t-att-src="'data:image/png;base64,%s' % to_text(o.company_id.logo)"
+							style="max-height: 130px;max-width: 130px;" />
+					</div>
+                       <div class="col-5" font-size="10px;">
                           <div>
                              <strong>Emisor</strong>
                           </div>
@@ -93,11 +88,7 @@
                              <strong>Registro Patronal</strong>: <span t-field="o.employee_id.registro_patronal" />
                           </div>
                        </div>
-
-            <!--TERMINA DATOS DEL EMISOR-->
-
-            <!--INFORMACIÓN GENERAL NOMINA-->
-						<div class="col-4" font-size="20px;">
+			<div class="col-4" font-size="10px;">
 							<div>
 								<strong>Folio:</strong>
 								<strong><span t-if="not o.company_id.serie_nomina=='false'" t-field="o.company_id.serie_nomina" /></strong>
@@ -111,16 +102,15 @@
 								<strong>Lugar de expedición: </strong>
 								<span t-field="o.company_id.partner_id.zip"/>
 							</div>
-							<div>
+							<!--<div>
 								<strong>Tipo de comprobante: </strong>
 								<span t-field="o.tipo_comprobante" />
-							</div>
+							</div>-->
 							<div>
 								<strong>Periodo: </strong>
 								<span t-field="o.date_from" /> - <span t-field="o.date_to" />
 							</div>
-					  </div>
-            <!--TERMINA INFORMACIÓN GENERAL DE LA NOMINA-->
+                       </div>
 					</div>
             <t t-set="dias_trabajados" t-value="0.0"/>
             <t t-set="dias_vacaiones" t-value="0.0"/>
@@ -161,9 +151,8 @@
             </t>
 
             <h2>Recibo de nómina</h2>
-            <div class="row mt32 mb32" style="padding-top: 2px;">
-        <!--PARTE DEL RECEPTOR-->
-					<div  class="col-5"  font-size="18px;">
+            <div class="row mt32 mb32"  font-size="10px;" style="padding-top: 2px;">
+			<div  class="col-5"  font-size="10px;">
                        <div >
                           <strong>Receptor</strong>
                        </div>
@@ -186,10 +175,7 @@
                           <strong>Número de empleado</strong>: <span t-field="o.employee_id.no_empleado" />
                        </div>
                     </div>
-          <!--TERMINA PARTE DEL RECEPTOR-->
-
-          <!--PARTE DATOS DE NOMINA-->
-					<div class="col-7" font-size="18px;">
+                    <div class="col-7" font-size="10px;">
                        <div >
                           <strong>Datos de la nómina</strong>
                        </div>
@@ -212,7 +198,6 @@
                           <strong>Total de días laborados</strong>: <span t-esc="dias_trabajados" />
                        </div>
                     </div>
-          <!--TERMINA DATOS DE NOMINA-->
             </div>
             <t t-if="o.company_id.modo_prueba == True">
                         <div style="position:absolute;opacity:0.2;z-index:99;width:100%;text-align:center;margin:auto;">
@@ -321,19 +306,19 @@
 
         <!--TERMINA TABLA OTROS PAGOS-->
 
-				<table  width="100%"  font-size="16px;">
+				<table  width="100%"  font-size="10px;">
 						<colgroup>
 							<col width='60%' />
 							<col width='10%' />
 							<col width='30%' />
 						</colgroup>
 					<tr>
-						<td font-size="16px;">
+						<td font-size="10px;">
 					Recibí de esta empresa la cantidad que señala este recibo de pago, estando conforme con las
                     percepciones y las retenciones descritas, por lo que certifico que no se me adeuda cantidad alguna
                     por ningún concepto. <br/> <br/>
 							<center>______________________________</center>
-                    <center font-size="16px;"><p><strong>Firma del empleado</strong></p></center>
+                    <center font-size="10px;"><p><strong>Firma del empleado</strong></p></center>
 						</td>
 						<td>
 						</td>
@@ -344,7 +329,7 @@
 							<col width='30%' />
 						</colgroup>
 								<tr>
-									<td font-size="16px;">
+									<td font-size="10px;">
 										Total de percepciones:
 									</td>
 									<td class="text-right">
@@ -360,7 +345,7 @@
 									</td>
 								</tr>
 								<tr>
-									<td font-size="16px;">
+									<td font-size="10px;">
 										Total de deducciones:
 									</td>
 									<td class="text-right">
@@ -389,15 +374,11 @@
 				</table>
 
 				<div class="row" style="page-break-inside: avoid">
-            <!--INICIA CODIGO QR-->
-						<div class="col-5">
+						<div class="col-1">
 						<img t-if="o.qrcode_image" t-att-src="'data:image/png;base64,%s' % to_text(o.qrcode_image)"
 								style="height: 190px;width: 190px;padding-left:10px;" />
 						</div>
-            <!--TERMINA CODIGO QR-->
-
-            <!--CADENA ORIGINAL>  -->
-          <div class="col-7" style="font-size:11px;">
+          <div class="col-9" style="font-size:11px;">
             <div>
               <strong>Cadena Original del Complemento digital del SAT</strong>
                 <span t-field="o.cadena_origenal" style="word-break:break-word;" />
@@ -438,7 +419,27 @@
             </div>
         </div>
 
-        <!--DOCUMENTO LEGAL-->
+         <div class="row">
+            <div class="col-3" style="font-size:10px;">
+              <strong>Forma de pago</strong><br/>
+                <span t-field="o.forma_pago"/>
+            </div>
+            
+            <div class="col-3" style="font-size:10px;">
+              <strong>Tipo de comprobante</strong><br/>
+                <span t-field="o.tipo_comprobante"/>
+            </div>
+            
+            <div class="col-3" style="font-size:10px;">
+              <strong>Método de pago</strong><br/>
+                <span t-field="o.methodo_pago"/>
+            </div> 
+
+            <div class="col-3" style="font-size:10px;">
+              <strong>Uso CFDI(cliente)</strong><br/>
+                <span t-field="o.uso_cfdi"/>
+            </div>
+        </div>
 					<p>
 						<center>
 							<strong>ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI</strong>
