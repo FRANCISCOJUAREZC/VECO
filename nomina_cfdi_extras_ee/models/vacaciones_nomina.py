@@ -17,6 +17,7 @@ class VacacionesNomina(models.Model):
     dias = fields.Integer('Días')
     dias_de_vacaciones_disponibles = fields.Integer("Dias de vacaciones disponibles")
     state = fields.Selection([('draft', 'Borrador'), ('done', 'Hecho'), ('cancel', 'Cancelado')], string='Estado', default='draft')
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('vacaciones.nomina'))
     
     @api.onchange('employee_id')
     def _onchange_employee_id(self):
@@ -30,17 +31,32 @@ class VacacionesNomina(models.Model):
         if self.dias and self.dias > self.dias_de_vacaciones_disponibles:
             raise Warning("No tiene suficientes dias de vacaciones")
             
+    @api.model
+    def init(self):
+        company_id = self.env['res.company'].search([])
+        for company in company_id:
+            vacaciones_nomina_sequence = self.env['ir.sequence'].search([('code', '=', 'vacaciones.nomina'), ('company_id', '=', company.id)])
+            if not vacaciones_nomina_sequence:
+                vacaciones_nomina_sequence.create({
+                        'name': 'Vacaciones nomina',
+                        'code': 'vacaciones.nomina',
+                        'padding': 4,
+                        'company_id': company.id,
+                    })
         
     @api.model
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('vacaciones.nomina') or _('New')
+            if 'company_id' in vals:
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('vacaciones.nomina') or _('New')
+            else:
+                vals['name'] = self.env['ir.sequence'].next_by_code('vacaciones.nomina') or _('New')
         result = super(VacacionesNomina, self).create(vals)
         return result
     
     @api.multi
     def action_validar(self):
-        leave_type = self.env.ref('nomina_cfdi_extras_ee.hr_holidays_status_vac', False)
+        leave_type = self.company_id.leave_type_vac or False
         if self.fecha_inicial:
             date_from = self.fecha_inicial
             date_to = date_from + relativedelta(days=self.dias - 1)

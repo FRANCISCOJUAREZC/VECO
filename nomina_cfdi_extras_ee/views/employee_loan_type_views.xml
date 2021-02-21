@@ -23,6 +23,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <field name="interest_type" attrs="{'invisible':[('is_apply_interest','!=',True)]}"/>
                             <field name="periodo_de_pago"/>
                             <field name="tipo_deduccion"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
                     <group>

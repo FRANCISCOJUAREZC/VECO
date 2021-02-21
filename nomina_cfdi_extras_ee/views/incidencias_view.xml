@@ -47,6 +47,7 @@
                          <field name="tipo_de_baja" attrs="{'readonly' : [('state', '!=','draft')],'invisible': [('tipo_de_incidencia','not in',('Baja'))]}"/>
                          <field name="contract_id" attrs="{'readonly' : [('state', '!=','draft')], 'invisible': [('tipo_de_incidencia','not in',('Cambio salario','Reingreso'))], 
                                                    'required': [('tipo_de_incidencia', 'in',('Cambio salario','Reingreso'))]}" domain="[('employee_id','=',employee_id)]"/>
+                     	<field name="company_id" groups="base.group_multi_company"/>
                      </group>
                  </group>
              </sheet>

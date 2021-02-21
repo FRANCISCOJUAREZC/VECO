@@ -34,6 +34,7 @@ class IncidenciasNomina(models.Model):
                                       ('9','Jubilación'),
                                       ('A', 'Pensión')], string='Tipo de baja')
     contract_id = fields.Many2one('hr.contract', string='Contrato')
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('incidencias.nomina'))
 
     @api.multi
     @api.onchange('tipo_de_incidencia')
@@ -119,9 +120,25 @@ class IncidenciasNomina(models.Model):
         return sueldo_diario_integrado
 
     @api.model
+    def init(self):
+        company_id = self.env['res.company'].search([])
+        for company in company_id:
+            incidencias_nomina_sequence = self.env['ir.sequence'].search([('code', '=', 'incidencias.nomina'), ('company_id', '=', company.id)])
+            if not incidencias_nomina_sequence:
+                incidencias_nomina_sequence.create({
+                        'name': 'Incidencias nomina',
+                        'code': 'incidencias.nomina',
+                        'padding': 4,
+                        'company_id': company.id,
+                    })
+
+    @api.model
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('incidencias.nomina') or _('New')
+            if 'company_id' in vals:
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('incidencias.nomina') or _('New')
+            else:
+                vals['name'] = self.env['ir.sequence'].next_by_code('incidencias.nomina') or _('New')
         result = super(IncidenciasNomina, self).create(vals)
         return result
 
