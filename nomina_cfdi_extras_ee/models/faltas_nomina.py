@@ -20,28 +20,11 @@ class FaltasNomina(models.Model):
                                       ('retardo', 'Por retardos')], string='Tipo de falta')
     state = fields.Selection([('draft', 'Borrador'), ('done', 'Hecho'), ('cancel', 'Cancelado')], string='Estado', default='draft')
     dias = fields.Integer("Dias")
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('faltas.nomina'))
-
-    @api.model
-    def init(self):
-        company_id = self.env['res.company'].search([])
-        for company in company_id:
-            faltas_sequence = self.env['ir.sequence'].search([('code', '=', 'faltas.nomina'), ('company_id', '=', company.id)])
-            if not faltas_sequence:
-                faltas_sequence.create({
-                        'name': 'Faltas nomina',
-                        'code': 'faltas.nomina',
-                        'padding': 4,
-                        'company_id': company.id,
-                    })
 
     @api.model
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
-            if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('faltas.nomina') or _('New')
-            else:
-                vals['name'] = self.env['ir.sequence'].next_by_code('faltas.nomina') or _('New')
+            vals['name'] = self.env['ir.sequence'].next_by_code('faltas.nomina') or _('New')
         result = super(FaltasNomina, self).create(vals)
         return result
 
@@ -58,13 +41,13 @@ class FaltasNomina(models.Model):
     def action_validar(self):
         leave_type = None
         if self.tipo_de_falta=='Justificada con goce de sueldo':
-            leave_type = self.company_id.leave_type_fjc or False
+            leave_type = self.env.ref('nomina_cfdi_extras_ee.hr_holidays_status_fjc', False)
         elif self.tipo_de_falta=='Justificada sin goce de sueldo':
-            leave_type = self.company_id.leave_type_fjs or False
+            leave_type = self.env.ref('nomina_cfdi_extras_ee.hr_holidays_status_fjs', False)
         elif self.tipo_de_falta=='Injustificada':
-            leave_type = self.company_id.leave_type_fi or False
+            leave_type = self.env.ref('nomina_cfdi_extras_ee.hr_holidays_status_fi', False)
         elif self.tipo_de_falta=='retardo':
-            leave_type = self.company_id.leave_type_fr or False
+            leave_type = self.env.ref('nomina_cfdi_extras_ee.hr_holidays_status_fr', False)
 
         date_from = self.fecha_inicio.strftime('%Y-%m-%d') +' 00:00:00'
         date_to = self.fecha_fin.strftime('%Y-%m-%d') +' 23:59:59'
@@ -128,9 +111,3 @@ class FaltasNomina(models.Model):
     @api.multi
     def unlink(self):
         raise UserError("Los registros no se pueden borrar, solo cancelar.")
-
-    def action_change_state(self):
-        for falta in self:
-            if falta.state == 'draft':
-                #print('ESTADO')
-                falta.action_validar()

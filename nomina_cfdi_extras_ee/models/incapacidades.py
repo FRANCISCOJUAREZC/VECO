@@ -25,28 +25,11 @@ class IncapacidadesNomina(models.Model):
     descripcion = fields.Text('Descripción')
     state = fields.Selection([('draft', 'Borrador'), ('done', 'Hecho'), ('cancel', 'Cancelado')], string='Estado', default='draft')
     folio_incapacidad = fields.Char('Folio de incapacidad')
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('incapacidades.nomina'))
-
-    @api.model
-    def init(self):
-        company_id = self.env['res.company'].search([])
-        for company in company_id:
-            incapacidades_nomina_sequence = self.env['ir.sequence'].search([('code', '=', 'incapacidades.nomina'), ('company_id', '=', company.id)])
-            if not incapacidades_nomina_sequence:
-                incapacidades_nomina_sequence.create({
-                        'name': 'Incapacidades nomina',
-                        'code': 'incapacidades.nomina',
-                        'padding': 4,
-                        'company_id': company.id,
-                    })
 
     @api.model
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
-            if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('incapacidades.nomina') or _('New')
-            else:
-                vals['name'] = self.env['ir.sequence'].next_by_code('incapacidades.nomina') or _('New')
+            vals['name'] = self.env['ir.sequence'].next_by_code('incapacidades.nomina') or _('New')
         result = super(IncapacidadesNomina, self).create(vals)
         return result
 
@@ -61,11 +44,11 @@ class IncapacidadesNomina(models.Model):
     def action_validar(self):
         leave_type = None
         if self.ramo_de_seguro=='Riesgo de trabajo':
-            leave_type = self.company_id.leave_type_rie_id or False
+            leave_type = self.env.ref('nomina_cfdi_extras_ee.hr_holidays_status_inc_rt', False)
         elif self.ramo_de_seguro=='Enfermedad general':
-            leave_type = self.company_id.leave_type_enf_id or False
+            leave_type = self.env.ref('nomina_cfdi_extras_ee.hr_holidays_status_inc_eg', False)
         elif self.ramo_de_seguro=='Maternidad':
-            leave_type = self.company_id.leave_type_mat_id or False
+            leave_type = self.env.ref('nomina_cfdi_extras_ee.hr_holidays_status_inc_mat', False)
 
         if self.fecha:
             date_from = self.fecha

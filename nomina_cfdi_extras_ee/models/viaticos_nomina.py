@@ -37,29 +37,12 @@ class ViaticosNomina(models.Model):
     
     entregas_ids = fields.One2many('entregas.viaticos.nomina', 'viaticos_id', 'Entregas')
     comprobaciones_ids = fields.One2many('comprobaciones.viaticos.nomina', 'viaticos_id', 'Comprobaciones')
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('viaticos.nomina'))
-    
-    @api.model
-    def init(self):
-        company_id = self.env['res.company'].search([])
-        for company in company_id:
-            viaticos_nomina_sequence = self.env['ir.sequence'].search([('code', '=', 'viaticos.nomina'), ('company_id', '=', company.id)])
-            if not viaticos_nomina_sequence:
-                viaticos_nomina_sequence.create({
-                        'name': 'Viaticos nomina',
-                        'code': 'viaticos.nomina',
-                        'padding': 4,
-                        'company_id': company.id,
-                    })
     
     @api.model
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
-            if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code(
-                    'viaticos.nomina') or _('New')
-            else:
-                vals['name'] = self.env['ir.sequence'].next_by_code('viaticos.nomina') or _('New')
+            vals['name'] = \
+                self.env['ir.sequence'].next_by_code('viaticos.nomina') or _('New')
         return super(ViaticosNomina, self).create(vals)
     
     @api.multi

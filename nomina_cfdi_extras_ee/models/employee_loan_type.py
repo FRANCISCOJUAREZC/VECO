@@ -28,8 +28,7 @@ class employee_loan_type(models.Model):
                                        ('5','Descuento periodico 4'),
                                        ('6','Descuento periodico 5'),
                                        ('7','Descuento periodico 6')], string='Tipo de deducción', required="1")
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('employee.loan.type'))
-
+    
     @api.constrains('is_apply_interest','interest_rate','interest_type')
     def _check_interest_rate(self):
         for loan in self:

@@ -8,7 +8,7 @@ Create new module for Odoo 11 called nomina_cfdi_extras_ee.
 This new module will create 2 new models: incidencias and incapacidades, they will have a tree view and will be located on Employees view. For both create sequential numbers for each register. Will have only 2 states: draft and done.
     ''',
     'author': 'IT Admin',
-    'version': '12.13',
+    'version': '12.12',
     'category': 'Employees',
     'depends': [
         'hr','nomina_cfdi_ee',"account_cancel",

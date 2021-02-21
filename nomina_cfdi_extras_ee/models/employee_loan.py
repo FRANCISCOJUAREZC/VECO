@@ -66,7 +66,10 @@ class employee_loan(models.Model):
                     end_date = self.get_quincenal_end_date(start_date, loan.term)
                 else:
                     end_date = start_date+relativedelta(months=self.term)
-
+                    
+                
+                #end_date = start_date+relativedelta(months=self.term)
+                
                 loan.end_date = end_date.strftime("%Y-%m-%d")
 
     name = fields.Char('Name',default='/',copy=False)
@@ -97,8 +100,14 @@ class employee_loan(models.Model):
     notes = fields.Text('Razón', required="1")
     is_close = fields.Boolean('Esta cerrado',compute='is_ready_to_close')
     move_id = fields.Many2one('account.move',string='Diario')
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('employee.loan'))
 
+#     @api.onchange('loan_type_id') #,'term','interest_rate','interest_type'
+#     def onchange_term_interest_type(self):
+#         if self.loan_type_id:
+#             self.term = self.loan_type_id.loan_term
+#             self.interest_rate = self.loan_type_id.interest_rate
+#             self.interest_type = self.loan_type_id.interest_type
+    
     @api.depends('remaing_amount')
     def is_ready_to_close(self):
         for loan in self:
@@ -177,21 +186,17 @@ class employee_loan(models.Model):
     @api.depends('loan_amount','interest_rate','is_apply_interest')
     def get_interest_amount(self):
         for loan in self:
-            if loan.loan_type_id:
-                if loan.loan_type_id.is_apply_interest:
-                    if loan.interest_rate and loan.loan_amount and loan.loan_type_id.interest_type == 'liner':
-                        loan.interest_amount = (loan.loan_amount  * loan.loan_type_id.interest_rate)/100 #* loan.term/12
-                    if loan.interest_rate and loan.loan_amount and loan.loan_type_id.interest_type == 'reduce':
-                        loan.interest_amount = (loan.remaing_amount  * loan.loan_type_id.interest_rate)/100 #* loan.term/12
-                        amt=0.0
-                        for line in loan.installment_lines:
-                            amt += line.ins_interest
-                        if amt:
-                            loan.interest_amount = amt
-                else:
-                    loan.interest_amount = 0
-            else:
-                loan.interest_amount = 0
+            if loan.is_apply_interest:
+                if loan.interest_rate and loan.loan_amount and loan.interest_type == 'liner':
+                    loan.interest_amount = (loan.loan_amount  * loan.interest_rate)/100 #* loan.term/12
+                if loan.interest_rate and loan.loan_amount and loan.interest_type == 'reduce':
+                    loan.interest_amount = (loan.remaing_amount  * loan.interest_rate)/100 #* loan.term/12
+                    amt=0.0
+                    for line in loan.installment_lines:
+                        amt += line.ins_interest
+                    if amt:
+                        loan.interest_amount = amt
+
 
     # @api.depends('interest_amount')
     # def get_install_interest_amount(self):
@@ -217,10 +222,7 @@ class employee_loan(models.Model):
                     base_url += '/web/login?db=%s&login=%s&key=%s#id=%s&model=%s' % (
                     self._cr.dbname, '', '', loan.id, 'employee.loan')
                     loan.loan_url = base_url
-                else:
-                    loan.loan_url = ''
-            else:
-                loan.loan_url = ''
+
 
     @api.depends('term','loan_amount')
     def get_installment_amount(self):
@@ -277,9 +279,33 @@ class employee_loan(models.Model):
 
     @api.multi
     def action_send_request(self):
+#        if not self.manager_id:
+#            raise ValidationError(_('Por favor seleccione el gerente del departamento'))
         self.state = 'hr_approval'
         if not self.installment_lines:
             self.compute_installment()
+        #if self.manager_id and self.manager_id.work_email:
+        #    ir_model_data = self.env['ir.model.data']
+        #    template_id = ir_model_data.get_object_reference('nomina_cfdi_extra_ee',
+        #                                                          'dev_dep_manager_request')
+        #    mtp = self.env['mail.template']
+        #    template_id = mtp.browse(template_id[1])
+        #    template_id.write({'email_to': self.manager_id.work_email})
+        #    s=template_id.send_mail(self.ids[0], True)
+
+#    @api.multi
+#    def get_hr_manager_email(self):
+#        group_id = self.env['ir.model.data'].get_object_reference('hr', 'group_hr_manager')[1]
+#        group_ids = self.env['res.groups'].browse(group_id)
+#        email=''
+#        if group_ids:
+#            employee_ids = self.env['hr.employee'].search([('user_id', 'in', group_ids.users.ids)])
+#            for emp in employee_ids:
+#                if email:
+#                    email = email+','+emp.work_email
+#                else:
+#                    email= emp.work_email
+#        return email
 
     @api.multi
     def dep_manager_approval_loan(self):
@@ -337,7 +363,7 @@ class employee_loan(models.Model):
                lst.append((0,0,{
                                'account_id':self.loan_type_id and self.loan_type_id.interest_account.id,
                                'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
-                               'name':str(self.name)+' - '+'Interes',
+                               'name':str(self.name)+' - '+'Interest',
                                'credit':self.interest_amount or 0.0,
                            }))
 
@@ -376,30 +402,12 @@ class employee_loan(models.Model):
     @api.multi
     def action_done_loan(self):
         self.state = 'done'
-        
-    @api.model
-    def init(self):
-        company_id = self.env['res.company'].search([])
-        for company in company_id:
-            employee_loan_sequence = self.env['ir.sequence'].search([('code', '=', 'employee.loan'), ('company_id', '=', company.id)])
-            if not employee_loan_sequence:
-                employee_loan_sequence.create({
-                        'name': 'Secuencia de prestamo',
-                        'code': 'employee.loan',
-                        'prefix': 'PRES/',
-                        'padding': 4,
-                        'company_id': company.id,
-                    })
 
     @api.model
     def create(self, vals):
         if vals.get('name', '/') == '/':
-            if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code(
-                    'employee.loan') or '/'
-            else:
-                vals['name'] = self.env['ir.sequence'].next_by_code(
-                    'employee.loan') or '/'
+            vals['name'] = self.env['ir.sequence'].next_by_code(
+                'employee.loan') or '/'
         return super(employee_loan, self).create(vals)
 
     @api.multi

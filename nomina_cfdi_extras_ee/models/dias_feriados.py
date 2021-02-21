@@ -16,28 +16,11 @@ class DiasFeriados(models.Model):
     fecha = fields.Date('Fecha')
     state = fields.Selection([('draft', 'Borrador'), ('done', 'Hecho'), ('cancel', 'Cancelado')], string='Estado', default='draft')
     tipo = fields.Selection([('doble', 'Doble'), ('triple', 'Triple')], string='Tipo', default='doble')
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('dias.feriados'))
-
-    @api.model
-    def init(self):
-        company_id = self.env['res.company'].search([])
-        for company in company_id:
-            dias_feriados_sequence = self.env['ir.sequence'].search([('code', '=', 'dias.feriados'), ('company_id', '=', company.id)])
-            if not dias_feriados_sequence:
-                dias_feriados_sequence.create({
-                        'name': 'Dias feriados',
-                        'code': 'dias.feriados',
-                        'padding': 4,
-                        'company_id': company.id,
-                    })
 
     @api.model
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
-            if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('dias.feriados') or _('New')
-            else:
-                vals['name'] = self.env['ir.sequence'].next_by_code('dias.feriados') or _('New')
+            vals['name'] = self.env['ir.sequence'].next_by_code('dias.feriados') or _('New')
         result = super(DiasFeriados, self).create(vals)
         return result
 
@@ -70,9 +53,9 @@ class DiasFeriados(models.Model):
 
         leave_type = None
         if self.tipo=='doble':
-           leave_type = self.company_id.leave_type_dfes or False
+           leave_type = self.env.ref('nomina_cfdi_extras_ee.hr_holidays_status_dfest', False)
         elif self.tipo=='triple':
-           leave_type = self.company_id.leave_type_dfes3 or False
+           leave_type = self.env.ref('nomina_cfdi_extras_ee.hr_holidays_status_dfest3', False)
         if not leave_type:
            leave_type = self.env['hr.holidays.status'].create({'name': 'DFES', 'limit': True})
 
@@ -124,8 +107,3 @@ class DiasFeriados(models.Model):
     @api.multi
     def unlink(self):
         raise UserError("Los registros no se pueden borrar, solo cancelar.")
-
-    def action_change_state(self):
-        for diaf in self:
-            if diaf.state == 'draft':
-                diaf.action_validar()
