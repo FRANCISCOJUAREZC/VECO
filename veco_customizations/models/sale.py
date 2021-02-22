@@ -8,6 +8,6 @@ from odoo import models
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-	def _get_protected_fields(self):
-		""" Method Overriden in order to avoid a error msg when the sale order is locked"""
+    def _get_protected_fields(self):
+        """ Method Overriden in order to avoid a error msg when the sale order is locked"""
         return []
