@@ -37,6 +37,7 @@
                          <field name="fecha_inicial" attrs="{'readonly' : [('state', '!=','draft')], 'required': [('state', '=','draft')]}"/>
                          <field name="dias" attrs="{'readonly' : [('state', '!=','draft')], 'required': [('state', '=','draft')]}"/>
                          <field name="dias_de_vacaciones_disponibles" readonly="1" force_save="1"/>
+                     	 <field name="company_id" groups="base.group_multi_company" readonly="1"/>
                      </group>
                      <group>
                      </group>

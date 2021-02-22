@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from . import incapacidades
+from . import res_company
 from . import incidencias
 from . import faltas_nomina
 from . import vacaciones_nomina

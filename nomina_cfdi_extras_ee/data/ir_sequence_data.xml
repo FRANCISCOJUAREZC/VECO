@@ -5,21 +5,21 @@
             <field name="name">Viaticos nomina</field>
             <field name="code">viaticos.nomina</field>
             <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
+            <field name="company_id" eval="True"/>
         </record>
 		<!-- Sequences for faltas.nomina -->
         <record id="seq_faltas_nomina" model="ir.sequence">
             <field name="name">Faltas nomina</field>
             <field name="code">faltas.nomina</field>
             <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
+            <field name="company_id" eval="True"/>
         </record>
         <!-- Sequences for vacaciones.nomina -->
         <record id="seq_vacaciones_nomina" model="ir.sequence">
             <field name="name">Vacaciones nomina</field>
             <field name="code">vacaciones.nomina</field>
             <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
+            <field name="company_id" eval="True"/>
         </record>
         
         <!-- Sequences for incidencias.nomina -->
@@ -28,7 +28,7 @@
             <field name="code">incidencias.nomina</field>
             <!-- <field name="prefix">SO</field> -->
             <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
+            <field name="company_id" eval="True"/>
         </record>
 		
 		<!-- Sequences for incapacidades.nomina -->
@@ -36,7 +36,7 @@
             <field name="name">Incapacidades nomina</field>
             <field name="code">incapacidades.nomina</field>
             <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
+            <field name="company_id" eval="True"/>
         </record>
 
         <!-- Sequences for regardo.nomina -->
@@ -44,7 +44,7 @@
             <field name="name">Retardo nomina</field>
             <field name="code">retardo.nomina</field>
             <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
+            <field name="company_id" eval="True"/>
         </record>
         
         <!-- Sequences for dias.feriados -->
@@ -52,7 +52,7 @@
             <field name="name">Dias feriados</field>
             <field name="code">dias.feriados</field>
             <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
+            <field name="company_id" eval="True"/>
         </record>
     </data>
 </odoo>

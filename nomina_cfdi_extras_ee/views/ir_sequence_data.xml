@@ -12,7 +12,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
             <field name="code">employee.loan</field>
             <field name="prefix">PRES/</field>
             <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
+            <field name="company_id" eval="True"/>
         </record>
         
         <!-- Sequences for Skipp installment -->
@@ -21,7 +21,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
             <field name="code">dev.skip.installment</field>
             <field name="prefix">SAL-PRES/</field>
             <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
+            <field name="company_id" eval="True"/>
         </record>
     </data>
 </odoo>

@@ -4,14 +4,14 @@
         <field name="name">calculo.isr.anual Form</field>
         <field name="model">calculo.isr.anual</field>
         <field name="arch" type="xml">
-        <form string="Calculo ISR anual">
+        <form string="Reporte de ISR retenido y SUBEM">
             <group >
                 <group>
                     <field name="ano" required="1"/>
-                    <field name="employee_id"/>
                 </group>
                 <group>
                     <field name="department_id"/>
+                    <field name="employee_id"/>
                 </group>
             </group>
             <footer>
@@ -22,7 +22,7 @@
         </field>
     </record>
     <record id="action_wizard_calculo_isr_anual" model="ir.actions.act_window">
-        <field name="name">Calculo ISR anual</field>
+        <field name="name">ISR retenido y SUBEM</field>
         <field name="res_model">calculo.isr.anual</field>
         <field name="type">ir.actions.act_window</field>
         <field name="view_type">form</field>
@@ -32,7 +32,7 @@
     </record>
 
     <menuitem id="menu_action_wizard_calculo_isr_anual"
-            name="Calculo ISR anual"
+            name="ISR retenido y SUBEM"
             action="action_wizard_calculo_isr_anual"
             parent="menu_payroll_payslip_reportes"
             groups="hr_payroll.group_hr_payroll_user"

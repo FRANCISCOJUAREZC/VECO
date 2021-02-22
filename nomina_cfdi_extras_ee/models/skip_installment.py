@@ -38,6 +38,7 @@ class dev_skip_installment(models.Model):
                               ('done','Hecho'),
                               ('reject','Rechazar'),
                               ('cancel','Cancelar'),], string='Estado', default='draft', track_visibility='onchange')
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('dev.skip.installment'))
 
     @api.depends('installment_id')
     def get_url(self):
@@ -199,10 +200,28 @@ class dev_skip_installment(models.Model):
         self.state = 'draft'
     
     @api.model
+    def init(self):
+        company_id = self.env['res.company'].search([])
+        for company in company_id:
+            skip_installment_sequence = self.env['ir.sequence'].search([('code', '=', 'dev.skip.installment'), ('company_id', '=', company.id)])
+            if not skip_installment_sequence:
+                skip_installment_sequence.create({
+                        'name': 'Secuencia de salto de prestamo',
+                        'code': 'dev.skip.installment',
+                        'prefix': 'SAL-PRES/',
+                        'padding': 4,
+                        'company_id': company.id,
+                    })
+    
+    @api.model
     def create(self, vals):
         if vals.get('name', '/') == '/':
-            vals['name'] = self.env['ir.sequence'].next_by_code(
-                'dev.skip.installment') or '/'
+            if 'company_id' in vals:
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code(
+                    'dev.skip.installment') or '/'
+            else:
+                vals['name'] = self.env['ir.sequence'].next_by_code(
+                    'dev.skip.installment') or '/'
         return super(dev_skip_installment, self).create(vals)
         
     @api.multi

@@ -122,6 +122,7 @@ class PayslipBatches(models.Model):
         worksheet.write(0, 1, 'Empleado', header_style)
         worksheet.write(0, 2, 'Dias Pag', header_style)
         col_nm = 3
+        
         all_column = self.get_all_columns()
         all_col_dict = all_column[0]
         all_col_list = all_column[1]
@@ -131,7 +132,7 @@ class PayslipBatches(models.Model):
         for t in ['Total Efectivo', 'Total Especie']:
             worksheet.write(0, col_nm, t, header_style)
             col_nm += 1
-        
+
         payslip_group_by_department = self.get_payslip_group_by_department()[0]
         row = 1
         grand_total = {}
@@ -142,13 +143,17 @@ class PayslipBatches(models.Model):
             row += 1
             slip_sorted_by_employee={}
             hr_payslips=[]
+            value = 1
             for slip in payslip_group_by_department[dept.id]:
-                if slip.employee_id:
+                if slip.employee_id and not slip.employee_id.no_empleado in slip_sorted_by_employee.values():
                     slip_sorted_by_employee[slip.id]=slip.employee_id.no_empleado or '0'
+                else:
+                    slip_sorted_by_employee[slip.id]=slip.employee_id.no_empleado + str(value) or '0' + str(value)
+                    value += 1
             for values in sorted(slip_sorted_by_employee.values()):
                 val_list = list(slip_sorted_by_employee.values())
                 key_list = list(slip_sorted_by_employee.keys())
-                slip = key_list[val_list.index(values)]  
+                slip = key_list[val_list.index(values)]
                 hr_payslips.append(self.env['hr.payslip'].browse(slip))
             for slip in hr_payslips:
                 if slip.state == "cancel":
@@ -162,13 +167,19 @@ class PayslipBatches(models.Model):
                 for code in all_col_list:
                     amt = 0
                     if code in total.keys():
-                        amt = slip.get_amount_from_rule_code(code)[0]
-                        if amt:
-                            grand_total[code] = grand_total.get(code) + amt
-                            total[code] = total.get(code) + amt
+                        for line in slip.details_by_salary_rule_category:
+                           if line.code == code:
+                               amt = line.total
+#                        amt = slip.get_amount_from_rule_code(code)[0]
+#                        if amt:
+                               grand_total[code] = grand_total.get(code) + amt
+                               total[code] = total.get(code) + amt
                     else:
-                        amt = slip.get_amount_from_rule_code(code)[0]
-                        total[code] = amt or 0
+                        #amt = slip.get_amount_from_rule_code(code)[0]
+                        for line in slip.details_by_salary_rule_category:
+                           if line.code == code:
+                               amt = line.total
+                               total[code] = amt or 0
                         if code in grand_total.keys():
                             grand_total[code] = amt + grand_total.get(code) or 0.0
                         else:
