@@ -19,12 +19,18 @@ class GenerarPagosBanco(models.TransientModel):
                     ('BSM970519DU8', 'Santander - Solo cuentas de banco Santanter'),
                     ('BSM970519DU8_2', 'Santander - Cuentas distintos bancos'),
                     ('BBA940707IE1', 'Banco del Bajío'),
-                    ('BNM840515VB1', 'Banamex'),],
+                    ('BNM840515VB1', 'Banamex - Dispersión "C"'),
+                    ('BNM840515VB1_2', 'Banamex - Dispersión "D"'),],
         string=_('Banco de dispersión'),
     )
     dato1 = fields.Char("Código de pago")
     dato2 = fields.Char("Dato adicional 2")
     dato3 = fields.Char("Dato adicional 3")
+    banamex_no_cliente = fields.Char("No. cliente")
+    banamex_secuencia = fields.Char("Secuencia", default="1")
+    banamex_descripcion = fields.Char("Descripción", default='Nomina')
+    banamex_referencia = fields.Char("Referencia")
+
     file_content = fields.Binary("Archivo")
     diario_pago = fields.Many2one('account.journal', string='Cuenta de pago', domain=[('type', '=', 'bank')])
     fecha_dispersion = fields.Date("Fecha de dispersión")
@@ -56,7 +62,7 @@ class GenerarPagosBanco(models.TransientModel):
                   data2 = '40'
                   data5 = '00' # estado pago
                   data7 = '          ' # filler
-            elif self.banco_rfc == 'BSM970519DU8' or self.banco_rfc == 'BSM970519DU8_2':            # Santander
+            elif self.banco_rfc == 'BSM970519DU8' or self.banco_rfc == 'BSM970519DU8_2': # Santander
                   enc1 = '1'+ str(num_registro).rjust(5, '0') + 'E'
                   enc2 = datetime.now().strftime("%m%d%Y")
                   if self.diario_pago.bank_account_id.acc_number:
@@ -66,6 +72,31 @@ class GenerarPagosBanco(models.TransientModel):
                   enc4 = self.fecha_dispersion.strftime("%m%d%Y")
                   str_encabezado.append((enc1)+(enc2)+(enc3)+(enc4))
                   num_registro += 1
+            elif self.banco_rfc == 'BNM840515VB1': # Banamex "C"
+                  #primer encabezado
+                  enc11 = '1' #FIJO
+                  enc12 = self.banamex_no_cliente.rjust(12, '0')
+                  enc13 = self.fecha_dispersion.strftime('%y%m%d') #datetime.strptime(self.fecha_dispersion, '%Y-%m-%d').strftime('%d%m%y')
+                  enc14 = '0001' #no. consecutivo del 1-99
+                  enc15 = self.diario_pago.company_id.nombre_fiscal[0:36].ljust(36, ' ') # RAZON SOCIAL
+                  enc16 = self.banamex_descripcion.ljust(20, ' ') #DESCRIPCION
+                  enc17 = '05' # Pago de nomina (Pagomatico) a cuentas Banamex
+                  enc18 = '                                        ' # solo para ordenes de pago
+                  enc19 = 'C' # version
+                  enc20 = '00' #fijo
+                  str_encabezado.append((enc11)+(enc12)+(enc13)+(enc14)+(enc15)+(enc16)+(enc17)+(enc18)+(enc19)+(enc20))
+            elif self.banco_rfc == 'BNM840515VB1_2': # Banamex "D"
+                  #primer encabezado
+                  enc11 = '1' #FIJO
+                  enc12 = self.banamex_no_cliente.rjust(12, '0')
+                  enc13 = self.fecha_dispersion.strftime('%y%m%d') #datetime.strptime(self.fecha_dispersion, '%Y-%m-%d').strftime('%y%m%d')
+                  enc14 = '0001' #no. consecutivo del 1-99
+                  enc15 = self.diario_pago.company_id.nombre_fiscal[0:36].ljust(36, ' ') # RAZON SOCIAL
+                  enc16 = self.banamex_descripcion.ljust(20, ' ') #DESCRIPCION
+                  enc17 = '15' # FIJO
+                  enc18 = 'D' # version de layout
+                  enc19 = '01' #fijo              123456789012345678    12345678901234567890
+                  str_encabezado.append((enc11)+(enc12)+(enc13)+(enc14)+(enc15)+(enc16)+(enc17)+(enc18)+(enc19))
 
               ##################################################################################
               ###################################################################################
@@ -77,6 +108,8 @@ class GenerarPagosBanco(models.TransientModel):
 
                     if employee.tipo_pago=='transferencia' and employee.diario_pago.bank_id.bic == str(self.banco_rfc).replace('_2',''):
                         net_total = sum(payslip.line_ids.filtered(lambda x:x.code=='EFECT').mapped('total'))
+                        if net_total == 0:
+                            continue
                         _logger.info('empleado %s --- banco %s', employee.name, self.banco_rfc)
                         if self.banco_rfc == 'BBA830831LJ2': # Dispersión de Bancomer
                            data1 = '3'+ employee.rfc # no identificador y rfc
@@ -104,8 +137,8 @@ class GenerarPagosBanco(models.TransientModel):
                            else:
                               data5b =  '00'
                            nombre_empleado = employee.name.replace('/','').replace('-','').replace('.','').replace(':','').replace('?','').replace('&','').replace('!','')
-                           nombre_empleado = nombre_empleado.replace('á','a').replace('é','e').replace('í','i').replace('ó','o').replace('ú','u')
-                           nombre_empleado = nombre_empleado.replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U')
+                           nombre_empleado = nombre_empleado.replace('á','a').replace('é','e').replace('í','i').replace('ó','o').replace('ú','u').replace('ü','u')
+                           nombre_empleado = nombre_empleado.replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U').replace('Ü','u')
                            nombre_empleado = nombre_empleado.replace('ñ','n').replace('Ñ','N')
                            data6 = nombre_empleado[0:40].ljust(40, ' ') # nombre del empleado
                            data7 = '001' # fillers
@@ -147,6 +180,87 @@ class GenerarPagosBanco(models.TransientModel):
                           # data9 = self.dato1
                            file_text.append((data1)+(data2)+(data3)+(data4)+(data5)+(data6)+(data7)+(data8))
                            num_registro += 1
+                        elif self.banco_rfc == 'BNM840515VB1': # Banamex "C"
+                           #3 0 001 01 001 000000000000242964 03 00005256781834028297 TRANSFER11      SALBADOR,SANTIAGO/     000000
+                           data1 = '3'
+                           data2 = '0'
+                           data3 = '001'
+                           data6 =  str(round(net_total,2)).split('.')[0].rjust(16, '0')
+                           if net_total > 0:
+                              data6a =  str(round(net_total,2)).split('.')[1].ljust(2, '0')
+                           else:
+                              data6a =  '00'
+                           data7 = '01' # tipo de cuenta de abono 
+                                        # 01: Cheques / CLABE
+                                        # 03=Plásticos
+                                        # 04=Orden de pago
+                                        # 15=Cuenta concentradora
+                           data8 = employee.no_cuenta.rjust(20, '0')
+                           data9 = (str(num_registro)).rjust(10, '0')
+                           data9a = '                              '
+                           if not employee.dispersion_nombre or not employee.dispersion_paterno:
+                               raise Warning("Falta nombre y/o apellido paterno para el empleado %s.", employee.name)
+                           if employee.dispersion_materno:
+                              nombre_empleado = employee.dispersion_nombre + ',' + employee.dispersion_paterno + '/' + employee.dispersion_materno
+                           else:
+                              nombre_empleado = employee.dispersion_nombre + ',' + employee.dispersion_paterno + '/'
+                           nombre_empleado = nombre_empleado.replace('-','').replace('.','').replace(':','').replace('?','').replace('&','').replace('!','')
+                           nombre_empleado = nombre_empleado.replace('á','a').replace('é','e').replace('í','i').replace('ó','o').replace('ú','u')
+                           nombre_empleado = nombre_empleado.replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U')
+                           nombre_empleado = nombre_empleado.replace('ñ','@').replace('Ñ','@')
+                           data10 = nombre_empleado[0:55].ljust(55, ' ')
+                           data11 = 'TRANSFERENCIA                           '
+                           data12 = '                        '
+                           data15 = '    ' # clave del banco, depende de opciones
+                           data16 = '       '
+                           data17 = '  '
+                           file_text.append((data1)+(data2)+(data3)+(data6)+(data6a)+(data7)+(data8)+(data9)+(data9a)+(data10)+(data11)+(data12)+(data15)+(data16)+(data17))
+                           num_registro += 1
+                        elif self.banco_rfc == 'BNM840515VB1_2': # Banamex "D"
+                           #3 0 001 01 001 000000000000242964 03 00005256781834028297 TRANSFER11      SALBADOR,SANTIAGO/     000000
+                           data1 = '3'
+                           data2 = '0'
+                           data3 = '001' # metodo pago  001: Cuentas Banamex 
+                                                       #002: Interbancario 
+                                                       #003: Orden de Pago.
+                           data4 = '01'  #tipo de pago 01 nominna -- hay varios
+                           data5 = '001'
+                           data6 =  str(round(net_total,2)).split('.')[0].rjust(16, '0')
+                           if net_total > 0:
+                              data6a =  str(round(net_total,2)).split('.')[1].ljust(2, '0')
+                           else:
+                              data6a =  '00'
+                           data7 = '03' # tipo de cuenta de abono 
+                                        #01: Cheques, sólo válido para Pago Banamex.
+                                        #03: Plásticos, válido para Pago Interbancario y Banamex.
+                                        #04: Orden de Pago.
+                                        #40: CLABE.
+                           data8 = '0000'
+                           data8a = employee.no_cuenta.ljust(16)
+                           data9 = ('TRANSFER'+ str(num_registro)).ljust(16, ' ')
+                           if not employee.dispersion_nombre or not employee.dispersion_paterno:
+                               raise Warning("Falta nombre y/o apellido paterno para el empleado %s.", employee.name)
+                           if employee.dispersion_materno:
+                              nombre_empleado = employee.dispersion_nombre + ',' + employee.dispersion_paterno + '/' + employee.dispersion_materno
+                           else:
+                              nombre_empleado = employee.dispersion_nombre + ',' + employee.dispersion_paterno + '/'
+                           nombre_empleado = nombre_empleado.replace('-','').replace('.','').replace(':','').replace('?','').replace('&','').replace('!','')
+                           nombre_empleado = nombre_empleado.replace('á','a').replace('é','e').replace('í','i').replace('ó','o').replace('ú','u')
+                           nombre_empleado = nombre_empleado.replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U')
+                           nombre_empleado = nombre_empleado.replace('ñ','@').replace('Ñ','@')
+                           data10 = nombre_empleado[0:55].ljust(55, ' ')
+                           data11 = '                                   '
+                           data12 = '                                   '
+                           data13 = '                                   '
+                           data14 = '                                   '
+                           data15 = '0000' # clave del banco, depende de opciones
+                           data16 = '00'
+                           data17 = '                                                                            '
+                           data18 = '                                                                            '
+                           #data19 = '                                                                           '
+                           #data20 = '                                                  '
+                           file_text.append((data1)+(data2)+(data3)+(data4)+(data5)+(data6)+(data6a)+(data7)+(data8)+(data8a)+(data9)+(data10)+(data11)+(data12)+(data13)+(data14)+(data15)+(data16)+(data17)+(data18))
+                           num_registro += 1
 
                         num_empleados += 1
                         monto_total += round(net_total,2)
@@ -172,6 +286,74 @@ class GenerarPagosBanco(models.TransientModel):
                    else:
                       sum5 =  '00'
                    str_sumario.append((sum1)+(sum2)+(sum3)+(sum4)+(sum5))
+            elif self.banco_rfc == 'BNM840515VB1': # Banamex "C"
+                  ### segundo encabezado  2 1 001 000000000037870848 01 00000000070020012747 000258
+                  enc21 = '2' #FIJO
+                  enc22 = '1' #FIJO
+                  enc23 = '001' #Moneda nacional
+                  enc24 = str(round(monto_total,2)).split('.')[0].rjust(16, '0')
+                  if monto_total > 0:
+                     enc24a =  str(round(monto_total,2)).split('.')[1].ljust(2, '0')
+                  else:
+                     enc24a =  '00'
+                  enc25 = '01' #fijo cuenta de cheques
+                  if self.diario_pago.bank_account_id.acc_number:
+                     enc26 = self.diario_pago.bank_account_id.acc_number[0:4] + self.diario_pago.bank_account_id.acc_number[4:].rjust(20, '0')
+                  else:
+                     enc26 = '                  '
+                  enc27 = '                    '
+                  str_encabezado.append((enc21)+(enc22)+(enc23)+(enc24)+(enc24a)+(enc25)+(enc26)+(enc27))
+                  #sumario
+                  #4 001 000258 000000000037870848 000001 000000000037870848
+                  sum1 = '4' #FIJO
+                  sum2 = '001' #Moneda nacional
+                  sum3 = str(num_empleados).rjust(6, '0')
+                  sum4 = str(round(monto_total,2)).split('.')[0].rjust(16, '0')
+                  if monto_total > 0:
+                     sum4a =  str(round(monto_total,2)).split('.')[1].ljust(2, '0')
+                  else:
+                     sum4a =  '00'
+                  sum5 = '000001'
+                  sum6 = str(round(monto_total,2)).split('.')[0].rjust(16, '0')
+                  if monto_total > 0:
+                     sum6a =  str(round(monto_total,2)).split('.')[1].ljust(2, '0')
+                  else:
+                     sum6a =  '00'
+                  str_sumario.append((sum1)+(sum2)+(sum3)+(sum4)+(sum4a)+(sum5)+(sum6)+(sum6a))
+            elif self.banco_rfc == 'BNM840515VB1_2': # Banamex "D"
+                  ### segundo encabezado  2 1 001 000000000037870848 01 00000000070020012747 000258
+                  enc21 = '2' #FIJO
+                  enc22 = '1' #FIJO
+                  enc23 = '001' #Moneda nacional
+                  enc24 = str(round(monto_total,2)).split('.')[0].rjust(16, '0')
+                  if monto_total > 0:
+                     enc24a =  str(round(monto_total,2)).split('.')[1].ljust(2, '0')
+                  else:
+                     enc24a =  '00'
+                  enc25 = '01' #fijo cuenta de cheques
+                  if self.diario_pago.bank_account_id.acc_number:
+                     enc26 = self.diario_pago.bank_account_id.acc_number.rjust(20, '0')
+                  else:
+                     enc26 = '                  '
+                  enc27 = str(num_empleados).rjust(6, '0')
+                  str_encabezado.append((enc21)+(enc22)+(enc23)+(enc24)+(enc24a)+(enc25)+(enc26)+(enc27))
+                  #sumario
+                  #4 001 000258 000000000037870848 000001 000000000037870848
+                  sum1 = '4' #FIJO
+                  sum2 = '001' #Moneda nacional
+                  sum3 = str(num_empleados).rjust(6, '0')
+                  sum4 = str(round(monto_total,2)).split('.')[0].rjust(16, '0')
+                  if monto_total > 0:
+                     sum4a =  str(round(monto_total,2)).split('.')[1].ljust(2, '0')
+                  else:
+                     sum4a =  '00'
+                  sum5 = '000001'
+                  sum6 = str(round(monto_total,2)).split('.')[0].rjust(16, '0')
+                  if monto_total > 0:
+                     sum6a =  str(round(monto_total,2)).split('.')[1].ljust(2, '0')
+                  else:
+                     sum6a =  '00'
+                  str_sumario.append((sum1)+(sum2)+(sum3)+(sum4)+(sum4a)+(sum5)+(sum6)+(sum6a))
 
 #            else:
 #               raise Warning("Banco no compatible con la dispersión.")

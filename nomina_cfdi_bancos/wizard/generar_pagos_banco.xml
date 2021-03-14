@@ -9,9 +9,11 @@
                 <group>
                     <field name="banco_rfc"/>
                     <field name="diario_pago" />
-                    <field name="dato1" />
-                    <field name="dato2" />
-                    <field name="dato3" />
+                    <field name="dato1" attrs="{'invisible':[('banco_rfc','!=','BSM970519DU8')]}"/>
+                    <field name="banamex_no_cliente" attrs="{'invisible':[('banco_rfc','not in',['BNM840515VB1_2', 'BNM840515VB1'])]}"/>
+                    <field name="banamex_secuencia" attrs="{'invisible':[('banco_rfc','not in',['BNM840515VB1_2', 'BNM840515VB1'])]}"/>
+                    <field name="banamex_descripcion" attrs="{'invisible':[('banco_rfc','not in',['BNM840515VB1_2', 'BNM840515VB1'])]}"/>
+                    <field name="banamex_referencia" attrs="{'invisible':[('banco_rfc','not in',['BNM840515VB1_2', 'BNM840515VB1'])]}"/>
                     <field name="fecha_dispersion" />
                 </group>
                 <footer>
