@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model='ir.ui.view' id='view_manufacture_cost_report_tree'>
+        <field name='name'>view.manufacture.cost.report.tree</field>
+        <field name='model'>manufacture.cost.report</field>
+        <field name='arch' type='xml'>
+            <tree>
+                <field name='date'/>
+                <field name="product_id"/>
+                <field name="description"/>
+                <field name="production_id"/>
+                <field name="customer"/>
+                <field name="product_uom_qty" sum="Total Qty"/>
+                <field name="product_uom_id"/>
+                <field name="components_amount" sum="Components Amount Total"/>
+                <field name="workforce_amount" sum="Workforce Amount Total"/>
+                <field name="hours" sum="Total Hours"/>
+                <field name="indirects_amount" sum="Indirects Amount Total"/>
+                <field name="components_percentage"/>
+                <field name="indirects_percentage"/>
+                <field name="workforce_percentage"/>
+                <field name="total_percentage"/>
+                <field name="price_subtotal" sum="Cost Total"/>
+                <field name="unit_cost" sum="Unit Cost Total"/>
+                <field name="sale_amount"/>
+                <field name="price_unit"/>
+                <field name="factor"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_manufacture_cost_report_pivot" model="ir.ui.view">
+         <field name="name">view.manufacture.cost.report.pivot</field>
+         <field name="model">manufacture.cost.report</field>
+         <field name="arch" type="xml">
+             <pivot string="Manufacture Cost Report" disable_linking="True">
+                 <field name="product_id" type="col"/>
+                 <field name="date" interval="month" type="row"/>
+                 <!-- <field name="price_subtotal" type="measure"/> -->
+             </pivot>
+         </field>
+    </record>
+
+    <record id="view_manufacture_cost_report_graph" model="ir.ui.view">
+         <field name="name">view.manufacture.cost.report.graph</field>
+         <field name="model">manufacture.cost.report</field>
+         <field name="arch" type="xml">
+             <graph string="Manufacture Cost Report" type="line">
+                 <field name="date" type="row" interval="day"/>
+                 <field name="product_uom_qty" type="measure"/>
+             </graph>
+         </field>
+    </record>
+
+    <record id="view_manufacture_cost_report_search" model="ir.ui.view">
+        <field name="name">view.manufacture.cost.report.search</field>
+        <field name="model">manufacture.cost.report</field>
+        <field name="arch" type="xml">
+            <search string="Manufacture Cost">
+                <field name="date"/>
+                <filter string="Date" name="month" invisible="1" date="date" default_period="this_month"/>
+                <separator/>
+                <field name="product_id"/>
+                <field name="customer"/>
+                <field name="production_id"/>
+                <group expand="1" string="Group By">
+                    <filter string="Customer" name="Customer" context="{'group_by':'customer'}"/>
+                    <filter string="Product" name="Product" context="{'group_by':'product_id'}"/>
+                    <filter string="Company" name="company" groups="base.group_multi_company" context="{'group_by':'company_id'}"/>
+                    <separator/>
+                    <filter string="Date" name="date" context="{'group_by':'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_manufacture_cost_report" model="ir.actions.act_window">
+        <field name="name">Manufacture Cost</field>
+        <field name="res_model">manufacture.cost.report</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,pivot,graph</field>
+        <field name="view_id"></field>  <!-- force empty -->
+        <field name="search_view_id" ref="view_manufacture_cost_report_search"/>
+        <field name="context">{'search_default_month': 1}</field>
+    </record>
+
+    <menuitem id="manufacture_cost_report_menu" name="Manufacture Costs" parent="mrp.menu_mrp_reporting" action="action_manufacture_cost_report" sequence="99"/>
+</odoo>
