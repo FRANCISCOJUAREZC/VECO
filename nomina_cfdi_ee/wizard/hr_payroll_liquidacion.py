@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, api, fields
+from odoo import models, api, fields,_
 from datetime import datetime
 from datetime import date
 
+import time
 from odoo.exceptions import Warning
 import logging
 _logger = logging.getLogger(__name__)
@@ -42,25 +43,32 @@ class GeneraLiquidaciones(models.TransientModel):
     estructura  = fields.Many2one('hr.payroll.structure', string='Estructura ordinaria')
     prima_vac = fields.Float('Días aguinaldo prima vacacional')
     journal_id = fields.Many2one("account.journal",'Diario')
+    payslip_run_id = fields.Many2one("hr.payslip.run",'Procesamiento')
 
     @api.multi
     def calculo_create(self):
         employee = self.employee_id
         if not employee:
             raise Warning("Seleccione primero al empleado.")
+        if not self.journal_id:
+            raise Warning("Seleccione primero el diario.")
         payslip_batch_nm = 'Liquidacion ' +employee.name
         date_from = self.fecha_inicio
         date_to = self.fecha_liquidacion
-        batch = self.env['hr.payslip.run'].create({
-            'name' : payslip_batch_nm,
-            'date_start': date_from,
-            'date_end': date_to,
-            'periodicidad_pago': self.contract_id.periodicidad_pago,
-            'tipo_nomina': 'E',
-            'fecha_pago' : date_to,
-            'journal_id': self.journal_id.id,
-            })
         # batch
+        if self.payslip_run_id:
+           batch = self.payslip_run_id
+        else:
+           batch = self.env['hr.payslip.run'].create({
+               'name' : payslip_batch_nm,
+               'date_start': date_from,
+               'date_end': date_to,
+               'periodicidad_pago': self.contract_id.periodicidad_pago,
+               'tipo_nomina': 'E',
+               'fecha_pago' : date_to,
+               'journal_id': self.journal_id.id,
+           })
+        #nomina
         payslip_obj = self.env['hr.payslip']
         payslip_onchange_vals = payslip_obj.onchange_employee_id(date_from, date_to, employee_id=employee.id)
         #Creación de nomina ordinaria
@@ -80,8 +88,18 @@ class GeneraLiquidaciones(models.TransientModel):
             contract_id = employee.contract_id.id
         if not contract_id:
             raise Warning("No se encontró contrato para %s en el periodo de tiempo."%(employee.name))
-        
+
         worked_days = []
+        compute_days = payslip_vals.get('worked_days_line_ids')
+        for lines in compute_days:
+             _logger.info('lineas %s', lines)
+             if lines['code'] != 'WORK100':
+                 worked_days.append((0,0,lines))
+             if lines['code'] != 'WORK100' and lines['code'] != 'DFES' and lines['code'] != 'DFES_3':
+                 self.dias_pendientes_pagar -= lines['number_of_days']
+                 if self.dias_pendientes_pagar < 0:
+                    self.dias_pendientes_pagar = 0
+
         worked_days.append((0,0,{'name' :'Dias aguinaldo', 'code' : 'AGUI', 'contract_id':contract_id, 'number_of_days': self.dias_aguinaldo}))
         worked_days.append((0,0,{'name' :'Dias vacaciones', 'code' : 'VAC', 'contract_id':contract_id, 'number_of_days': self.dias_vacaciones}))
         worked_days.append((0,0,{'name' :'Prima vacacional', 'code' : 'PVC', 'contract_id':contract_id, 'number_of_days': self.dias_prima_vac}))
@@ -186,14 +204,40 @@ class GeneraLiquidaciones(models.TransientModel):
             self.dias_pendientes_pagar = delta_dias.days + 1
 
             #Dias de aguinaldo
+            payslip_obj = self.env['hr.payslip']
             year_date_start = self.contract_id.date_start.year
-            first_day_date = datetime(self.fecha_liquidacion.year, 1, 1)
             if year_date_start < self.fecha_liquidacion.year:
-                delta1 = self.fecha_liquidacion - first_day_date.date()
-                self.dias_aguinaldo = delta1.days + 1 
+                inicio_ano = date(self.fecha_liquidacion.year, 1, 1)
+                payslip_onchange_vals = payslip_obj.onchange_employee_id(str(inicio_ano), self.fecha_liquidacion, employee_id=self.employee_id.id)
             else:
-                delta2 = self.fecha_liquidacion - self.contract_id.date_start
-                self.dias_aguinaldo = delta2.days + 1
+                payslip_onchange_vals = payslip_obj.onchange_employee_id(self.contract_id.date_start, self.fecha_liquidacion, employee_id=self.employee_id.id)
+            #Creación de nomina ordinaria
+            payslip_vals = {**payslip_onchange_vals.get('value',{})} #TO copy dict to new dict. 
+            contract_id = self.contract_id.id
+            if not contract_id:
+                contract_id = payslip_vals.get('contract_id')
+            else:
+                payslip_vals['contract_id'] = contract_id 
+            if not contract_id:
+                contract_id = self.employee_id.contract_id.id
+            if not contract_id:
+                raise Warning("No se encontró contrato para %s en el periodo de tiempo."%(self.employee_id.name))
+
+            worked_days = [(0, 0, x) for x in payslip_vals.get('worked_days_line_ids')]
+            self.dias_aguinaldo = 0
+            for lines in worked_days:
+               _logger.info('lineas %s', lines[2])
+               if lines[2]['code'] == 'WORK100' or lines[2]['code'] == 'FJC' or lines[2]['code'] == 'VAC' or lines[2]['code'] == 'SEPT':
+                   self.dias_aguinaldo += lines[2]['number_of_days']
+
+#            year_date_start = datetime.strptime(self.contract_id.date_start, "%Y-%m-%d").year
+#            first_day_date = datetime(datetime.strptime(self.fecha_liquidacion,"%Y-%m-%d").year, 1, 1)
+#            if year_date_start < datetime.strptime(self.fecha_liquidacion,"%Y-%m-%d").year:
+#                delta1 = datetime.strptime(self.fecha_liquidacion,"%Y-%m-%d") - first_day_date # datetime.strptime(first_day_date,"%Y-%m-%d")
+#                self.dias_aguinaldo = delta1.days + 1
+#            else:
+#                delta2 = datetime.strptime(self.fecha_liquidacion,"%Y-%m-%d") - datetime.strptime(self.contract_id.date_start,"%Y-%m-%d")
+#                self.dias_aguinaldo = delta2.days + 1
 
             if self.contract_id.tablas_cfdi_id:
                 line = self.env['tablas.antiguedades.line'].search([('form_id','=',self.contract_id.tablas_cfdi_id.id),('antiguedad','<=',self.antiguedad_anos+1)],order='antiguedad desc',limit=1)
