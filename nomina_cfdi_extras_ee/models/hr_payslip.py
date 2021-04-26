@@ -452,5 +452,9 @@ class HrPayslip(models.Model):
             else:
                 payslip.move_id.reverse_moves()
                 payslip.move_id = False
-
+            #quitar los prestamos
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                   installment.is_paid = False
+                   installment.payslip_id = None
         return self.write({'state': 'cancel'})

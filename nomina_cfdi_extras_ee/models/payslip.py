@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 import xlwt
 from xlwt import easyxf
 import io
 from docutils.nodes import line
+from odoo.exceptions import UserError, Warning
+
 class Payslip(models.Model):
     _inherit = 'hr.payslip'
 
@@ -169,7 +171,12 @@ class PayslipBatches(models.Model):
         worksheet.write(0, 1, 'Empleado', header_style)
         worksheet.write(0, 2, 'Dias Pag', header_style)
         col_nm = 3
-        
+
+        noms = self.slip_ids
+        for nom in noms:
+            if not nom.employee_id.department_id:
+                raise UserError(_('%s no tiene departamento configurado') % (nom.employee_id.name))
+
         all_column = self.get_all_columns()
         all_col_dict = all_column[0]
         all_col_list = all_column[1]
@@ -216,7 +223,7 @@ class PayslipBatches(models.Model):
                     if code in total.keys():
                         for line in slip.details_by_salary_rule_category:
                            if line.code == code:
-                               amt = line.total
+                               amt = round(line.total,2)
 #                        amt = slip.get_amount_from_rule_code(code)[0]
 #                        if amt:
                                grand_total[code] = grand_total.get(code) + amt
@@ -225,7 +232,7 @@ class PayslipBatches(models.Model):
                         #amt = slip.get_amount_from_rule_code(code)[0]
                         for line in slip.details_by_salary_rule_category:
                            if line.code == code:
-                               amt = line.total
+                               amt = round(line.total,2)
                                total[code] = amt or 0
                         if code in grand_total.keys():
                             grand_total[code] = amt + grand_total.get(code) or 0.0
