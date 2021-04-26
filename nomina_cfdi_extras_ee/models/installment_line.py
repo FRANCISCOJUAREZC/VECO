@@ -25,7 +25,16 @@ class installment_line(models.Model):
                                        ('4','Descuento periodico 3'),
                                        ('5','Descuento periodico 4'),
                                        ('6','Descuento periodico 5'),
-                                       ('7','Descuento periodico 6')], string='Tipo de deducción')
+                                       ('7','Descuento periodico 6'),
+                                       ('8','Descuento periodico 7'),
+                                       ('9','Descuento periodico 8'),
+                                       ('10','Descuento periodico 9'),
+                                       ('11','Descuento periodico 10'),
+                                       ('12','Descuento periodico 11'),
+                                       ('13','Descuento periodico 12'),
+                                       ('14','Descuento periodico 13'),
+                                       ('15','Descuento periodico 14'),
+                                       ('16','Descuento periodico 15'),], string='Tipo de deducción')
 
     @api.depends('installment_amt','ins_interest')
     def get_total_installment(self):

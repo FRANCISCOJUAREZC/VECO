@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
 
-For Module Support : devintelle@gmail.com  or Skype : devintelle 
- -->
 <odoo>
     <record id="dev_hr_payslip_adv_payment_inherit_form" model="ir.ui.view">
          <field name="name">dev.hr.payslip.adv.pay.inheri.form</field>

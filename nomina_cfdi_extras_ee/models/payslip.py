@@ -15,7 +15,6 @@ class Payslip(models.Model):
         else:
             return 0.0
 
-
     @api.one
     def get_total_work_days(self):
         total = 0
@@ -85,7 +84,24 @@ class PayslipBatches(models.Model):
     @api.one
     def get_payslip_group_by_department(self):
         result = {}
-        for line in self.slip_ids:
+        start_range = self._context.get('start_range')
+        end_range = self._context.get('end_range')
+        if start_range and end_range:
+            slips = self.env['hr.payslip'].browse()
+            for slip in self.slip_ids:
+                try:
+                    if slip.employee_id.no_empleado:
+                        emp_no = eval(slip.employee_id.no_empleado)
+                except Exception as e:
+                    continue
+                if type(emp_no) not in (float,int):
+                    continue
+                if emp_no >= start_range and emp_no <= end_range:
+                    slips += slip
+            
+        else:
+            slips = self.slip_ids
+        for line in slips:
             if line.employee_id.department_id.id in result.keys():
                 result[line.employee_id.department_id.id].append(line)
             else:
@@ -96,8 +112,24 @@ class PayslipBatches(models.Model):
     def get_all_columns(self):
         result = {}
         all_col_list_seq = []
+        start_range = self._context.get('start_range')
+        end_range = self._context.get('end_range')
         if self.slip_ids:
-            for line in self.env['hr.payslip.line'].search([('slip_id', 'in', self.slip_ids.ids)], order="sequence"):
+            if start_range and end_range:
+                slips = self.env['hr.payslip'].browse()
+                for slip in self.slip_ids:
+                    try:
+                        if slip.employee_id.no_empleado:
+                            emp_no = eval(slip.employee_id.no_empleado)
+                    except Exception as e:
+                        continue
+                    if type(emp_no) not in (float,int):
+                        continue
+                    if emp_no >= start_range and emp_no <= end_range:
+                        slips += slip
+            else:
+                slips = self.slip_ids
+            for line in slips.mapped('line_ids').sorted(lambda x:x.sequence):
                 if line.code not in all_col_list_seq:
                     all_col_list_seq.append(line.code)
                 if line.code not in result.keys():
@@ -108,7 +140,22 @@ class PayslipBatches(models.Model):
 #                     result[line.code] = line.name
         return [result, all_col_list_seq]
 
-    @api.multi
+    def export_report_xlsx_button(self):
+        view = self.env.ref('nomina_cfdi_extras.listado_de_monin_wizard')
+        ctx = self.env.context.copy()
+        ctx .update({'default_payslip_batch_id':self.id})
+        return {
+            'name': 'Listado De Nomina',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'listado.de.monina',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'context': ctx,
+        }
+       
     def export_report_xlsx(self):
         import base64
         workbook = xlwt.Workbook()
