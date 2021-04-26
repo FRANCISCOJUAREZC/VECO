@@ -18,7 +18,7 @@ class WizardReglasSalariales(models.TransientModel):
     date_from = fields.Date(string='Fecha inicio')
     date_to = fields.Date(string='Fecha fin')
     department_id = fields.Many2one('hr.department', 'Departamento')
-    rule_ids = fields.Many2many('hr.salary.rule', 'hr_salary_rule_regalas_salarieles_rel','wizard_id','rule_id', string='Conceptos', default=lambda self: self.env['hr.salary.rule'].search([]))
+    rule_ids = fields.Many2many('hr.salary.rule', 'hr_salary_rule_regalas_salarieles_rel','wizard_id','rule_id', string='Conceptos')
     file_data = fields.Binary("File Data")
     
     @api.multi
@@ -51,8 +51,9 @@ class WizardReglasSalariales(models.TransientModel):
         worksheet.write_merge(2, 2, 0, 4, from_to_date, bold)
         #worksheet.write_merge(3, 3, 0, 4, concepto, bold)
         
-        worksheet.write(4, 0, 'Empleado', bold)
-        col = 3
+        worksheet.write(4, 0, 'No.Empleado', bold)
+        worksheet.write(4, 1, 'Empleado', bold)
+        col = 4
         rule_index = {}
         for rule in rules:
             worksheet.write(4, col, rule.name, bold)
@@ -75,21 +76,22 @@ class WizardReglasSalariales(models.TransientModel):
         row = 5
         tipo_nomina = {'O':'Nómina ordinaria', 'E':'Nómina extraordinaria'}
         for employee, payslips in employees.items():
-            worksheet.write(row, 0, employee.name)
+            worksheet.write(row, 0, employee.no_empleado)
+            worksheet.write(row, 1, employee.name)
             row +=1
-            worksheet.write(row, 1, 'Fecha de la nomina', bold)
-            worksheet.write(row, 2, 'Tipo', bold)
+            worksheet.write(row, 2, 'Fecha de la nomina', bold)
+            worksheet.write(row, 3, 'Tipo', bold)
             row +=1
             total_by_rule = defaultdict(lambda: 0.0)
             for payslip,lines in payslips.items():
             #for line in lines:
-                worksheet.write(row, 1, payslip.date_from)
-                worksheet.write(row, 2, tipo_nomina.get(payslip.tipo_nomina,''))
+                worksheet.write(row, 2, payslip.date_from)
+                worksheet.write(row, 3, tipo_nomina.get(payslip.tipo_nomina,''))
                 for line in lines:
                     worksheet.write(row, rule_index.get(line.salary_rule_id.id), line.total)
                     total_by_rule[line.salary_rule_id.id] += line.total
                 row +=1
-            worksheet.write(row, 2, 'Total', bold)
+            worksheet.write(row, 3, 'Total', bold)
             for rule_id, total in total_by_rule.items():
                 worksheet.write(row, rule_index.get(rule_id), total)
             row +=1

@@ -20,3 +20,4 @@ from . import skip_installment
 from . import contract_historial_salario
 from . import hr_contract
 from . import dias_feriados
+from . import credito_infonavit

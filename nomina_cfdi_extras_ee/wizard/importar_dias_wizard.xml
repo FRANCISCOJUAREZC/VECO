@@ -8,7 +8,7 @@
                 <form string="Import Dias XLS">
                 	<group>
                 		<field name="import_file" required="1" filename="file_name" accept='.xls'/>
-                		<field name="contract_id" />
+                		<field name="contract_id" invisible="1"/>
                 		<field name="file_name" invisible="1"/>
                 	</group>
                 	<footer>

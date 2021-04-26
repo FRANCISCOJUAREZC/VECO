@@ -20,7 +20,7 @@ class employee_loan(models.Model):
                 ('done','Hecho'),
                 ('close', 'Cerrar'),
                 ('reject','Rechazar'),
-                ('cancel','Cancelar')]
+                ('cancel','Cancelado')]
                 
     @api.model
     def _get_employee(self):
@@ -66,8 +66,9 @@ class employee_loan(models.Model):
                     end_date = self.get_quincenal_end_date(start_date, loan.term)
                 else:
                     end_date = start_date+relativedelta(months=self.term)
-
                 loan.end_date = end_date.strftime("%Y-%m-%d")
+            else:
+               loan.end_date = datetime.today().strftime("%Y-%m-%d")
 
     name = fields.Char('Name',default='/',copy=False)
     state = fields.Selection(loan_state,string='Estado',default='draft', track_visibility='onchange')
@@ -314,52 +315,52 @@ class employee_loan(models.Model):
     @api.multi
     def paid_loan(self):
         if self.loan_type_id.tipo_deduccion == '1':
-           if not self.employee_id.address_home_id:
-               raise ValidationError(_('Para realizar un préstamo el empleado debe tener una dirección asignada'))
+            if not self.employee_id.address_home_id:
+                raise ValidationError(_('Para realizar un préstamo el empleado debe tener una dirección asignada'))
 
-           self.state = 'paid'
-           vals={
-               'date':self.date,
-               'ref':self.name,
-               'journal_id':self.loan_type_id.journal_id and self.loan_type_id.journal_id.id,
-               'company_id':self.env.user.company_id.id
-           }
-           acc_move_id = self.env['account.move'].create(vals)
-           lst = []
-           lst.append((0,0,{
-                           'account_id':self.loan_type_id and self.loan_type_id.loan_account.id,
-                           'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
-                           'name':self.name,
-                           'credit':self.loan_amount or 0.0,
-                       }))
-
-           if self.interest_amount:
-               lst.append((0,0,{
-                               'account_id':self.loan_type_id and self.loan_type_id.interest_account.id,
-                               'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
-                               'name':str(self.name)+' - '+'Interes',
-                               'credit':self.interest_amount or 0.0,
-                           }))
-
-           credit_account=False
-           if self.employee_id.address_home_id and self.employee_id.address_home_id.property_account_payable_id:
-               credit_account = self.employee_id.address_home_id.property_account_payable_id.id or False
-                    
-           debit_amount = self.loan_amount
-           if self.interest_amount:
-               debit_amount += self.interest_amount
-
-           lst.append((0,0,{
-                           'account_id':credit_account or False,
-                           'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
-                           'name':'/',
-                           'debit':debit_amount  or 0.0,
-                       }))
-           acc_move_id.line_ids = lst
-           if acc_move_id:
-               self.move_id = acc_move_id.id
+            self.state = 'paid'
+            vals={
+                'date':self.date,
+                'ref':self.name,
+                'journal_id':self.loan_type_id.journal_id and self.loan_type_id.journal_id.id,
+                'company_id':self.env.user.company_id.id
+            }
+            acc_move_id = self.env['account.move'].create(vals)
+            lst = []
+            lst.append((0,0,{
+                            'account_id':self.loan_type_id and self.loan_type_id.loan_account.id,
+                            'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
+                            'name':self.name,
+                            'credit':self.loan_amount or 0.0,
+                        }))
+            
+            if self.interest_amount:
+                lst.append((0,0,{
+                                'account_id':self.loan_type_id and self.loan_type_id.interest_account.id,
+                                'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
+                                'name':str(self.name)+' - '+'Interes',
+                                'credit':self.interest_amount or 0.0,
+                            }))
+            
+            credit_account=False
+            if self.employee_id.address_home_id and self.employee_id.address_home_id.property_account_payable_id:
+                credit_account = self.employee_id.address_home_id.property_account_payable_id.id or False
+                     
+            debit_amount = self.loan_amount
+            if self.interest_amount:
+                debit_amount += self.interest_amount
+            
+            lst.append((0,0,{
+                            'account_id':credit_account or False,
+                            'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
+                            'name':'/',
+                            'debit':debit_amount  or 0.0,
+                        }))
+            acc_move_id.line_ids = lst
+            if acc_move_id:
+                self.move_id = acc_move_id.id
         else:
-           self.state = 'paid'
+            self.state = 'paid'
 
 
     @api.multi

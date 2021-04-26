@@ -7,9 +7,10 @@ class HrHolidaysStatus(models.Model):
     
     @api.multi
     def unlink(self):
-        auto_created_leaves = []
-        if leave_type:
-            auto_created_leaves.append(leave_type.id)
-        for status in self:
-            if status.id in auto_created_leaves:
-                raise Warning("No puedes borrar un registro creado automáticamente %s"%(status.name))
+        for leave_type in self:
+           auto_created_leaves = []
+           if leave_type:
+               auto_created_leaves.append(leave_type.id)
+           for status in self:
+               if status.id in auto_created_leaves:
+                   raise Warning("No puedes borrar un registro creado automáticamente %s"%(status.name))

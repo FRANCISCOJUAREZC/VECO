@@ -11,7 +11,7 @@ class employee_loan_type(models.Model):
     name = fields.Char('Nombre', required="1")
     loan_limit = fields.Float('Límite del monto del deducción', default=50000, required="1")
     loan_term = fields.Integer('Plazo de la deducción', default=12, required="1")
-    is_apply_interest = fields.Boolean('Aplicar interés')
+    is_apply_interest = fields.Boolean('Aplicar interés', default=False)
     interest_rate = fields.Float('Taza de interés',default=10)
     interest_type = fields.Selection([('liner','Sobre monto total'),('reduce','Sobre saldo pendiente')],string='Tipo de interés',
                                      default='liner')
@@ -27,7 +27,16 @@ class employee_loan_type(models.Model):
                                        ('4','Descuento periodico 3'),
                                        ('5','Descuento periodico 4'),
                                        ('6','Descuento periodico 5'),
-                                       ('7','Descuento periodico 6')], string='Tipo de deducción', required="1")
+                                       ('7','Descuento periodico 6'),
+                                       ('8','Descuento periodico 7'),
+                                       ('9','Descuento periodico 8'),
+                                       ('10','Descuento periodico 9'),
+                                       ('11','Descuento periodico 10'),
+                                       ('12','Descuento periodico 11'),
+                                       ('13','Descuento periodico 12'),
+                                       ('14','Descuento periodico 13'),
+                                       ('15','Descuento periodico 14'),
+                                       ('16','Descuento periodico 15'),], string='Tipo de deducción', required="1")
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('employee.loan.type'))
 
     @api.constrains('is_apply_interest','interest_rate','interest_type')

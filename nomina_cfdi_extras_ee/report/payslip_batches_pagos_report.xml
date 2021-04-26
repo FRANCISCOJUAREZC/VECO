@@ -41,10 +41,10 @@
 								<t t-foreach="o.slip_ids" t-as="l">
 					             <t t-if="not l.state =='cancel'">
 								  <tr>
-									<t t-set="col1" t-value="l.get_amount_from_rule_code('TPER')[0]"/>
-									<t t-set="col2" t-value="l.get_amount_from_rule_code('TDED')[0]"/>
-									<t t-set="col3" t-value="l.get_amount_from_rule_code('NET')[0]"/>
-									<t t-set="col4" t-value="l.get_amount_from_rule_code('TOP')[0]"/>
+									<t t-set="col1" t-value="l.get_amount_from_rule_code('TPER')[0]" t-options='{"widget": "float", "precision": 2}'/>
+									<t t-set="col2" t-value="l.get_amount_from_rule_code('TDED')[0]" t-options='{"widget": "float", "precision": 2}'/>
+									<t t-set="col3" t-value="l.get_amount_from_rule_code('NET')[0]" t-options='{"widget": "float", "precision": 2}'/>
+									<t t-set="col4" t-value="l.get_amount_from_rule_code('TOP')[0]" t-options='{"widget": "float", "precision": 2}'/>
 									<t t-set="col1_tot" t-value="col1_tot + col1 + col4"/>
 									<t t-set="col2_tot" t-value="col2_tot + col2"/>
 									<t t-set="col3_tot" t-value="col3_tot + col3"/>

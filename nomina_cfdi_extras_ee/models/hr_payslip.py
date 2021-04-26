@@ -1,18 +1,8 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
-#
-#    For Module Support : devintelle@gmail.com  or Skype : devintelle 
-#
-##############################################################################
-
 from odoo import models, fields, api, _
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 from odoo.tools.safe_eval import safe_eval as eval
-
 
 class hr_payslip(models.Model):
     _inherit = 'hr.payslip'
@@ -32,6 +22,24 @@ class hr_payslip(models.Model):
     descuento5_int = fields.Float('Interés descuento 5',compute='get_descuento5_amount')
     descuento6_amount = fields.Float('Monto descuento 6',compute='get_descuento6_amount')
     descuento6_int = fields.Float('Interés descuento 6',compute='get_descuento6_amount')
+    descuento7_amount = fields.Float('Monto descuento 7',compute='get_descuento7_amount')
+    descuento7_int = fields.Float('Interés descuento 7',compute='get_descuento7_amount')
+    descuento8_amount = fields.Float('Monto descuento 8',compute='get_descuento8_amount')
+    descuento8_int = fields.Float('Interés descuento 8',compute='get_descuento8_amount')
+    descuento9_amount = fields.Float('Monto descuento 9',compute='get_descuento9_amount')
+    descuento9_int = fields.Float('Interés descuento 9',compute='get_descuento9_amount')
+    descuento10_amount = fields.Float('Monto descuento 10',compute='get_descuento10_amount')
+    descuento10_int = fields.Float('Interés descuento 10',compute='get_descuento10_amount')
+    descuento11_amount = fields.Float('Monto descuento 11',compute='get_descuento11_amount')
+    descuento11_int = fields.Float('Interés descuento 11',compute='get_descuento11_amount')
+    descuento12_amount = fields.Float('Monto descuento 12',compute='get_descuento12_amount')
+    descuento12_int = fields.Float('Interés descuento 12',compute='get_descuento12_amount')
+    descuento13_amount = fields.Float('Monto descuento 13',compute='get_descuento13_amount')
+    descuento13_int = fields.Float('Interés descuento 13',compute='get_descuento13_amount')
+    descuento14_amount = fields.Float('Monto descuento 14',compute='get_descuento14_amount')
+    descuento14_int = fields.Float('Interés descuento 14',compute='get_descuento14_amount')
+    descuento15_amount = fields.Float('Monto descuento 15',compute='get_descuento15_amount')
+    descuento15_int = fields.Float('Interés descuento 15',compute='get_descuento15_amount')
     rp_dias_completos = fields.Float('dias completos', compute='get_dias_completos')
     rp_dias_laborados = fields.Float('dias laborados', compute='get_dias_laborados')
     rp_dias_periodo = fields.Float('dias periodo', compute='get_dias_periodo')
@@ -45,11 +53,19 @@ class hr_payslip(models.Model):
     @api.multi
     def compute_sheet(self):
         for data in self:
-            installment_ids = self.env['installment.line'].search(
-                    [('employee_id', '=', data.employee_id.id), ('loan_id.state', '=', 'done'),
-                     ('is_paid', '=', False),('date','<=',data.date_to)])
-            if installment_ids:
-                data.installment_ids = [(6, 0, installment_ids.ids)]
+          if data.concepto_periodico:
+              if data.nom_liquidacion:
+                 installment_ids = data.env['installment.line'].search(
+                      [('employee_id', '=', data.employee_id.id), ('loan_id.state', '=', 'done'),
+                       ('is_paid', '=', False)])
+              else:
+                 installment_ids = data.env['installment.line'].search(
+                      [('employee_id', '=', data.employee_id.id), ('loan_id.state', '=', 'done'),
+                       ('is_paid', '=', False),('date','<=',data.date_to)])
+              if installment_ids:
+                  data.installment_ids = [(6, 0, installment_ids.ids)]
+          else:
+              data.installment_ids = [(6, 0, [])]
         return super(hr_payslip,self).compute_sheet()
     
 #    @api.multi
@@ -152,6 +168,123 @@ class hr_payslip(models.Model):
                         int_amount += installment.ins_interest
             payslip.descuento6_amount = amount
             payslip.descuento6_int = int_amount
+
+    @api.depends('installment_ids')
+    def get_descuento7_amount(self):
+        for payslip in self:
+            amount = 0
+            int_amount = 0
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                    if not installment.is_skip and installment.tipo_deduccion == '8':
+                        amount += installment.installment_amt
+                        int_amount += installment.ins_interest
+            payslip.descuento7_amount = amount
+            payslip.descuento7_int = int_amount
+
+    @api.depends('installment_ids')
+    def get_descuento8_amount(self):
+        for payslip in self:
+            amount = 0
+            int_amount = 0
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                    if not installment.is_skip and installment.tipo_deduccion == '9':
+                        amount += installment.installment_amt
+                        int_amount += installment.ins_interest
+            payslip.descuento8_amount = amount
+            payslip.descuento8_int = int_amount
+
+    @api.depends('installment_ids')
+    def get_descuento9_amount(self):
+        for payslip in self:
+            amount = 0
+            int_amount = 0
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                    if not installment.is_skip and installment.tipo_deduccion == '10':
+                        amount += installment.installment_amt
+                        int_amount += installment.ins_interest
+            payslip.descuento9_amount = amount
+            payslip.descuento9_int = int_amount
+
+    @api.depends('installment_ids')
+    def get_descuento10_amount(self):
+        for payslip in self:
+            amount = 0
+            int_amount = 0
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                    if not installment.is_skip and installment.tipo_deduccion == '11':
+                        amount += installment.installment_amt
+                        int_amount += installment.ins_interest
+            payslip.descuento10_amount = amount
+            payslip.descuento10_int = int_amount
+
+    @api.depends('installment_ids')
+    def get_descuento11_amount(self):
+        for payslip in self:
+            amount = 0
+            int_amount = 0
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                    if not installment.is_skip and installment.tipo_deduccion == '12':
+                        amount += installment.installment_amt
+                        int_amount += installment.ins_interest
+            payslip.descuento11_amount = amount
+            payslip.descuento11_int = int_amount
+
+    @api.depends('installment_ids')
+    def get_descuento12_amount(self):
+        for payslip in self:
+            amount = 0
+            int_amount = 0
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                    if not installment.is_skip and installment.tipo_deduccion == '13':
+                        amount += installment.installment_amt
+                        int_amount += installment.ins_interest
+            payslip.descuento12_amount = amount
+            payslip.descuento12_int = int_amount
+
+    @api.depends('installment_ids')
+    def get_descuento13_amount(self):
+        for payslip in self:
+            amount = 0
+            int_amount = 0
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                    if not installment.is_skip and installment.tipo_deduccion == '14':
+                        amount += installment.installment_amt
+                        int_amount += installment.ins_interest
+            payslip.descuento13_amount = amount
+            payslip.descuento13_int = int_amount
+
+    @api.depends('installment_ids')
+    def get_descuento14_amount(self):
+        for payslip in self:
+            amount = 0
+            int_amount = 0
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                    if not installment.is_skip and installment.tipo_deduccion == '15':
+                        amount += installment.installment_amt
+                        int_amount += installment.ins_interest
+            payslip.descuento14_amount = amount
+            payslip.descuento14_int = int_amount
+
+    @api.depends('installment_ids')
+    def get_descuento15_amount(self):
+        for payslip in self:
+            amount = 0
+            int_amount = 0
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                    if not installment.is_skip and installment.tipo_deduccion == '16':
+                        amount += installment.installment_amt
+                        int_amount += installment.ins_interest
+            payslip.descuento15_amount = amount
+            payslip.descuento15_int = int_amount
 
     @api.onchange('employee_id')
     def onchange_employee(self):
@@ -319,5 +452,9 @@ class HrPayslip(models.Model):
             else:
                 payslip.move_id.reverse_moves()
                 payslip.move_id = False
-
+            #quitar los prestamos
+            if payslip.installment_ids:
+                for installment in payslip.installment_ids:
+                   installment.is_paid = False
+                   installment.payslip_id = None
         return self.write({'state': 'cancel'})

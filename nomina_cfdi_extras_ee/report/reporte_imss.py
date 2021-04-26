@@ -40,6 +40,7 @@ class PartnerXlsx(models.AbstractModel):
             for slip_line in slip_lines:
                 if slip_line.state == 'cancel':
                     continue
+                slip_line = slip_line.sudo()
                 sheet.write(row_index, col_index, slip_line.employee_id.no_empleado)
                 col_index+=1
                 sheet.write(row_index, col_index, slip_line.employee_id.name)

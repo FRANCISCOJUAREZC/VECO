@@ -54,5 +54,13 @@
             <field name="padding">4</field>
             <field name="company_id" eval="False"/>
         </record>
+
+        <!-- Sequences for credito.infonavit -->
+        <record id="seq_credito_infonavit" model="ir.sequence">
+            <field name="name">Credito infonvit</field>
+            <field name="code">credito.infonavit</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
     </data>
 </odoo>
