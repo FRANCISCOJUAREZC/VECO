@@ -10,6 +10,7 @@ import string
 
 class TotalPorEmpleado(models.TransientModel):
     _name = 'total.por.empleado'
+    _description = 'Total por empleado'
 
     hr_payslip_run_ids = fields.Many2many('hr.payslip.run',string="payslip batches")
     file_data = fields.Binary()

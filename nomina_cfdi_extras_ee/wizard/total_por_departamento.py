@@ -8,6 +8,7 @@ from docutils.nodes import line
 import base64
 class TotalPorDepartamento(models.TransientModel):
     _name = 'total.por.departamento'
+    _description = 'Total por departamento'
 
     hr_payslip_run_ids = fields.Many2many('hr.payslip.run',string="payslip batches")
     file_data = fields.Binary()
