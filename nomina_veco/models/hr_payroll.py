@@ -318,7 +318,7 @@ class HrPayslip(models.Model):
                if date_start > d_from:
                    number_of_days =  (date_to - date_start).days + 1 - leave_days
                else:
-                   number_of_days =  (date_to - date_from).days + 1 - leave_days
+                   number_of_days =  (date_to - d_from).days + 1 - leave_days
             attendances = {
                 'name': _("Días de trabajo"),
                 'sequence': 1,
