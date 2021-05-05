@@ -315,7 +315,7 @@ class HrPayslip(models.Model):
                if date_start:
                    d_from = fields.Date.from_string(date_from)
                    d_to = fields.Date.from_string(date_to)
-               if date_start > date_from:
+               if date_start > d_from:
                    number_of_days =  (date_to - date_start).days + 1 - leave_days
                else:
                    number_of_days =  (date_to - date_from).days + 1 - leave_days
