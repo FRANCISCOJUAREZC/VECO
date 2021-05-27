@@ -107,6 +107,8 @@ class Contract(models.Model):
             diff_date = today - date_start 
             years = diff_date.days /365.0
             self.antiguedad_anos = int(years)
+        else:
+            self.antiguedad_anos = 0
 
     @api.model
     def calcular_liquidacion(self):

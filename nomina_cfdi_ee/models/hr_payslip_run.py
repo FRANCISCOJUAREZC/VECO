@@ -20,11 +20,9 @@ class HrPayslipRun(models.Model):
     dias_pagar = fields.Float(string='Dias a pagar', store=True)
     imss_dias = fields.Float(string='Dias a cotizar en la nómina', store=True)
     imss_mes = fields.Float(string='Dias en el mes', store=True)
-    #no_nomina = fields.Selection(
-    #    selection=[('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'), ('6', '6')], string=_('No. de nómina en el mes / periodo'))
     ultima_nomina = fields.Boolean(string='Última nómina del mes')
     nominas_mes = fields.Integer('Nóminas a pagar en el mes')
-    concepto_periodico = fields.Boolean('Desactivar conceptos periódicos')
+    concepto_periodico = fields.Boolean('Conceptos periódicos', default = True)
     isr_ajustar = fields.Boolean(string='Ajustar ISR en nómina')
     isr_devolver = fields.Boolean(string='Devolver ISR')
     periodicidad_pago = fields.Selection(
