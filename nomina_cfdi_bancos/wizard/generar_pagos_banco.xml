@@ -14,6 +14,9 @@
                     <field name="banamex_secuencia" attrs="{'invisible':[('banco_rfc','not in',['BNM840515VB1_2', 'BNM840515VB1'])]}"/>
                     <field name="banamex_descripcion" attrs="{'invisible':[('banco_rfc','not in',['BNM840515VB1_2', 'BNM840515VB1'])]}"/>
                     <field name="banamex_referencia" attrs="{'invisible':[('banco_rfc','not in',['BNM840515VB1_2', 'BNM840515VB1'])]}"/>
+                    <field name="banorte_numero" attrs="{'invisible':[('banco_rfc','!=','BMN930209927')]}"/>
+                    <field name="bbva_referencia" attrs="{'invisible':[('banco_rfc','!=','BBA830831LJ2')]}"/>
+                    <field name="bbva_no_contrato" attrs="{'invisible':[('banco_rfc','!=','BBA830831LJ2')]}"/>
                     <field name="fecha_dispersion" />
                 </group>
                 <footer>
