@@ -6,10 +6,10 @@
     Added mutlti company filter in Payroll models.
     """,
     "version": "12.0.1.0",
-    "author": "Nikunj Antala",
+    "author": "IT Admin",
     "website": "",
     "category": "Hidden",
-    "depends": ["hr_contract","hr_payroll"],
+    "depends": ["hr_contract","hr_payroll", "nomina_cfdi_ee"],
     "data": [
              "security/security.xml",
              "views/hr_payslip_view.xml",
