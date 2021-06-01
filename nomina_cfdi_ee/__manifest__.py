@@ -28,6 +28,7 @@
         'report/report_payslip.xml',
         'views/res_bank_view.xml',
         'data/mail_template_data.xml',
+        'security/security.xml',
         'security/ir.model.access.csv',
         'data/res.bank.csv',
         'views/menu.xml',
