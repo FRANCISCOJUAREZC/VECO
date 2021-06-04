@@ -321,7 +321,7 @@ class GenerarPagosBanco(models.TransientModel):
                     enc9 = '101'
                     enc10 = '1'
                     enc11 = datetime.now().strftime("%Y%m%d")
-                    enc12 = self.fecha_dispersion.strftime('%y%m%d')
+                    enc12 = self.fecha_dispersion.strftime('%Y%m%d')
                     enc13 = '                                                                                                                                              '
                     str_encabezado.append(enc1 + enc2 + enc3 + enc3a + enc4 + enc5 + enc6 + enc7 + enc8 + enc9+ enc10+ enc11+ enc12+ enc13 + '\r')
                 elif self.banco_rfc == 'BSM970519DU8' or self.banco_rfc == 'BSM970519DU8_2':            # Santander
