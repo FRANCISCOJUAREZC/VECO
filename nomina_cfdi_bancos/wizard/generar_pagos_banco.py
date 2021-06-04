@@ -99,7 +99,7 @@ class GenerarPagosBanco(models.TransientModel):
                 ###################################################################################
                 for payslip in record.slip_ids.filtered(lambda x: x.state!='cancel'):
                     employee = payslip.employee_id
-                    
+
                     if employee.tipo_pago=='transferencia' and employee.diario_pago.bank_id.bic == str(self.banco_rfc).replace('_2',''):
                         net_total = sum(payslip.line_ids.filtered(lambda x:x.code=='EFECT').mapped('total'))
                         if net_total == 0:
