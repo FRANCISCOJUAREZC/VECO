@@ -1,0 +1,249 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* mrp_account_cost_report
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 12.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-04-20 22:02+0000\n"
+"PO-Revision-Date: 2021-04-20 22:02+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__company_id
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_search
+msgid "Company"
+msgstr "Compañía"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__components_percentage
+msgid "Components %"
+msgstr "M.P. %"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__components_amount
+msgid "Components Amount"
+msgstr "M.P."
+
+#. module: mrp_account_cost_report
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_tree
+msgid "Components Amount Total"
+msgstr "Total M.P."
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__components_percentage
+msgid "Components Percentage"
+msgstr "MP %"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__components_amount
+msgid "Components Total"
+msgstr "M.P."
+
+#. module: mrp_account_cost_report
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_tree
+msgid "Cost Total"
+msgstr "Subtotal"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__customer
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_search
+msgid "Customer"
+msgstr "Cliente"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__date
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_search
+msgid "Date"
+msgstr "Fecha"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__description
+msgid "Description"
+msgstr "Descripción"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__factor
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__factor
+msgid "Factor"
+msgstr "Factor"
+
+#. module: mrp_account_cost_report
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__hours
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__hours
+msgid "Hours"
+msgstr "Horas"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__id
+msgid "ID"
+msgstr ""
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__indirects_percentage
+msgid "Indirects %"
+msgstr "GI %"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__indirects_amount
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__indirects_amount
+msgid "Indirects Amount"
+msgstr "G.I."
+
+#. module: mrp_account_cost_report
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_tree
+msgid "Indirects Amount Total"
+msgstr "Total G.I."
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__indirects_percentage
+msgid "Indirects Percentage"
+msgstr "GI %"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report____last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: mrp_account_cost_report
+#: model:ir.actions.act_window,name:mrp_account_cost_report.action_manufacture_cost_report
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_search
+msgid "Manufacture Cost"
+msgstr "Costos de Manufactura"
+
+#. module: mrp_account_cost_report
+#: model:ir.model,name:mrp_account_cost_report.model_manufacture_cost_report
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_graph
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_pivot
+msgid "Manufacture Cost Report"
+msgstr "Reporte Costos MRP"
+
+#. module: mrp_account_cost_report
+#: model:ir.ui.menu,name:mrp_account_cost_report.manufacture_cost_report_menu
+msgid "Manufacture Costs"
+msgstr "Costos Manufactura"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__production_id
+msgid "Manufacture Order"
+msgstr "Orden de Producción"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__price_unit
+msgid "Price Unit"
+msgstr "Precio Unitario"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__product_id
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_search
+msgid "Product"
+msgstr "Producto"
+
+#. module: mrp_account_cost_report
+#: model:ir.model,name:mrp_account_cost_report.model_mrp_production
+msgid "Production"
+msgstr "Producción"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__qty_done
+msgid "Qty Done"
+msgstr "Cantidad realizada"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__product_uom_qty
+msgid "Quantity"
+msgstr "Cantidad"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__sale_amount
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__sale_amount
+msgid "Sale Amount"
+msgstr "Total Ventas"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__sale_price_unit
+msgid "Sale Price Unit"
+msgstr "Precio Unitario"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__price_subtotal
+msgid "Subtotal"
+msgstr "Subtotal"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__total_percentage
+msgid "Total %"
+msgstr "Total %"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__total_cost
+msgid "Total Cost"
+msgstr "Precio Unitario"
+
+#. module: mrp_account_cost_report
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_tree
+msgid "Total Hours"
+msgstr "Horas Totales"
+
+#. module: mrp_account_cost_report
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_tree
+msgid "Total Qty"
+msgstr "Cant. total"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__unit_cost
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__unit_cost
+msgid "Unit Cost"
+msgstr "Costo Unitario"
+
+#. module: mrp_account_cost_report
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_tree
+msgid "Unit Cost Total"
+msgstr "Total Costo Unitario"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__product_uom_id
+msgid "Unit of Measure"
+msgstr "Unidad de medida"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__workforce_percentage
+msgid "Workforce %"
+msgstr "MO %"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__workforce_amount
+msgid "Workforce Amount"
+msgstr "M.O."
+
+#. module: mrp_account_cost_report
+#: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_tree
+msgid "Workforce Amount Total"
+msgstr "Total M.O."
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_mrp_production__workforce_percentage
+msgid "Workforce Percentage"
+msgstr "MO %"
+
+#. module: mrp_account_cost_report
+#: model:ir.model.fields,field_description:mrp_account_cost_report.field_manufacture_cost_report__workforce_amount
+msgid "Workforce Total"
+msgstr "Total M.O."
+
