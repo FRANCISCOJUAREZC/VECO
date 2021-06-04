@@ -13,6 +13,7 @@
         'sale',
         'mrp_workorder',
         'mrp_account',
+        'mrp_account_workorder_v2',
     ],
     'data': [
         'security/ir.model.access.csv',
