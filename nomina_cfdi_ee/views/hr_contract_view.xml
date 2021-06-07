@@ -76,4 +76,14 @@
           </xpath>
         </field>
     </record>
+
+    <record id="action_dar_alta" model="ir.actions.server">
+        <field name="name">Dar alta</field>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="nomina_cfdi_ee.model_hr_contract"/>
+        <field name="binding_model_id" ref="nomina_cfdi_ee.model_hr_contract"/>
+        <field name="code">records.action_dar_alta()
+        </field>
+    </record>
 </odoo>

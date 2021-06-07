@@ -7,7 +7,7 @@
     Nomina CFDI Module
     ''',
     'author': 'IT Admin',
-    'version': '12.29',
+    'version': '12.31',
     'category': 'Employees',
     'depends': [
         'base', 'hr', 'hr_payroll', 'hr_payroll_account'
@@ -35,6 +35,11 @@
         'views/horas_extras_view.xml',
         'wizard/wizard_liquidacion_view.xml',
         'wizard/import_nomina_xml.xml',
+        'wizard/listado_de_nomina_wizard_view.xml',
+        'wizard/generar_recibo_nomina.xml',
+        'views/confirmar_cancelar_nomina.xml',
+        'wizard/dar_baja_view.xml',
+        'views/registro_patronal.xml',
     ],
     'installable': True,
     'application': False,

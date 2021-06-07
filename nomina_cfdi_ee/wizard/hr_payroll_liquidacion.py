@@ -52,7 +52,7 @@ class GeneraLiquidaciones(models.TransientModel):
             raise Warning("Seleccione primero al empleado.")
         if not self.journal_id:
             raise Warning("Seleccione primero el diario.")
-        payslip_batch_nm = 'Liquidacion ' +employee.name
+        payslip_batch_nm = 'Liquidacion ' + employee.name
         date_from = self.fecha_inicio
         date_to = self.fecha_liquidacion
         # batch
@@ -208,7 +208,7 @@ class GeneraLiquidaciones(models.TransientModel):
             year_date_start = self.contract_id.date_start.year
             if year_date_start < self.fecha_liquidacion.year:
                 inicio_ano = date(self.fecha_liquidacion.year, 1, 1)
-                payslip_onchange_vals = payslip_obj.onchange_employee_id(str(inicio_ano), self.fecha_liquidacion, employee_id=self.employee_id.id)
+                payslip_onchange_vals = payslip_obj.onchange_employee_id(inicio_ano, self.fecha_liquidacion, employee_id=self.employee_id.id)
             else:
                 payslip_onchange_vals = payslip_obj.onchange_employee_id(self.contract_id.date_start, self.fecha_liquidacion, employee_id=self.employee_id.id)
             #Creación de nomina ordinaria
@@ -225,31 +225,35 @@ class GeneraLiquidaciones(models.TransientModel):
 
             worked_days = [(0, 0, x) for x in payslip_vals.get('worked_days_line_ids')]
             self.dias_aguinaldo = 0
+            dias_faltas = 0
+#            _logger.info('worked_days %s --- ', worked_days)
             for lines in worked_days:
                _logger.info('lineas %s', lines[2])
-               if lines[2]['code'] == 'WORK100' or lines[2]['code'] == 'FJC' or lines[2]['code'] == 'VAC' or lines[2]['code'] == 'SEPT':
-                   self.dias_aguinaldo += lines[2]['number_of_days']
+               if lines[2]['code'] != 'WORK100' and lines[2]['code'] != 'FJC' and lines[2]['code'] != 'VAC' and lines[2]['code'] != 'SEPT':
+                   dias_faltas += lines[2]['number_of_days']
 
-#            year_date_start = datetime.strptime(self.contract_id.date_start, "%Y-%m-%d").year
-#            first_day_date = datetime(datetime.strptime(self.fecha_liquidacion,"%Y-%m-%d").year, 1, 1)
-#            if year_date_start < datetime.strptime(self.fecha_liquidacion,"%Y-%m-%d").year:
-#                delta1 = datetime.strptime(self.fecha_liquidacion,"%Y-%m-%d") - first_day_date # datetime.strptime(first_day_date,"%Y-%m-%d")
-#                self.dias_aguinaldo = delta1.days + 1
-#            else:
-#                delta2 = datetime.strptime(self.fecha_liquidacion,"%Y-%m-%d") - datetime.strptime(self.contract_id.date_start,"%Y-%m-%d")
-#                self.dias_aguinaldo = delta2.days + 1
+            year_date_start = self.contract_id.date_start.year
+            first_day_date = date(self.fecha_liquidacion.year, 1, 1)
+            if year_date_start < self.fecha_liquidacion.year:
+                delta1 = self.fecha_liquidacion - first_day_date
+                self.dias_aguinaldo = delta1.days + 1
+            else:
+                delta2 = self.fecha_liquidacion - self.contract_id.date_start
+                self.dias_aguinaldo = delta2.days + 1
 
             if self.contract_id.tablas_cfdi_id:
                 line = self.env['tablas.antiguedades.line'].search([('form_id','=',self.contract_id.tablas_cfdi_id.id),('antiguedad','<=',self.antiguedad_anos+1)],order='antiguedad desc',limit=1)
                 if line:
                     dias_aguinaldo2 = line.aguinaldo
-                    self.dias_aguinaldo = (dias_aguinaldo2*self.dias_aguinaldo)/365.0
+                    self.dias_aguinaldo = (dias_aguinaldo2* (self.dias_aguinaldo - dias_faltas))/365.0
                     _logger.info('dias %s, dias aguinaldo %s,', self.dias_aguinaldo, dias_aguinaldo2)
 
             #dias de vacaciones
             vac_pagada = False
             dias_vac = 0
             if date_start:
+                if str(date_start.day) == '29' and str(date_start.month) == '2':
+                     date_start -=  timedelta(days=1)
                 date_start = date_start.replace(last_day.year)
                 _logger.info('last_day %s, date_start %s', last_day, date_start) 
                 if last_day <= date_start:

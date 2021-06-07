@@ -87,6 +87,7 @@ class Contract(models.Model):
     prima_dominical = fields.Boolean(string='Prima dominical')
     calc_isr_extra = fields.Boolean(string='Incluir nóminas extraordirias en calculo ISR mensual', default = False)
 
+    @api.multi
     @api.onchange('wage')
     def _compute_sueldo(self):
         if self.wage:
@@ -107,6 +108,8 @@ class Contract(models.Model):
             diff_date = today - date_start 
             years = diff_date.days /365.0
             self.antiguedad_anos = int(years)
+        else:
+            self.antiguedad_anos = 0
 
     @api.model
     def calcular_liquidacion(self):
@@ -121,7 +124,7 @@ class Contract(models.Model):
         self.calcular_liquidacion()
         return True
 
-    @api.model 
+    @api.model
     def calculate_sueldo_base_cotizacion(self): 
         if self.date_start: 
             today = datetime.today().date()
@@ -150,7 +153,7 @@ class Contract(models.Model):
             sueldo_base_cotizacion = 0
         return sueldo_base_cotizacion
 
-    @api.model 
+    @api.model
     def calculate_sueldo_diario_integrado(self): 
         if self.date_start: 
             today = datetime.today().date()
@@ -177,6 +180,20 @@ class Contract(models.Model):
         return sueldo_diario_integrado
 
 
+
+
+    #FUNCTION TO CREATE INCIDENTIA DAR ALTA
+    def action_dar_alta(self):
+        for contract in self:
+           vals = {
+              'tipo_de_incidencia': 'Alta',
+              'employee_id': contract.employee_id.id,
+              'fecha': contract.date_start,
+              'state': 'done',
+           }
+           contract.env['incidencias.nomina'].create(vals)
+
+
 class TablasVacacioneslLine(models.Model):
     _name = 'tablas.vacaciones.line'
     _description = 'tablas vacaciones'
@@ -190,3 +207,4 @@ class TablasVacacioneslLine(models.Model):
                    ('2021', '2021'),
                    ],
         string=_('Año'),)
+        

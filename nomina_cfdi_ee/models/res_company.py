@@ -83,7 +83,7 @@ class ResCompany(models.Model):
             for contract in self.env['hr.contract'].browse(contract_ids):
                 #self.env['hr.contract'].browse(contract_ids)
                 if contract.employee_id.correo_electronico:
-                    mail_values = {
+                      mail_values = {
                       #'email_from': contract.employee_id.work_email,
                       #'reply_to': mailing.reply_to,
                       'email_to': company.nomina_mail,
@@ -94,8 +94,8 @@ class ResCompany(models.Model):
                       #'attachment_ids': [(4, attachment.id) for attachment in mailing.attachment_ids],
                       'auto_delete': True,
                       }
-                    mail = self.env['mail.mail'].create(mail_values)
-                    mail.send()
+                      mail = self.env['mail.mail'].create(mail_values)
+                      mail.send()
                 self.calculate_contract_vacaciones(contract)
         return
     
