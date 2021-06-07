@@ -39,7 +39,6 @@
         'wizard/generar_recibo_nomina.xml',
         'views/confirmar_cancelar_nomina.xml',
         'wizard/dar_baja_view.xml',
-        'views/registro_patronal.xml',
     ],
     'installable': True,
     'application': False,
