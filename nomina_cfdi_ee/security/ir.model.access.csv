@@ -20,5 +20,4 @@ access_timbrado_nomina,access_timbrado_nomina,nomina_cfdi_ee.model_timbrado_de_n
 access_generar_recibo_nomina,generar.recibo.nomina,nomina_cfdi_ee.model_generar_recibo_nomina,,1,1,1,1
 access_confirmado_nomina,access_confirmado_nomina,nomina_cfdi_ee.model_confirmado_de_nomina,hr_payroll.group_hr_payroll_user,1,1,1,1
 access_tablas_cfdi20,tablas_cfdi20,nomina_cfdi_ee.model_tablas_isr_periodo,hr_payroll.group_hr_payroll_user,1,1,1,1
-access_registro_patronal,access_registro_patronal,nomina_cfdi_ee.model_registro_patronal,hr_payroll.group_hr_payroll_user,1,1,1,1
 
