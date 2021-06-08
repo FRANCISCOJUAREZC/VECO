@@ -107,15 +107,25 @@ class GenerarPagosBanco(models.TransientModel):
                         _logger.info('empleado %s --- banco %s', employee.name, self.banco_rfc)
                         if self.banco_rfc == 'BBA830831LJ2': # Bancomer Mixto
                             data1 = '3' # identificador
-                            data2 = self.bbva_referencia[:7]
+                            if employee.banco.c_banco == '012':
+                                data2 = '0000000'
+                            else:
+                                data2 = self.bbva_referencia[:7]
                             data3 = employee.rfc and employee.rfc.ljust(18,' ')
                             if employee.tipo_cuenta == 'c_ahorro':
-                                data4 = '40'
+                                if employee.banco.c_banco == '012':
+                                    data4 = '01'
+                                else:
+                                    data4 = '40'
                             else:
                                 raise UserError(_('Debes seleccionar "Cuenta de Ahorro" y colocar la CLABE para el empleado %s') % (employee.name))
                             data5 = employee.no_cuenta[:3] #posiciones 1, 2 y 3 de la cuenta CLABE
-                            data6 = employee.no_cuenta[3:6] # posiciones 4, 5 y 6 de la cuenta CLABE.
-                            data7 = employee.no_cuenta[6:].rjust(16,'0') #12 posiciones.
+                            if employee.banco.c_banco == '012':
+                               data6 = '000'
+                               data7 = employee.no_cuenta[7:17].rjust(16,'0') #12 posiciones.
+                            else:
+                               data6 = employee.no_cuenta[3:6] # posiciones 4, 5 y 6 de la cuenta CLABE.
+                               data7 = employee.no_cuenta[6:].rjust(16,'0') #12 posiciones.
                             data8 =  str(round(net_total,2)).split('.')[0].rjust(13, '0')
                             if net_total > 0:
                                 data8b =  str(round(net_total,2)).split('.')[1].ljust(2, '0')
