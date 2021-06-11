@@ -13,9 +13,10 @@
         'sale',
         'mrp_workorder',
         'mrp_account',
+        'mrp_account_workorder_v2',
     ],
     'data': [
         'security/ir.model.access.csv',
-        'report/manufacture_cost_report.xml',
+  #      'report/manufacture_cost_report.xml',
     ]
 }
