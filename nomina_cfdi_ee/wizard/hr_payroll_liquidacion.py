@@ -52,7 +52,7 @@ class GeneraLiquidaciones(models.TransientModel):
             raise Warning("Seleccione primero al empleado.")
         if not self.journal_id:
             raise Warning("Seleccione primero el diario.")
-        payslip_batch_nm = 'Liquidacion ' +employee.name
+        payslip_batch_nm = 'Liquidacion ' + employee.name
         date_from = self.fecha_inicio
         date_to = self.fecha_liquidacion
         # batch

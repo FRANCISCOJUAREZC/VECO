@@ -6,6 +6,7 @@ from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 
 class exportar_cfdi_sua(models.TransientModel):
     _name = 'exportar.cfdi.sua'
+    _description = 'Exportar SUA'
     
     start_date = fields.Date('Fecha inicio')
     end_date = fields.Date('Fecha fin')

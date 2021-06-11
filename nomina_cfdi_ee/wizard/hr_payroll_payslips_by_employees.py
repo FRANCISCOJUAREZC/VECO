@@ -66,10 +66,13 @@ class HrPayslipEmployeesExt(models.TransientModel):
             date_start_1 = employ_contract_id.date_start
             d_from_1 = fields.Date.from_string(from_date)
             d_to_1 = fields.Date.from_string(to_date)
-            if date_start_1 > d_from_1:
-               imss_dias =  (to_date - date_start_1).days + 1
-               res.update({'imss_dias': imss_dias,
-                           'dias_infonavit': imss_dias,})
+            if date_start_1:
+               if date_start_1> d_from_1:
+                   imss_dias =  (to_date - date_start_1).days + 1
+                   res.update({'imss_dias': imss_dias,
+                            'dias_infonavit': imss_dias,})
+               else:
+                   res.update({'imss_dias': payslip_batch.imss_dias,})
             else:
                res.update({'imss_dias': payslip_batch.imss_dias,})
 
@@ -78,16 +81,3 @@ class HrPayslipEmployeesExt(models.TransientModel):
         payslips.compute_sheet()
         
         return {'type': 'ir.actions.act_window_close'}
-    
-#     @api.multi
-#     def compute_sheet(self):
-#         res = super(HrPayslipEmployees, self).compute_sheet()
-#         active_id = self.env.context.get('active_id')
-#         if active_id and self.employee_ids:
-#             payslips = self.env['hr.payslip'].search([('employee_id', '=', self.employee_ids.ids), ('payslip_run_id', '=', active_id)])
-#             payslip_batch = self.env['hr.payslip.run'].browse(active_id)
-#             payslips.write({'tipo_nomina': payslip_batch.tipo_nomina})
-#         return res
-    
-        
-#HrPayslipEmployees.compute_sheet = HrPayslipEmployeesExt.compute_sheet

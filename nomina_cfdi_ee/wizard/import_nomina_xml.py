@@ -12,6 +12,7 @@ from reportlab.lib.units import mm
 
 class import_nomina_from_xml(models.TransientModel):
     _name ='import.nomina.from.xml'
+    _description = 'Importar Nomina'
     
     import_file = fields.Binary("Importar Archivo",required=False)
     file_name = fields.Char("Nombre del archivo")

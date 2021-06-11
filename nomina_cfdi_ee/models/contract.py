@@ -123,7 +123,7 @@ class Contract(models.Model):
         self.calcular_liquidacion()
         return True
 
-    @api.model 
+    @api.model
     def calculate_sueldo_base_cotizacion(self): 
         if self.date_start: 
             today = datetime.today().date()
@@ -152,7 +152,7 @@ class Contract(models.Model):
             sueldo_base_cotizacion = 0
         return sueldo_base_cotizacion
 
-    @api.model 
+    @api.model
     def calculate_sueldo_diario_integrado(self): 
         if self.date_start: 
             today = datetime.today().date()
@@ -192,3 +192,4 @@ class TablasVacacioneslLine(models.Model):
                    ('2021', '2021'),
                    ],
         string=_('Año'),)
+        
