@@ -17,6 +17,6 @@
     ],
     'data': [
         'security/ir.model.access.csv',
-  #      'report/manufacture_cost_report.xml',
+        'report/manufacture_cost_report.xml',
     ]
 }
