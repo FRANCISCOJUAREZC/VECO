@@ -18,7 +18,7 @@ class HrPayslipEmployeesExt(models.TransientModel):
         to_date = run_data.get('date_end')
         if not data['employee_ids']:
             raise UserError(_("You must select employee(s) to generate payslip(s)."))
-        payslip_batch = self.env['hr.payslip.run'].browse(active_id)
+        payslip_batch = self.env['hr.payslip.run'].sudo().browse(active_id)
         struct_id = payslip_batch.estructura and payslip_batch.estructura.id or False
         other_inputs = []
         for other in payslip_batch.tabla_otras_entradas:
@@ -26,7 +26,7 @@ class HrPayslipEmployeesExt(models.TransientModel):
                 other_inputs.append((0,0,{'name':other.descripcion, 'code': other.codigo, 'amount':other.monto}))
             
         for employee in self.env['hr.employee'].browse(data['employee_ids']):
-            slip_data = self.env['hr.payslip'].onchange_employee_id(from_date, to_date, employee.id, contract_id=False)
+            slip_data = self.env['hr.payslip'].sudo().onchange_employee_id(from_date, to_date, employee.id, contract_id=False)
             res = {
                 'employee_id': employee.id,
                 'name': slip_data['value'].get('name'),
@@ -64,7 +64,7 @@ class HrPayslipEmployeesExt(models.TransientModel):
                         domain.append(('date_from','>=',line.dia_inicio))
                         domain.append(('date_to','<=',line.dia_fin))
                     domain.append(('employee_id','=',employee.id))
-                    payslips = self.env['hr.payslip'].search(domain)
+                    payslips = self.env['hr.payslip'].sudo().search(domain)
                     if payslips:
                         no_slips = len(payslips)
                         if payslip_batch.periodicidad_pago == '04':
@@ -102,7 +102,7 @@ class HrPayslipEmployeesExt(models.TransientModel):
             else:
                res.update({'imss_dias': payslip_batch.imss_dias,})
 
-            payslips += self.env['hr.payslip'].create(res)
+            payslips += self.env['hr.payslip'].sudo().create(res)
 
         payslips.compute_sheet()
         
