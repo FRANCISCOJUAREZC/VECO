@@ -121,7 +121,7 @@ class GeneraLiquidaciones(models.TransientModel):
             'contract_id' : contract_id,
             'fecha_pago' : date_to,
             'mes': str(date_to.month).zfill(2),
-            'dias_pagar': dias_pagar,
+            'dias_pagar': '30.4', #dias_pagar,
             'imss_dias': self.dias_pendientes_pagar,
             'nom_liquidacion': True,
             'journal_id': self.journal_id.id,
