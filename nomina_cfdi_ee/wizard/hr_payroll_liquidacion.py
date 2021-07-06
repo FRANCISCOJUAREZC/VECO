@@ -191,10 +191,10 @@ class GeneraLiquidaciones(models.TransientModel):
 
                 if self.sueldo_calculo_monto > tope_prima_antiguedad:
                     _logger.info('mayor')
-                    self.monto_prima_antiguedad = round(self.antiguedad_anos) * 12 * self.tope_prima_monto * 2
+                    self.monto_prima_antiguedad = round(self.antiguedad_anos,4) * 12 * self.tope_prima_monto * 2
                 else:
                     _logger.info('menor')
-                    self.monto_prima_antiguedad = round(self.antiguedad_anos) * 12 * self.sueldo_calculo_monto
+                    self.monto_prima_antiguedad = round(self.antiguedad_anos,4) * 12 * self.sueldo_calculo_monto
             else:
                 self.monto_prima_antiguedad = 0
 
