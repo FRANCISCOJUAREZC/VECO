@@ -127,7 +127,7 @@ class MrpProductionPlanItem(models.TransientModel):
                         'diff_days_delivery': get_days(sale_line.order_id.x_studio_entrada_almacn, sale_line.order_id.date_order ),
                         'retraso': get_days(sale_line.order_id.expected_date, sale_line.order_id.date_order) if  get_days(sale_line.order_id.expected_date, sale_line.order_id.date_order) < 1 else 'OT',
                         'production_finished': mrp.state == 'done',
-                        'full_delivery':  sale_line.product_uom_qty == sale_line.qty_delivered and mrp.state == 'done',
+                        'full_delivered':  sale_line.product_uom_qty == sale_line.qty_delivered and mrp.state == 'done',
                         'mrp_month': mrp.date_start.month if mrp.date_start else False,
                         'weeknum':int(mrp.date_finished.strftime("%V")),
                         'year': mrp.date_finished.year,
