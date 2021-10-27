@@ -1,0 +1,86 @@
+<odoo>
+  <data>
+
+    <record id="production_plan_form_view" model="ir.ui.view">
+        <field name="name">production_plan_form_view</field>
+        <field name="model">mrp.production.plan.item</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                  <field name="date" />
+                  <field name="sale_id" />
+                  <field name="partner_id" />
+                  <field name="code" />
+                  <field name="product_id" />
+                  <field name="qty_to_produce" />
+                  <field name="uom" />
+                  <field name="planned_date" />
+                  <field name="sale_date" />
+                  <field name="family" />
+                </group>
+                <group>
+                  <field name="mrp_date" />
+                  <field name="comp_date" />
+                  <field name="op_name" />
+                  <field name="pack" />
+                  <field name="op_item_name" />
+                  <field name="code_item_name" />
+                  <field name="qty" />
+                  <field name="dimension" />
+                  <field name="incomming_date" />
+                  <field name="status" />
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="production_plan_tree_view" model="ir.ui.view">
+        <field name="name">production_plan_tree_view</field>
+        <field name="model">mrp.production.plan.item</field>
+        <field name="arch" type="xml">
+            <tree string="Plan de producción" editable="bottom">
+                <field name="date" optional="show"/>
+                <field name="sale_id"/>
+                <field name="partner_id" optional="show"/>
+                <field name="code" optional="show"/>
+                <field name="product_id" optional="show"/>
+                <field name="qty_to_produce" optional="show"/>
+                <field name="uom" optional="show"/>
+                <field name="planned_date" optional="show"/>
+                <field name="sale_date" optional="show"/>
+                <field name="family" optional="show"/>
+                <field name="mrp_date" optional="show"/>
+                <field name="comp_date" optional="show"/>
+                <field name="op_name" optional="show"/>
+                <field name="pack" optional="show"/>
+                <field name="op_item_name" optional="show"/>
+                <field name="code_item_name" optional="show"/>
+                <field name="qty" optional="show"/>
+                <field name="dimension" optional="show"/>
+                <field name="incomming_date" optional="show"/>
+                <field name="status" optional="show"/>
+                <field name="client_delivery_date" optional="show"/>
+                <field name="invoice_id" optional="show"/>
+                <field name="delay" optional="show"/>
+                <field name="delay_days" optional="show"/>
+                <field name="notes" optional="show"/>
+                <field name="completed" optional="show"/>
+                <field name="sale_time" optional="show"/>
+                <field name="plant_time" optional="show"/>
+                <field name="real_time" optional="show"/>
+
+
+                <field name="is_delivery" optional="hide" />
+                <field name="mrp_month" optional="hide" />
+                <field name="sale_month" optional="hide" />
+                <field name="sale_year" optional="hide" />
+                <field name="diff_days_delivery" optional="hide" />
+                <field name="retraso" optional="hide" />
+                <field name="production_finished" optional="hide" />
+                <field name="full_delivered" optional="hide" />
+            </tree>
+        </field>
+    </record>
+
+  </data>
+</odoo>
