@@ -109,9 +109,9 @@ class MrpProductionPlanItem(models.Model):
             # Numero de semana de fecha de fabricacion
             item.weeknum = int(item.mrp_date.strftime("%V")) if item.mrp_date else False
             # Mes fecha fabricacion
-            item.mrp_month = item.mrp_date.month
+            item.mrp_month = item.mrp_date.month if item.mrp_date else False
             # Año fecha fabricacion
-            item.year = item.mrp_date.year
+            item.year = item.mrp_date.year if item.mrp_date else False
 
             
     def get_diff_dates(self,date1, date2):
