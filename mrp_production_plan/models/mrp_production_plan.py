@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
-
+from datetime import date, datetime
 
 class MrpProductionPlanItem(models.Model):
     _name = "mrp.production.plan.item"
@@ -115,6 +115,12 @@ class MrpProductionPlanItem(models.Model):
 
             
     def get_diff_dates(self,date1, date2):
+        if isinstance(date1, date):
+            date1 = datetime.combine(date.today(), datetime.min.time())
+
+        if isinstance(date2, date):
+            date2 = datetime.combine(date.today(), datetime.min.time())
+
         if not date1 or not date2:
             return 0
         return (date1 - date2).days
