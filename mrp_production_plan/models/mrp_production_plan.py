@@ -5,68 +5,119 @@ from odoo import models, fields, api
 class MrpProductionPlanItem(models.Model):
     _name = "mrp.production.plan.item"
 
-
+    #Campos no mostrados pero utiles
+    sale_line_id = fields.Many2one('sale.order.line', string='Linea de venta')
     # Campos de venta
-    sale_line_id = fields.Many2one('sale.order.line', string='Linea de venta',readonly=True)
-    sale_id = fields.Many2one(related="sale_line_id.order_id", string='Venta', readonly=True)
-    partner_id = fields.Many2one(related="sale_line_id.order_id.partner_id", string="Cliente", readonly=True)
-    product_id = fields.Many2one(related="sale_line_id.product_id", string=u'Descripción', readonly=True)
-    qty_to_produce = fields.Float(related="sale_line_id.product_uom_qty",string='SOL.', help="Cantidad a producir en la orden de manofactura", readonly=True)
-    uom = fields.Many2one(related="sale_line_id.product_uom", string='UM', readonly=True)
-    planned_date = fields.Datetime(related="sale_id.date_order", string=u"Fecha aprobación", readonly=True)
-    sale_date = fields.Datetime(related="sale_id.commitment_date",string='Fecha promesa de ventas',readonly=True)
-    family = fields.Char(related="product_id.family",string='Familia', readonly=True)
+    in_date = fields.Date('Ingreso',default=fields.date.today())
+    sale_id = fields.Many2one(related="sale_line_id.order_id", string='Venta')
+    partner_id = fields.Many2one(related="sale_line_id.order_id.partner_id", string="Cliente")
+    product_id = fields.Many2one(related="sale_line_id.product_id", string=u'Descripción')
+    qty_to_produce = fields.Float(related="sale_line_id.product_uom_qty",string='SOL.', help="Cantidad a producir en la orden de manofactura")
+    uom = fields.Many2one(related="sale_line_id.product_uom", string='UM')
+    planned_date = fields.Datetime(related="sale_id.date_order", string=u"Fecha aprobación")
+    sale_date = fields.Datetime(related="sale_id.commitment_date",string='Fecha promesa de ventas')
+    family = fields.Char(related="product_id.family",string='Familia')
     # Campos MRP
-    mrp_id = fields.Many2one('mrp.production', string=u'Órden de producción', readonly=True)
-    mrp_date = fields.Datetime(related="mrp_id.x_studio_fecha_inicio_fabrticacion",string='Fecha de fabricación', readonly=True)
-    comp_date = fields.Datetime(related="sale_id.x_studio_fecha_compromiso_planta",string='Compromiso en planta')
+    mrp_date = fields.Datetime(related="mrp_id.x_studio_fecha_inicio_fabrticacion",string='Fecha de fabricación')
+    comp_date = fields.Datetime(related="sale_id.x_studio_fecha_compromiso_planta",string='Compromiso en planta',readonly=False)
+    mrp_id = fields.Many2one('mrp.production', string=u'Órden de producción')
     pack = fields.Char('Pack')
     # Habilitado
-    op_item_name = fields.Char(related="mrp_id.origin",string=u'Órden de habilitado', readonly=True)
-    code_item_name = fields.Many2one('product.product',u'Código de habilitado', readonly=True)
-    qty = fields.Integer('Cantidad', default=0)
-    dimension = fields.Char(u'Dimensión')
-    incomming_date = fields.Date('Ingreso Físico', readonly=True)
-    # MRP desde picking out
-    close_date = fields.Datetime(string=u'Fecha cierre de la órden')
+    hability_mrp_id = fields.Many2one('mrp.production',string=u'Órden de habilitado')
+    hability_product_id = fields.Many2one(related="hability_mrp_id.product_id",string=u'Código de habilitado')
+    hability_qty = fields.Float(related="hability_mrp_id.product_qty", default=0)
+    hability_dimension = fields.Text(related="hability_mrp_id.product_id.description_pickingin")
+    hability_incomming_date = fields.Datetime(u'Ingreso Físico al almacén')
+    # MRP 
     status = fields.Selection(related="mrp_id.x_studio_estatus_de_produccin",string=u'Estatus producción', readonly=False)
-    # Venta -> picking out -> estado done
-    client_delivery_date = fields.Date('Fecha de entrega al cliente',default=fields.date.today(), readonly=True)
-    invoice_id = fields.Many2one('account.move', string='N. Factura', readonly=True)
-    
-    delay = fields.Char('Retraso', readonly=True)
-    delay_days = fields.Integer(u'Días entre ingreso y entrega', default=0, readonly=True)
-
+    client_delivery_date = fields.Datetime('Fecha de entrega al cliente')
+    invoice_list = fields.Char(string='N. Factura')
+    #
+    delay = fields.Char('Retraso')
     notes = fields.Text(related="sale_id.note",string='Observaciones', readonly=False)
-
-    completed = fields.Boolean('Completo', readonly=True)
-
-
-    sale_time = fields.Integer(u'Tiempo que ventas deja para fabricar el producto', default=0, readonly=True)
-    plant_time = fields.Integer(u'Tiempo que planta ofrecio para ese producto en la semana que entro el pedido', default=0, readonly=True)
-    real_time = fields.Integer(u'Tiempo real en programa para entregar el producto', default=0, readonly=True, compute='_get_real_time')
-    # Campos calculados
-    is_delivery = fields.Boolean('Entregado',readonly=True)
-    mrp_month = fields.Integer(u'Mes (Órden de producción)',readonly=True)
-    sale_month = fields.Integer('Mes (Prom Vta)',readonly=True)
-    sale_year = fields.Integer(u'Año (Prom Vta)',readonly=True)
-    diff_days_delivery = fields.Integer(u'Entrega Almacén vs Fecha Promesa',readonly=True)
-    retraso = fields.Char(u'Retraso Prod vs Almacén',readonly=False)
-    production_finished = fields.Boolean(u'Producción', readonly=False)
+    completed = fields.Boolean('Completo')
+    # Campos calculados (fechas)
+    delay_days = fields.Integer(u'Días entre ingreso y entrega', default=0, compute="_compute_dates")
+    sale_time = fields.Integer(u'Tiempo que ventas deja para fabricar el producto', default=0,compute="_compute_dates")
+    plant_time = fields.Integer(u'Tiempo que planta ofrecio para ese producto en la semana que entro el pedido', default=0,compute="_compute_dates")
+    sale_week = fields.Integer('Semana (Prom Vta)', compute="_compute_dates")
+    sale_month = fields.Integer('Mes (Prom Vta)', compute="_compute_dates")
+    sale_year = fields.Integer(u'Año (Prom Vta)', compute="_compute_dates")
+    weeknum = fields.Integer('Número de la semana (recepción - MRP)', default=0, compute="_compute_dates")
+    mrp_month = fields.Integer(u'Mes (Órden de producción)',compute="_compute_dates")
+    year = fields.Integer('Año (recepción - MRP)', default=0,compute="_compute_dates")
+    # Campos calculados (char)
+    prod_delay_warehouse = fields.Char(u'Retraso Prod vs Almacén',readonly=False, compute='_get_prod_delay')
+    production= fields.Boolean(u'Producción',compute='_get_prod_delay')
+    is_delivery = fields.Boolean('Entregado',compute='_get_prod_delay')
+    #
+    diff_days_delivery = fields.Integer(u'Entrega Almacén vs Fecha Promesa')
     full_delivered = fields.Boolean('Entregado 100%')
     ###################
-    weeknum = fields.Integer('Número de la semana (recepción - MRP)', default=0, readonly=True)
-    year = fields.Integer('Año (recepción - MRP)', default=0, readonly=True)
 
-
-    def _get_real_time(self):
-        for line in self:
-            line.real_time = 0
-            if line.comp_date and line.incomming_date:
-                num_days = (line.comp_date - line.incomming_date).days
-                print("num_days: %s"%num_days)
-                line.real_time = num_days if isinstance(num_days, int) else 0
+    def _get_delivery_client_delay(self):
+        for item in self:
+            # 'Entrega Almacén vs Fecha Promesa
+            # Si fecha entrega cliente es mayor a la fecha promeda de ventas
+            # ingreso fisico - fecha promesa 
+            # si el ingreso fisico esta vacio PEND
+            promise_date = item.sale_date or 0
+            value = 'OT'
+            if not item.client_delivery_date:
+                value = 'PEND'
+            elif item.client_delivery_date > promise_date:
+                value = str(item.get_diff_dates(item.client_delivery_date, item.sale_date))
             
+            item.full_delivery = value == 'OT'
+            item.diff_days_delivery = value
+
+
+    def _get_prod_delay(self):
+        for item in self:
+            # Retraso Prod vs Almacén
+            # Si ingreso fisico al almacen es mayor a la fecha promeda de ventas
+            # ingreso fisico - fecha promesa 
+            # si el ingreso fisico esta vacio PEND
+            promise_date = item.sale_date or 0
+            value = 'OT'
+            if not item.hability_incomming_date:
+                value = 'PEND'
+            elif item.hability_incomming_date > promise_date:
+                value = str(item.get_diff_dates(item.hability_incomming_date, item.sale_date))
+            
+            item.production = value == 'OT'
+            item.prod_delay_warehouse = value
+            item.is_delivery = item.status == "c. Facturado/Entregado"
+
+    def _compute_dates(self):
+        now = fields.datetime.now()
+        for item in self:
+            # dias ingreso y entrega
+            item.delay_days = item.get_diff_dates(item.client_delivery_date, item.in_date)
+            # fecha promesa de entrega - ingreso pedido (aprobacion)
+            item.sale_time = item.get_diff_dates(item.sale_date, item.planned_date)
+            # fecha compromiso planta - ingreso pedido (aprobacion)
+            item.plant_time = item.get_diff_dates(item.comp_date, item.planned_date)
+            # Numero de semana de promesa de venta
+            item.sale_week = int(item.sale_date.strftime("%V")) if item.sale_date else False
+            # Mes de promesa de venta
+            item.sale_month = item.sale_date.month if item.sale_date else False
+            # año de promesa de venta
+            item.sale_year = item.sale_date.year if item.sale_date else False
+            # Entrega  (ingreso fisico al almacen) vs Fecha Promesa Cliente
+            item.sale_time = item.get_diff_dates(item.hability_incomming_date, item.sale_date)
+            # Numero de semana de fecha de fabricacion
+            item.weeknum = int(item.mrp_date.strftime("%V")) if item.mrp_date else False
+            # Mes fecha fabricacion
+            item.mrp_month = item.mrp_date.month
+            # Año fecha fabricacion
+            item.year = item.mrp_date.year
+
+            
+    def get_diff_dates(self,date1, date2):
+        if not date1 or not date2:
+            return 0
+        return (date1 - date2).days
 
     def create_records(self):
         production_items = self
@@ -76,71 +127,49 @@ class MrpProductionPlanItem(models.Model):
             ('state', 'not in', ['cancel','draft']),\
             ]
         if current_rows and current_rows.mapped('sale_line_id'):
-            search_values += ('sale_line_id','not in',current_rows.mapped('sale_line_id.id'))
-        print("search_values: %s"%search_values)
+            search_values.append(('id','not in',current_rows.mapped('sale_line_id.id')))
+
         sale_line_ids = self.env['sale.order.line'].search(search_values)
-
-        for sale_line in sale_line_ids:
-            # Si el producto tiene lista de materiales
-            mrp_ids = self.env['mrp.production'].search([('product_id', '=', sale_line.product_id.id)])
-            if sale_line.product_id.bom_ids:
-                for mrp in mrp_ids:
-                    invoice_ids = self.env['account.move']
-                    if sale_line.order_id.invoice_ids:
-                        invoice_ids = sale_line.order_id.invoice_ids.filtered(lambda x: x.state not in ['cancel','draft'])
-
-
-                    def get_days(date1, date2):
-                        if not date1 or not date2:
-                            return 0
-                        return (date1 - date2).days
-
-                    values = {
-                        'sale_line_id':sale_line.id,
-                        'mrp_id':mrp.id,
-                        #'qty_to_produce': sale_line.product_uom_qty,
-                        #'uom': sale_line.product_uom.id,
-                        #'planned_date': sale_line.order_id.date_order,
-                        #'sale_date': sale_line.order_id.expected_date,
-                        #'family': sale_line.product_id.family,
-                        #'mrp_date': mrp.date_planned_start,
-                        #'op_name': mrp.id,
-                        #'op_item_name': mrp.origin,
-                        #'code_item_name': mrp.product_id.id,
-                        #'qty': mrp.product_qty,
-                        #'dimension': mrp.product_id.description_pickingin,
-                        #'incomming_date': sale_line.order_id.x_studio_entrada_almacn,
-                        #'status': mrp.status,
-                        #'client_delivery_date': sale_line.order_id.confirmation_date,
-                        #'invoice_id': ', '.join(invoice_ids.mapped('display_name')) if invoice_ids else False,
-                        #'delay_days': get_days(sale_line.order_id.effective_date, sale_line.order_id.x_studio_entrada_almacn ),
-                        #'notes': sale_line.order_id.note,
-                        #'completed': sale_line.product_uom_qty == sale_line.qty_delivered,
-                        #'sale_time': get_days(sale_line.order_id.x_studio_entrada_almacn, sale_line.order_id.date_order ),
-                        #'plant_time': get_days(mrp.date_planned_start, sale_line.order_id.date_order ),
-                        #'real_time': get_days(sale_line.order_id.x_studio_fecha_compromiso_planta, sale_line.order_id.x_studio_entrada_almacn),
-                        #'is_delivery': sale_line.product_uom_qty == sale_line.qty_delivered,
-                        #'sale_month': sale_line.order_id.date_order.month if sale_line.order_id.date_order else False,
-                        #'sale_year': sale_line.order_id.date_order.year if sale_line.order_id.date_order else False,
-                        ##'diff_days_delivery': get_days(sale_line.order_id.x_studio_entrada_almacn, sale_line.order_id.date_order ),
-                        #'retraso': get_days(sale_line.order_id.expected_date, sale_line.order_id.date_order) if  get_days(sale_line.order_id.expected_date, sale_line.order_id.date_order) < 1 else 'OT',
-                        #'production_finished': mrp.state == 'done',
-                        #'full_delivered':  sale_line.product_uom_qty == sale_line.qty_delivered and mrp.state == 'done',
-                        'mrp_month': mrp.date_start.month if mrp.date_start else False,
-                        'weeknum':int(mrp.date_finished.strftime("%V")),
-                        'year': mrp.date_finished.year,
-                        #'comp_date': sale_line.order_id.x_studio_fecha_compromiso_planta,
-                    }
         
-                    production_items += self.create(values)
+
+        mrp_production_order_ids = self.env['mrp.production'].search([('state', '!=', 'cancel')])
+
+        for mrp in mrp_production_order_ids:
+            # MRP values
+            sale_line_ids = mrp.x_studio_sale_id.order_line.filtered(lambda x: x.product_id == mrp.product_id)
+            sale_line = sale_line_ids[0] if sale_line_ids else self.env['sale.order.line']
+  
+            hability_mrp_id = self.env['mrp.production'].search([('origin', '=', mrp.name)])
+            dest_location = hability_mrp_id.location_dest_id or self.env['stock.location']
+            hability_sfp_picking = hability_mrp_id.picking_ids.filtered(lambda x: x.location_id == dest_location)
+            hability_incomming_date = False
+            if hability_sfp_picking:
+                hability_incomming_date = hability_sfp_picking.date_done or False
+
+            sale_picking = sale_line.order_id.picking_ids.filtered(lambda x: x.state == 'done')
+            sale_picking_date_done = False
+
+            if sale_picking:
+                sale_picking_date_done = sale_picking[0].date_done
+
+            invoice_ids = sale_line.order_id.invoice_ids.filtered(lambda x: x.state not in ['draft','cancel'])
+            values = {
+                'sale_line_id':sale_line.id,
+                'mrp_id':mrp.id,
+                'hability_mrp_id': hability_mrp_id.id if hability_mrp_id else False,
+                'hability_incomming_date': hability_incomming_date,
+                'client_delivery_date': sale_picking_date_done,
+                'invoice_list': ', '.join(invoice_ids.mapped('display_name')) if invoice_ids else False,
+            }
+
+            production_items += self.create(values)
 
         action = {
             'name': u'Plan de producción',
             'type': 'ir.actions.act_window',
-            'view_mode': 'tree',
+            'view_mode': 'tree,form',
             'res_model': 'mrp.production.plan.item',
             'domain': [('id', 'in', production_items.ids)],
         }
-        print("action: %s"%action)
         return action
 
