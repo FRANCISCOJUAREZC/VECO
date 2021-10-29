@@ -19,7 +19,7 @@ class MrpProductionPlanItem(models.Model):
     # Campos MRP
     mrp_id = fields.Many2one('mrp.production', string=u'Órden de producción', readonly=True)
     mrp_date = fields.Datetime(related="mrp_id.x_studio_fecha_inicio_fabrticacion",string='Fecha de fabricación', readonly=True)
-    comp_date = fields.Datetime(related="mrp_id.x_studio_fecha_compromiso_planta",string='Compromiso en planta')
+    comp_date = fields.Datetime(related="sale_id.x_studio_fecha_compromiso_planta",string='Compromiso en planta')
     pack = fields.Char('Pack')
     # Habilitado
     op_item_name = fields.Char(related="mrp_id.origin",string=u'Órden de habilitado', readonly=True)
@@ -126,9 +126,9 @@ class MrpProductionPlanItem(models.Model):
                         #'retraso': get_days(sale_line.order_id.expected_date, sale_line.order_id.date_order) if  get_days(sale_line.order_id.expected_date, sale_line.order_id.date_order) < 1 else 'OT',
                         #'production_finished': mrp.state == 'done',
                         #'full_delivered':  sale_line.product_uom_qty == sale_line.qty_delivered and mrp.state == 'done',
-                        #'mrp_month': mrp.date_start.month if mrp.date_start else False,
-                        #'weeknum':int(mrp.date_finished.strftime("%V")),
-                        #'year': mrp.date_finished.year,
+                        'mrp_month': mrp.date_start.month if mrp.date_start else False,
+                        'weeknum':int(mrp.date_finished.strftime("%V")),
+                        'year': mrp.date_finished.year,
                         #'comp_date': sale_line.order_id.x_studio_fecha_compromiso_planta,
                     }
         
