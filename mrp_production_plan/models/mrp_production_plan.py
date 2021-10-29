@@ -138,29 +138,41 @@ class MrpProductionPlanItem(models.Model):
             # MRP values
             sale_line_ids = mrp.x_studio_sale_id.order_line.filtered(lambda x: x.product_id == mrp.product_id)
             sale_line = sale_line_ids[0] if sale_line_ids else self.env['sale.order.line']
-  
-            hability_mrp_id = self.env['mrp.production'].search([('origin', '=', mrp.name)])
-            dest_location = hability_mrp_id.location_dest_id or self.env['stock.location']
-            hability_sfp_picking = hability_mrp_id.picking_ids.filtered(lambda x: x.location_id == dest_location)
-            hability_incomming_date = False
-            if hability_sfp_picking:
-                hability_incomming_date = hability_sfp_picking.date_done or False
-
             sale_picking = sale_line.order_id.picking_ids.filtered(lambda x: x.state == 'done')
             sale_picking_date_done = False
 
+            invoice_ids = sale_line.order_id.invoice_ids.filtered(lambda x: x.state not in ['draft','cancel'])
             if sale_picking:
                 sale_picking_date_done = sale_picking[0].date_done
+  
+            hability_mrp_ids = self.env['mrp.production'].search([('origin', '=', mrp.name)])
+            for hability_mrp_id in hability_mrp_ids:
+                # Obtencion de los campos de la orden de hablitado
+                dest_location = hability_mrp_id.location_dest_id or self.env['stock.location']
+                hability_sfp_picking = hability_mrp_id.picking_ids.filtered(lambda x: x.location_id == dest_location)
+                hability_incomming_date = False
+                if hability_sfp_picking:
+                    hability_incomming_date = hability_sfp_picking.date_done or False
 
-            invoice_ids = sale_line.order_id.invoice_ids.filtered(lambda x: x.state not in ['draft','cancel'])
-            values = {
-                'sale_line_id':sale_line.id,
-                'mrp_id':mrp.id,
-                'hability_mrp_id': hability_mrp_id.id if hability_mrp_id else False,
-                'hability_incomming_date': hability_incomming_date,
-                'client_delivery_date': sale_picking_date_done,
-                'invoice_list': ', '.join(invoice_ids.mapped('display_name')) if invoice_ids else False,
-            }
+
+                values = {
+                    'sale_line_id':sale_line.id,
+                    'mrp_id':mrp.id,
+                    'hability_mrp_id': hability_mrp_id.id if hability_mrp_id else False,
+                    'hability_incomming_date': hability_incomming_date,
+                    'client_delivery_date': sale_picking_date_done,
+                    'invoice_list': ', '.join(invoice_ids.mapped('display_name')) if invoice_ids else False,
+                }
+                production_items += self.create(values)
+            else:
+                values = {
+                    'sale_line_id':sale_line.id,
+                    'mrp_id':mrp.id,
+                    'client_delivery_date': sale_picking_date_done,
+                    'invoice_list': ', '.join(invoice_ids.mapped('display_name')) if invoice_ids else False,
+                }
+                production_items += self.create(values)
+
 
             production_items += self.create(values)
 
