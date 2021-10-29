@@ -152,7 +152,7 @@ class MrpProductionPlanItem(models.Model):
                 hability_sfp_picking = hability_mrp_id.picking_ids.filtered(lambda x: x.location_id == dest_location)
                 hability_incomming_date = False
                 if hability_sfp_picking:
-                    hability_incomming_date = hability_sfp_picking.date_done or False
+                    hability_incomming_date = hability_sfp_picking[0].date_done or False
 
 
                 values = {
