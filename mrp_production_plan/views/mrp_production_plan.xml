@@ -5,7 +5,7 @@
         <field name="name">production_plan_form_view</field>
         <field name="model">mrp.production.plan.item</field>
         <field name="arch" type="xml">
-            <form string="Plan de produccion">
+            <form string="Plan de producción">
               <sheet>
                 <group>
                     <group>     

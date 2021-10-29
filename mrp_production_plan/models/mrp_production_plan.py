@@ -40,12 +40,13 @@ class MrpProductionPlanItem(models.Model):
     delay_days = fields.Integer(u'Días entre ingreso y entrega', default=0, compute="_compute_dates")
     sale_time = fields.Integer(u'Tiempo que ventas deja para fabricar el producto', default=0,compute="_compute_dates")
     plant_time = fields.Integer(u'Tiempo que planta ofrecio para ese producto en la semana que entro el pedido', default=0,compute="_compute_dates")
-    sale_week = fields.Integer('Semana (Prom Vta)', compute="_compute_dates")
-    sale_month = fields.Integer('Mes (Prom Vta)', compute="_compute_dates")
-    sale_year = fields.Integer(u'Año (Prom Vta)', compute="_compute_dates")
-    weeknum = fields.Integer('Número de la semana (recepción - MRP)', default=0, compute="_compute_dates")
-    mrp_month = fields.Integer(u'Mes (Órden de producción)',compute="_compute_dates")
-    year = fields.Integer('Año (recepción - MRP)', default=0,compute="_compute_dates")
+
+    sale_week = fields.Char('Semana (Prom Vta)', compute="_compute_dates")
+    sale_month = fields.Char('Mes (Prom Vta)', compute="_compute_dates")
+    sale_year = fields.Char(u'Año (Prom Vta)', compute="_compute_dates")
+    weeknum = fields.Char('Número de la semana (recepción - MRP)', default=0, compute="_compute_dates")
+    mrp_month = fields.Char(u'Mes (Órden de producción)',compute="_compute_dates")
+    year = fields.Char('Año (recepción - MRP)', default=0,compute="_compute_dates")
     # Campos calculados (char)
     prod_delay_warehouse = fields.Char(u'Retraso Prod vs Almacén',readonly=False, compute='_get_prod_delay')
     production= fields.Boolean(u'Producción',compute='_get_prod_delay')
@@ -99,19 +100,19 @@ class MrpProductionPlanItem(models.Model):
             # fecha compromiso planta - ingreso pedido (aprobacion)
             item.plant_time = item.get_diff_dates(item.comp_date, item.planned_date)
             # Numero de semana de promesa de venta
-            item.sale_week = int(item.sale_date.strftime("%V")) if item.sale_date else False
+            item.sale_week = str(item.sale_date.strftime("%V")) if item.sale_date else False
             # Mes de promesa de venta
-            item.sale_month = item.sale_date.month if item.sale_date else False
+            item.sale_month = str(item.sale_date.month) if item.sale_date else False
             # año de promesa de venta
-            item.sale_year = item.sale_date.year if item.sale_date else False
+            item.sale_year = str(item.sale_date.year) if item.sale_date else False
             # Entrega  (ingreso fisico al almacen) vs Fecha Promesa Cliente
             item.sale_time = item.get_diff_dates(item.hability_incomming_date, item.sale_date)
             # Numero de semana de fecha de fabricacion
-            item.weeknum = int(item.mrp_date.strftime("%V")) if item.mrp_date else False
+            item.weeknum = str(item.mrp_date.strftime("%V")) if item.mrp_date else False
             # Mes fecha fabricacion
-            item.mrp_month = item.mrp_date.month if item.mrp_date else False
+            item.mrp_month = str(item.mrp_date.month) if item.mrp_date else False
             # Año fecha fabricacion
-            item.year = item.mrp_date.year if item.mrp_date else False
+            item.year = str(item.mrp_date.year) if item.mrp_date else False
 
             
     def get_diff_dates(self,date1, date2):
