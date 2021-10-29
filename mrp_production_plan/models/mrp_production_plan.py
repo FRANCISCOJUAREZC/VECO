@@ -139,7 +139,7 @@ class MrpProductionPlanItem(models.Model):
         sale_line_ids = self.env['sale.order.line'].search(search_values)
         
 
-        mrp_production_order_ids = self.env['mrp.production'].search([('state', '!=', 'cancel')])
+        mrp_production_order_ids = self.env['mrp.production'].search([('state', '!=', 'cancel'),('id','not in',current_rows.mapped('mrp_id.id'))])
 
         for mrp in mrp_production_order_ids:
             # MRP values
