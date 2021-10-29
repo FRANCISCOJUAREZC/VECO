@@ -25,7 +25,7 @@
             <field name="target">new</field>
         </record>
         
-        <menuitem name="Plan de producción" id="main_menu_production_menu" parent="mrp.mrp_planning_menu_root" sequence="1" action="action_view_production_plan"/>
+        <menuitem name="Generar plan de producción" id="main_menu_production_menu" parent="mrp.mrp_planning_menu_root" sequence="1" action="action_view_production_plan"/>
 
     </data>
 </odoo>

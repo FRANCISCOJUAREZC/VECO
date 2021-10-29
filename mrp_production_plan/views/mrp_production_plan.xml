@@ -7,29 +7,24 @@
         <field name="arch" type="xml">
             <form>
                 <group>
-                  <field name="date" />
-                  <field name="sale_id" />
-                  <field name="partner_id" />
-                  <field name="code" />
-                  <field name="product_id" />
-                  <field name="qty_to_produce" />
-                  <field name="uom" />
-                  <field name="planned_date" />
-                  <field name="sale_date" />
-                  <field name="family" />
+                    <field name="sale_line_id" />
+                    <field name="sale_id" />
+                    <field name="partner_id" />
+                    <field name="product_id" />
+                    <field name="qty_to_produce" />
+                    <field name="uom" />
+                    <field name="planned_date" />
+                    <field name="sale_date" />
+                    <field name="family" />
+                    <field name="mrp_id" />
+                    <field name="pack" />
+                    <field name="op_item_name" />
+                    <field name="code_item_name" />
+                    <field name="qty" />
+                    <field name="dimension" />
+                    <field name="incomming_date" />
                 </group>
-                <group>
-                  <field name="mrp_date" />
-                  <field name="comp_date" />
-                  <field name="op_name" />
-                  <field name="pack" />
-                  <field name="op_item_name" />
-                  <field name="code_item_name" />
-                  <field name="qty" />
-                  <field name="dimension" />
-                  <field name="incomming_date" />
-                  <field name="status" />
-                </group>
+
             </form>
         </field>
     </record>
@@ -39,48 +34,36 @@
         <field name="model">mrp.production.plan.item</field>
         <field name="arch" type="xml">
             <tree string="Plan de producción" editable="bottom">
-                <field name="date" optional="show"/>
-                <field name="sale_id"/>
-                <field name="partner_id" optional="show"/>
-                <field name="code" optional="show"/>
-                <field name="product_id" optional="show"/>
-                <field name="qty_to_produce" optional="show"/>
-                <field name="uom" optional="show"/>
-                <field name="planned_date" optional="show"/>
-                <field name="sale_date" optional="show"/>
-                <field name="family" optional="show"/>
-                <field name="mrp_date" optional="show"/>
-                <field name="comp_date" optional="show"/>
-                <field name="op_name" optional="show"/>
-                <field name="pack" optional="show"/>
-                <field name="op_item_name" optional="show"/>
-                <field name="code_item_name" optional="show"/>
-                <field name="qty" optional="show"/>
-                <field name="dimension" optional="show"/>
-                <field name="incomming_date" optional="show"/>
-                <field name="status" optional="show"/>
-                <field name="client_delivery_date" optional="show"/>
-                <field name="invoice_id" optional="show"/>
-                <field name="delay" optional="show"/>
-                <field name="delay_days" optional="show"/>
-                <field name="notes" optional="show"/>
-                <field name="completed" optional="show"/>
-                <field name="sale_time" optional="show"/>
-                <field name="plant_time" optional="show"/>
-                <field name="real_time" optional="show"/>
-
-
-                <field name="is_delivery" optional="hide" />
-                <field name="mrp_month" optional="hide" />
-                <field name="sale_month" optional="hide" />
-                <field name="sale_year" optional="hide" />
-                <field name="diff_days_delivery" optional="hide" />
-                <field name="retraso" optional="hide" />
-                <field name="production_finished" optional="hide" />
-                <field name="full_delivered" optional="hide" />
+                <field name="sale_line_id" />
+                <field name="sale_id" />
+                <field name="partner_id" />
+                <field name="product_id" />
+                <field name="qty_to_produce" />
+                <field name="uom" />
+                <field name="planned_date" />
+                <field name="sale_date" />
+                <field name="family" />
+                <field name="mrp_id" />
+                <field name="pack" />
+                <field name="op_item_name" />
+                <field name="code_item_name" />
+                <field name="qty" />
+                <field name="dimension" />
+                <field name="incomming_date" />
             </tree>
         </field>
     </record>
+    
+    <record id="action_view_production_plan_show" model="ir.actions.act_window">
+        <field name="name">Plan de producción</field>
+        <field name="res_model">mrp.production.plan.item</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="production_plan_tree_view"/>
+        <field name="target">current</field>
+    </record>
+    
+    <menuitem name="Ver plan de producción" id="main_menu_view_production_plan"
+              parent="mrp.mrp_planning_menu_root" sequence="1" action="action_view_production_plan_show"/>
 
   </data>
 </odoo>
