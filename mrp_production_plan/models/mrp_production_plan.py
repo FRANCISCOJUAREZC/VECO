@@ -62,9 +62,9 @@ class MrpProductionPlanItem(models.Model):
             # Si fecha entrega cliente es mayor a la fecha promeda de ventas
             # ingreso fisico - fecha promesa 
             # si el ingreso fisico esta vacio PEND
-            promise_date = item.sale_date or 0
+            promise_date = item.sale_date
             value = 'OT'
-            if not item.client_delivery_date:
+            if not item.client_delivery_date or not promise_date:
                 value = 'PEND'
             elif item.client_delivery_date > promise_date:
                 value = str(item.get_diff_dates(item.client_delivery_date, item.sale_date))
@@ -79,9 +79,9 @@ class MrpProductionPlanItem(models.Model):
             # Si ingreso fisico al almacen es mayor a la fecha promeda de ventas
             # ingreso fisico - fecha promesa 
             # si el ingreso fisico esta vacio PEND
-            promise_date = item.sale_date or 0
+            promise_date = item.sale_date
             value = 'OT'
-            if not item.hability_incomming_date:
+            if not item.hability_incomming_date or not promise_date:
                 value = 'PEND'
             elif item.hability_incomming_date > promise_date:
                 value = str(item.get_diff_dates(item.hability_incomming_date, item.sale_date))
