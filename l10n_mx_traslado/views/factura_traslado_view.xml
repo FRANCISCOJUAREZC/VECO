@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    	<record id="view_fatura_global_form" model="ir.ui.view">
+            <field name="name">CFDI Traslado tree</field>
+            <field name="model">cfdi.traslado</field>
+            <field name="arch" type="xml">
+                <form string="CFDI Traslado">
+                   <header>
+                        <field name="factura_cfdi" invisible="1"/>
+                        <button name="action_valid" type="object" states="draft" string="Validar" class="oe_highlight"/>
+                        <button name="action_set_draft" type="object" states="cancel" string="Cambiar a borrador" class="oe_highlight"/>
+                        <button name="action_cancel" string="Cancelar" type="object" attrs="{'invisible':[('state','in',['draft','cancel'])]}"/>
+                        <button name="action_cfdi_generate" type="object" string="Generar CFDI" 
+                            attrs="{'invisible':['|',('factura_cfdi','=',True), ('state','not in',('valid'))]}"
+                            class="oe_highlight" groups="base.group_user"/>
+                        <button name="action_cfdi_cancel"
+                            type="object" 
+                            string="Cancelar CFDI" 
+                            attrs="{'invisible':['|',('factura_cfdi','=',False), ('estado_factura','in',('solicitud_cancelar', 'factura_cancelada', 'solicitud_rechazada'))]}" 
+                            class="oe_highlight" 
+                            groups="base.group_user"
+                            confirm="¿Esta seguro que quiere cancelar la factura?"/>
+                            <!--<button name="action_cfdi_rechazada"
+                            type="object" 
+                            string="Cambiar estado CFDI a factura correcta" 
+                            attrs="{'invisible':['|',('factura_cfdi','=',False), ('estado_factura','not in',('solicitud_rechazada'))]}" 
+                            class="oe_highlight" 
+                            groups="base.group_user"
+                            confirm="La factura va pasar a estado correcto y puede intentar cancelar nuevamente."/>-->
+                        <button name="send_factura_mail" class="oe_highlight" attrs="{'invisible':[('estado_factura','=','factura_no_generada')]}" string="Enviar por correo-e" type="object"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,valid,cancel" />
+                   </header>
+                   <sheet>
+                   <div>
+                    <h1 class="mt0">
+                       <field name="number" class="oe_inline"/>
+                    </h1>
+                   </div>
+                   <group>
+                    <group>
+                        <field name="partner_id" attrs="{'readonly':[('state','=','valid')]}"/>
+                        <field name="source_document" attrs="{'readonly':[('state','=','valid')]}"/>
+                    </group>
+                    <group>
+                        <field name="invoice_date" attrs="{'readonly':[('state','=','valid')]}"/>
+                        <field name="tipo_transporte" attrs="{'readonly':[('state','=','valid')]}"/>
+                        <field name="carta_porte" attrs="{'readonly':[('state','=','valid')]}"/>
+                    </group>
+                    </group>
+                    <notebook>
+                        <page name="invoice_line_factura" string="Mercancía a trasladar">
+                            <field name="factura_line_ids" attrs="{'readonly':[('state','=','valid')]}">
+                            <control>
+                                <create string="Agregar línea"/>
+                            </control>
+                            <tree editable="bottom">
+                                <field name="currency_id" invisible="1"/>  
+                                <field name="product_id" string="Producto"/>
+                                <field name="name" string="Nombre"/>
+                                <field name="pedimento" widget="many2many_tags" />
+                                <field name="quantity" string="Cantidad"/>
+                                <field name="price_unit" string="Precio Unitario"/>
+                                <field name="pesoenkg"/>
+                                <field name="invoice_line_tax_ids" widget="many2many_tags" invisible="1"/>
+                                <field name="guiaid_numero"/>
+                                <field name="guiaid_descrip"/>
+                                <field name="guiaid_peso"/>
+                                <field name="price_subtotal" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </tree>
+                            </field> 
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="currency_id" invisible="1"/>
+                                <field name="amount_untaxed" string="Subtotal"/>
+                                <field name="amount_tax" invisible="1"/>
+                                <field name="amount_total" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}" string="Total"/>
+                            </group>
+                            <field name="comment" placeholder="Términos y condiciones..."/>
+                        </page>
+                        <page name="info_adicional" string="Información Adicional">
+                            <group cols="4">
+                                <group string="Detalles de Pago">
+                                    <field name="company_id" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="journal_id" attrs="{'readonly':[('state','=','valid')]}"/>
+                                   <!--<field name="pricelist_id"/>-->
+                                    <field name="currency_id" string="Moneda" attrs="{'readonly':[('state','=','valid')]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="info_cdfi" string="CFDI 3.3">
+                            <group cols="4">
+                                <group string="Detalles de Pago">
+                                    <field name="forma_pago" invisible="1" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="methodo_pago" invisible="1" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="uso_cfdi" attrs="{'readonly':[('state','=','valid')]}"/>
+                                </group>
+                                <group  string="Detalles de Factura">
+                                    <field name="tipo_comprobante" readonly="True" default="T" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="folio_fiscal" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="confirmacion" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="estado_factura" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="fecha_factura" attrs="{'readonly':[('state','=','valid')]}"/>
+                                </group>
+                                <group  string="CFDI Relacionados">
+                                    <field name="tipo_relacion"/>
+                                    <field name="uuid_relacionado"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page name="carta_porte" string="Carta Porte">
+                            <group cols="4">
+                                <group string="Atributos de carta porte">
+                                    <field name="transpinternac" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="entradasalidamerc" attrs="{'readonly':[('state','=','valid')], 'invisible': [('transpinternac','!=','Sí')]}"/>
+                                    <field name="viaentradasalida" attrs="{'readonly':[('state','=','valid')], 'invisible': [('transpinternac','!=','Sí')]}"/>
+                                    <!--<field name="totaldistrec" attrs="{'readonly':[('state','=','valid')]}"/>-->
+                                    <field name="uuidcomercioext" attrs="{'readonly':[('state','=','valid')], 'invisible': ['|', ('transpinternac','!=','Sí'), ('entradasalidamerc','!=','salida')]}"/>
+                                    <field name="paisorigendestino" attrs="{'readonly':[('state','=','valid')], 'invisible': [('transpinternac','!=','Sí')]}"/>
+                                </group>
+                                <group string="Atributos de mercancias">
+                                    <field name="pesobrutototal" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="unidadpeso" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="pesonetototal" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="numerototalmercancias" attrs="{'readonly':[('state','=','valid')]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="ccp_ubicaciones" string="Ubicaciones">
+                          <field name="ubicaciones_line_ids" attrs="{'readonly':[('state','=','valid')]}" context="{'default_tipo_transporte' : tipo_transporte}">
+                           <control>
+                                <create string="Agregar línea"/>
+                           </control>
+                            <tree editable="bottom">
+                                <field name="tipo_transporte" invisible="1"/>
+                                <field name="tipoubicacion" />
+                                <field name="contacto" />
+                                <field name="fecha" />
+                                <field name="tipoestacion" attrs="{'invisible': [('tipo_transporte','==','01')] }"/>
+                                <field name="numestacion" attrs="{'invisible': [('tipo_transporte','==','01')] }"/>
+                                <field name="distanciarecorrida" attrs="{'invisible': [('tipo_transporte','!=','01')] }"/>
+                            </tree>
+                          </field>
+                        </page>
+                        <page name="ccp_autotransporte" string="Datos de transporte">
+                            <group cols="4">
+                                <group string="Generales">
+                                    <field name="permisosct" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="numpermisosct" attrs="{'readonly':[('state','=','valid')]}"/>
+                                </group>
+                                <group>
+                                </group>
+                                <group string="Autotransporte"  attrs="{'invisible':[('tipo_transporte','!=','01')]}">
+                                    <field name="autotrasporte_ids" attrs="{'readonly':[('state','=','valid')]}"/>
+                                </group>
+                                <group attrs="{'invisible':[('tipo_transporte','!=','01')]}">
+                                    <field name="remolque_line_ids" attrs="{'readonly':[('state','=','valid')]}">
+                                        <control>
+                                           <create string="Agregar línea"/>
+                                        </control>
+                                        <tree editable="bottom">
+                                           <field name="subtipo_id" />
+                                           <field name="placa" />
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group string="Seguro de mercancías" attrs="{'invisible':[('tipo_transporte','!=','01')]}">
+                                    <field name="nombreaseg_merc" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="numpoliza_merc" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="primaseguro_merc" attrs="{'readonly':[('state','=','valid')]}"/>
+                                </group>
+                                <group string="Aereo"  attrs="{'invisible':[('tipo_transporte','!=','03')]}">
+                                    <field name="numeroguia" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="lugarcontrato" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="transportista_id" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="embarcador_id" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="matriculaaeronave" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="cargoportasacion" attrs="{'readonly':[('state','=','valid')]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="ccp_figuratrans" string="Figura transporte">
+                                <group string="Figura transporte">
+                                    <field name="figuratransporte_ids" attrs="{'readonly':[('state','=','valid')]}">
+                                        <control>
+                                           <create string="Agregar línea"/>
+                                        </control>
+                                        <tree editable="bottom">
+                                           <field name="tipofigura" />
+                                           <field name="figura_id" />
+                                           <field name="partetransporte" widget="many2many_tags"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                        </page>
+                    </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+                </form>
+            </field>
+        </record>
+    
+    	<record id="view_fatura_global_tree" model="ir.ui.view">
+            <field name="name">CFDI Traslado tree</field>
+            <field name="model">cfdi.traslado</field>
+            <field name="arch" type="xml">
+                <tree string="CFDI Traslado" default_order="invoice_date desc">
+                	<field name="currency_id" invisible="1"/>
+                   	<field name="partner_id" string="Cliente"/>
+                    <field name="invoice_date" string="Fecha de factura"/>
+                    <field name="number" string="Número"/>
+                    <field name="source_document" string="Documento Origen"/>
+                    <field name="amount_total" sum="amount total" widget="monetary" options="{'currency_field': 'currency_id'}" string="Cantidad total"/>
+                    <field name="estado_factura" string="Estado factura"/>
+                    <field name="state" string="Estado"/>
+                </tree>
+            </field>
+        </record>
+    	 <record id="action_fatura_global_tree" model="ir.actions.act_window">
+            <field name="name">CFDI Traslado</field>
+            <field name="res_model">cfdi.traslado</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_fatura_global_tree"/>
+        </record>
+    	<menuitem id="customer_sub_menu_factura_global" name="CFDI Traslado" action="action_fatura_global_tree" parent="account.menu_finance_receivables" sequence="111"/>
+    </data>
+</odoo>
