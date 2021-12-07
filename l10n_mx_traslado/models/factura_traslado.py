@@ -34,7 +34,7 @@ class CfdiTrasladoLine(models.Model):
     price_total = fields.Monetary(string='Cantidad (con Impuestos)',
         store=True, readonly=True, compute='_compute_price', help="Cantidad total con impuestos")
     pesoenkg = fields.Float(string='Peso Kg', digits=dp.get_precision('Product Price'))
-    pedimento = fields.Many2many('stock.production.lot', string='Lote / Serie', copy=False)
+    pedimento = fields.Many2many('stock.production.lot', string='Pedimentos', copy=False)
     guiaid_numero = fields.Char(string=_('No. Guia'))
     guiaid_descrip = fields.Char(string=_('Descr. guia'))
     guiaid_peso = fields.Float(string='Peso guia')
@@ -49,7 +49,8 @@ class CfdiTrasladoLine(models.Model):
         self.invoice_line_tax_ids = fp_taxes = taxes
         fix_price = self.env['account.tax']._fix_tax_included_price
         self.price_unit = fix_price(self.product_id.lst_price, taxes, fp_taxes)
-        
+        self.pesoenkg = self.product_id.weight
+
     @api.depends('price_unit', 'invoice_line_tax_ids', 'quantity',
         'product_id', 'cfdi_traslado_id.partner_id', 'cfdi_traslado_id.currency_id',)
     def _compute_price(self):
@@ -61,6 +62,10 @@ class CfdiTrasladoLine(models.Model):
                 taxes = line.invoice_line_tax_ids.compute_all(price, currency, line.quantity, product=line.product_id, partner=line.cfdi_traslado_id.partner_id)
             line.price_subtotal = taxes['total_excluded'] if taxes else line.quantity * price
             line.price_total = taxes['total_included'] if taxes else line.price_subtotal
+
+    @api.onchange('quantity')
+    def _onchange_quantity(self):
+        self.pesoenkg = self.product_id.weight * self.quantity
 
 class CCPUbicacionesLine(models.Model):
     _name = "ccp.ubicaciones.line"
@@ -166,6 +171,7 @@ class CfdiTraslado(models.Model):
                    ('D10', _('Pagos por servicios educativos (colegiaturas)')),
                    ('P01', _('Por definir')),],
         string=_('Uso CFDI (cliente)'),
+        default = 'P01',
     )
 
     tipo_comprobante = fields.Selection(
@@ -225,7 +231,7 @@ class CfdiTraslado(models.Model):
     qr_value = fields.Char(string=_('QR Code Value'))
     qrcode_image = fields.Binary("QRCode")
     comment = fields.Text("Comentario")
-    partner_id = fields.Many2one('res.partner', string="Cliente", required=True, )
+    partner_id = fields.Many2one('res.partner', string="Cliente", required=True, default=lambda self: self.env.user.company_id.id)
     source_document = fields.Char(string="Documento origen")
     invoice_date = fields.Datetime(string="Fecha de factura")
     factura_line_ids = fields.One2many('cfdi.traslado.line', 'cfdi_traslado_id', string='CFDI Traslado Line', copy=True)
@@ -289,9 +295,9 @@ class CfdiTraslado(models.Model):
     ubicaciones_line_ids = fields.One2many('ccp.ubicaciones.line', 'cfdi_traslado_id', string='Ubicaciones', copy=True)
 
     ##### mercancias CP
-    pesobrutototal = fields.Float(string='Peso bruto total')
+    pesobrutototal = fields.Float(string='Peso bruto total', compute='_compute_pesobruto')
     unidadpeso = fields.Many2one('cve.clave.unidad',string='Unidad peso')
-    pesonetototal = fields.Float(string='Peso neto total', compute='_compute_pesoneto')
+    pesonetototal = fields.Float(string='Peso neto total')
     numerototalmercancias = fields.Float(string='Numero total de mercancías', compute='_compute_mercancia')
     cargoportasacion = fields.Float(string='Cargo por tasación')
 
@@ -391,12 +397,12 @@ class CfdiTraslado(models.Model):
         self.write({'state': 'draft'})
 
     @api.onchange('factura_line_ids')
-    def _compute_pesoneto(self):
+    def _compute_pesobruto(self):
         peso = 0
         if self.factura_line_ids:
             for line in self.factura_line_ids:
                peso += line.pesoenkg
-        self.pesonetototal = peso
+        self.pesobrutototal = peso
 
     @api.onchange('factura_line_ids')
     def _compute_mercancia(self):
@@ -437,9 +443,9 @@ class CfdiTraslado(models.Model):
                       'serie': self.company_id.serie_timbrado,
                       'folio': self.number.replace('CT','').replace('/',''),
                       'fecha_expedicion': date_from,
-                      'forma_pago': self.forma_pago,
+                      'forma_pago':'',
                       'subtotal': self.amount_untaxed,
-                      'descuento': 0,
+                     # 'descuento': 0,
                       'moneda': 'XXX', #self.currency_id.name,
                      # 'tipocambio': tipocambio,
                       'total': self.amount_total,
@@ -462,7 +468,7 @@ class CfdiTraslado(models.Model):
                 },
                 'informacion': {
                       'cfdi': '3.3',
-                      'sistema': 'odoo14EE',
+                      'sistema': 'odoo12EE',
                       'version': '2',
                       'api_key': self.company_id.proveedor_timbrado,
                       'modo_prueba': self.company_id.modo_prueba,
@@ -633,7 +639,7 @@ class CfdiTraslado(models.Model):
                        'UnidadPeso': self.unidadpeso.clave,
                        'PesoNetoTotal': self.pesonetototal,
                        'NumTotalMercancias': self.numerototalmercancias,
-                       'CargoPorTasacion': self.cargoportasacion,
+                       'CargoPorTasacion': self.cargoportasacion if self.cargoportasacion > 0 else '',
         }
 
         mercancia = []
@@ -653,9 +659,9 @@ class CfdiTraslado(models.Model):
                            # 'Embalaje': line.product_id.embalaje.clave,
                             'DescripEmbalaje': line.product_id.desc_embalaje,
                             'PesoEnKg': line.pesoenkg,
-                            'ValorMercancia': line.price_subtotal if self.tipo_transporte == '03' else '',
+                            'ValorMercancia': line.price_subtotal,
                             'Moneda': self.currency_id.name,
-                            'FraccionArancelaria': ' ', #line.product_id.l10n_mx_edi_umt_aduana_id.name,
+                            'FraccionArancelaria': '', #line.product_id.l10n_mx_edi_umt_aduana_id.name,
                             'UUIDComercioExt': self.uuidcomercioext,
             }
             pedimentos = []

@@ -4,8 +4,8 @@ from datetime import date, datetime
 
 class StockPicking(models.Model):
     _inherit = "stock.picking"
-    
-    def create_cfdi_traslado(self):        
+
+    def create_cfdi_traslado(self):
         line_vals = []
         is_product = False
         cfdi_traslado_obj = self.env['cfdi.traslado']
@@ -17,12 +17,16 @@ class StockPicking(models.Model):
                             is_product = True
                             l.update({'quantity': l.get('quantity') + line.reserved_availability})
                     if not is_product:
-                        line_vals.append({'product_id':line.product_id.id,'name':line.product_id.partner_ref,'price_unit':line.product_id.lst_price, 'quantity':line.reserved_availability})
+                        line_vals.append({'product_id':line.product_id.id,
+                                          'name':line.product_id.partner_ref,
+                                          'price_unit':line.product_id.lst_price,
+                                          'pesoenkg':line.product_id.weight * line.reserved_availability,
+                                          'quantity':line.reserved_availability})
                     is_product = False
             else:
                 raise UserError(_('Please select product line.'))
             val = {
-                'partner_id':data.partner_id.id,
+                'partner_id': self.env.user.company_id.id,
                 'source_document':data.name,
                 'invoice_date': datetime.today(),
                 'currency_id': self.env.user.company_id.currency_id.id,

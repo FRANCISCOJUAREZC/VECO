@@ -63,9 +63,9 @@
                                 <field name="price_unit" string="Precio Unitario"/>
                                 <field name="pesoenkg"/>
                                 <field name="invoice_line_tax_ids" widget="many2many_tags" invisible="1"/>
-                                <field name="guiaid_numero"/>
+                                <!--<field name="guiaid_numero"/>
                                 <field name="guiaid_descrip"/>
-                                <field name="guiaid_peso"/>
+                                <field name="guiaid_peso"/>-->
                                 <field name="price_subtotal" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                             </tree>
                             </field> 
@@ -92,18 +92,18 @@
                                 <group string="Detalles de Pago">
                                     <field name="forma_pago" invisible="1" attrs="{'readonly':[('state','=','valid')]}"/>
                                     <field name="methodo_pago" invisible="1" attrs="{'readonly':[('state','=','valid')]}"/>
-                                    <field name="uso_cfdi" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="uso_cfdi" readonly="True" attrs="{'readonly':[('state','=','valid')]}"/>
                                 </group>
                                 <group  string="Detalles de Factura">
                                     <field name="tipo_comprobante" readonly="True" default="T" attrs="{'readonly':[('state','=','valid')]}"/>
-                                    <field name="folio_fiscal" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="folio_fiscal" readonly="True"/>
                                     <field name="confirmacion" attrs="{'readonly':[('state','=','valid')]}"/>
                                     <field name="estado_factura" attrs="{'readonly':[('state','=','valid')]}"/>
                                     <field name="fecha_factura" attrs="{'readonly':[('state','=','valid')]}"/>
                                 </group>
                                 <group  string="CFDI Relacionados">
-                                    <field name="tipo_relacion"/>
-                                    <field name="uuid_relacionado"/>
+                                    <field name="tipo_relacion" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="uuid_relacionado" attrs="{'readonly':[('state','=','valid')]}"/>
                                 </group>
                             </group>
                         </page>

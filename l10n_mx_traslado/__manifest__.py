@@ -6,7 +6,7 @@
 
 {
     'name': 'CFDI Traslado EE',
-    'version': '12.02',
+    'version': '12.03',
     'description': ''' Agrega campos para generar CFDI de tipo traslado con el complemento de carta porte.
     ''',
     'category': 'Accounting',
