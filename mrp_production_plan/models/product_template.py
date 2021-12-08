@@ -5,6 +5,5 @@ from odoo.exceptions import UserError
 
 class ProductTemplate(models.Model):
     _inherit = "product.template"
-    
-    family = fields.Char('Familia')
 
+    family = fields.Char('Familia')
