@@ -261,7 +261,7 @@ class MrpProductionPlanItem(models.Model):
 
     def _create_items(self):
         production_items = self
-        self.search([]).unlink()
+        # self.search([]).unlink()
         current_rows = self.search([])
         # Create transient records based on sale orders and manufacture orders
         sale_domain = [('state', 'in', ['sale', 'done'])]
