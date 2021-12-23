@@ -1,4 +1,3 @@
-
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 #	* mrp_production_plan
@@ -7,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-06 20:52+0000\n"
-"PO-Revision-Date: 2021-12-06 20:52+0000\n"
+"POT-Creation-Date: 2021-12-21 21:23+0000\n"
+"PO-Revision-Date: 2021-12-21 21:23+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -22,6 +21,11 @@ msgid "Approval Date"
 msgstr "Fecha de aprobación"
 
 #. module: mrp_production_plan
+#: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__client_delivery_date_formatted
+msgid "Client Delivery Date Formatted"
+msgstr "Fecha Entrega al Cliente"
+
+#. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__sale_date
 msgid "Commitment Sale Date"
 msgstr "Fecha promesa de ventas"
@@ -29,7 +33,7 @@ msgstr "Fecha promesa de ventas"
 #. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__completed
 msgid "Completed"
-msgstr "Completo"
+msgstr "Terminado y Entregado a Almacén"
 
 #. module: mrp_production_plan
 #: model_terms:ir.ui.view,arch_db:mrp_production_plan.production_plan_form_view
@@ -50,6 +54,7 @@ msgstr "Creado el"
 
 #. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__partner_id
+#: model_terms:ir.ui.view,arch_db:mrp_production_plan.view_production_plan_search
 msgid "Customer"
 msgstr "Cliente"
 
@@ -106,15 +111,25 @@ msgid "Familia"
 msgstr "Familia"
 
 #. module: mrp_production_plan
+#: model_terms:ir.ui.view,arch_db:mrp_production_plan.view_production_plan_search
+msgid "Family"
+msgstr "Familia"
+
+#. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__full_delivered
 msgid "Fully Delivered"
 msgstr "Entregado 100%"
 
 #. module: mrp_production_plan
+#: model_terms:ir.ui.view,arch_db:mrp_production_plan.view_production_plan_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__id
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_subproduct_line__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__invoice_list
@@ -145,16 +160,6 @@ msgid "MRP - Warehouse Delay"
 msgstr "Retraso Prod vs Almacén"
 
 #. module: mrp_production_plan
-#: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__sale_month
-msgid "Month"
-msgstr "Mes (Prom Vta)"
-
-#. module: mrp_production_plan
-#: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__mrp_month
-msgid "Month (Production Order)"
-msgstr "Mes (Orden Producción)"
-
-#. module: mrp_production_plan
 #: model:ir.model,name:mrp_production_plan.model_mrp_production_plan_subproduct_line
 msgid "Mrp Production Plan SubProduct Line"
 msgstr "Linea de Habilitado"
@@ -175,14 +180,24 @@ msgid "Plan"
 msgstr "Item"
 
 #. module: mrp_production_plan
+#: model:ir.model.fields,field_description:mrp_production_plan.field_sale_order_line__plant_commitment_date
+msgid "Plant Commitment Date"
+msgstr "Fecha Compromiso Planta"
+
+#. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__plant_time
 msgid "Plant Time"
-msgstr " Tiempo que planta ofrecio para ese producto en la semana que entro el pedido"
+msgstr " Días que planta ofreció"
 
 #. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__production
 msgid "Produced"
 msgstr "Producción"
+
+#. module: mrp_production_plan
+#: model_terms:ir.ui.view,arch_db:mrp_production_plan.view_production_plan_search
+msgid "Product"
+msgstr "Producto"
 
 #. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__family
@@ -206,6 +221,7 @@ msgstr "Fecha de fabricación"
 
 #. module: mrp_production_plan
 #: model:ir.actions.act_window,name:mrp_production_plan.action_view_production_plan_show
+#: model:ir.actions.server,name:mrp_production_plan.action_run_production_plan
 #: model:ir.ui.menu,name:mrp_production_plan.main_menu_view_production_plan
 msgid "Production Plan"
 msgstr "Plan de Producción"
@@ -236,11 +252,6 @@ msgid "Reception Date"
 msgstr "Fecha de recepción"
 
 #. module: mrp_production_plan
-#: model:ir.actions.server,name:mrp_production_plan.action_run_production_plan
-msgid "Replenishment"
-msgstr "Plan de Producción"
-
-#. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__sale_line_id
 msgid "Sale Line"
 msgstr "Línea de venta"
@@ -253,7 +264,12 @@ msgstr "Pedido de venta"
 #. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__sale_time
 msgid "Sale Time"
-msgstr "Tiempo que ventas deja para fabricar el producto"
+msgstr "Días que ventas ofreció"
+
+#. module: mrp_production_plan
+#: model:ir.model,name:mrp_production_plan.model_sale_order_line
+msgid "Sales Order Line"
+msgstr "Línea de pedido de venta"
 
 #. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_subproduct_line__hability_product_id
@@ -271,15 +287,9 @@ msgid "Sub Products"
 msgstr "Habilitados"
 
 #. module: mrp_production_plan
-#: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__notes
-msgid "Terms and conditions"
-msgstr "Términos y condiciones"
-
-#. module: mrp_production_plan
 #: model:ir.model.fields,help:mrp_production_plan.field_mrp_production_plan_item__sale_date
 msgid "This is the delivery date promised to the customer. If set, the delivery order will be scheduled based on this date rather than product lead times."
 msgstr ""
-"Esta es la fecha compromiso de entrega al cliente. Si está seleccionado, la orden de entrega será planificada basada en esta fecha"
 
 #. module: mrp_production_plan
 #: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__uom
@@ -292,30 +302,9 @@ msgid "Warehouse - Delivery Delay"
 msgstr "Entrega Almacén vs Fecha Promesa"
 
 #. module: mrp_production_plan
-#: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__sale_week
-msgid "Week"
-msgstr "Semana (Prom Vta)"
-
-#. module: mrp_production_plan
-#: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__weeknum
-msgid "Week (Order Reception)"
-msgstr "Semana (Recepción)"
-
-#. module: mrp_production_plan
-#: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__sale_year
-msgid "Year"
-msgstr "Año (Prom Vta)"
-
-#. module: mrp_production_plan
-#: model:ir.model.fields,field_description:mrp_production_plan.field_mrp_production_plan_item__year
-msgid "Year (Production Order)"
-msgstr "Año (Order de Producción)"
-
-#. module: mrp_production_plan
 #: model:ir.model.fields,help:mrp_production_plan.field_mrp_production_plan_item__partner_id
 msgid "You can find a customer by its Name, TIN, Email or Internal Reference."
 msgstr ""
-"Puedes encontrar un cliente por su nombre, RFC, email o referencia"
 
 #. module: mrp_production_plan
 #: model:ir.model,name:mrp_production_plan.model_mrp_production_plan_item

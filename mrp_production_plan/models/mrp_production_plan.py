@@ -2,8 +2,9 @@
 # © 2021 Morwi Encoders Consulting SA DE CV
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
-from odoo import models, fields, api
 from datetime import date, datetime
+
+from odoo import models, fields, api
 
 
 class MrpProductionPlanItem(models.Model):
@@ -20,9 +21,11 @@ class MrpProductionPlanItem(models.Model):
         default=fields.date.today(),
     )
     sale_id = fields.Many2one(
+        'sale.order',
         related="sale_line_id.order_id",
         string='Sale Order',  # Venta
         index=True,
+        store=True,
     )
     partner_id = fields.Many2one(
         related="sale_line_id.order_id.partner_id",
@@ -40,17 +43,23 @@ class MrpProductionPlanItem(models.Model):
         related="sale_line_id.product_uom_qty",
         string='Quantity to Produce',  # SOL.
         help="Qty to produce in Manufacture Orders",
+        store=True,
     )
     uom = fields.Many2one(
         related="sale_line_id.product_uom",
         string='UoM',  # UM
+        store=True,
     )
     planned_date = fields.Datetime(
         related="sale_id.date_order",
-        string="Approval Date")  # Fecha aprobación
+        string="Approval Date",  # Fecha aprobación
+        store=True,
+    )
     sale_date = fields.Datetime(
         related="sale_id.commitment_date",
-        string='Commitment Sale Date')  # Fecha promesa de ventas
+        string='Commitment Sale Date',  # Fecha promesa de ventas
+        store=True,
+    )
     family = fields.Selection(
         related="product_id.x_studio_lnea_produccin",
         string='Product Family',
@@ -61,11 +70,13 @@ class MrpProductionPlanItem(models.Model):
     mrp_date = fields.Datetime(
         compute="_compute_mrp_date",
         string='Production Date',  # Fecha de fabricación
+        store=True,
     )
     comp_date = fields.Datetime(
-        related="sale_id.x_studio_fecha_compromiso_planta",
+        related="sale_line_id.plant_commitment_date",
         string='Factory Commitment Date',  # Compromiso en planta
         readonly=False,
+        store=True,
     )
     mrp_id = fields.Many2one(
         'mrp.production',
@@ -85,78 +96,62 @@ class MrpProductionPlanItem(models.Model):
         related="mrp_id.x_studio_estatus_de_produccin",
         string='Production State',  # Estatus producción
         readonly=False,
+        store=True,
     )
     client_delivery_date = fields.Datetime(
         'Customer Delivery Date')  # Fecha de entrega al cliente
+    client_delivery_date_formatted = fields.Char(
+        compute='_compute_client_delivery_date_formatted',
+        store=True,
+    )
     invoice_list = fields.Char(
         string='Invoice',  # N. Factura
     )
     delay = fields.Char()  # Retraso
-    notes = fields.Text(
-        readonly=False,  # Observaciones
-    )
     completed = fields.Boolean()  # Completo
     # Campos calculados (fechas)
     delay_days = fields.Integer(
         default=0,  # Días entre ingreso y entrega
         compute="_compute_dates",
+        store=True,
     )
     sale_time = fields.Integer(
         default=0,  # Tiempo que ventas deja para fabricar el producto
         compute="_compute_dates",
+        store=True,
     )
     plant_time = fields.Integer(
         default=0,  # Tiempo que planta ofrecio para ese producto en la semana que entro el pedido
         compute="_compute_dates",
-    )
-    sale_week = fields.Char(
-        'Week',  # Semana (Prom Vta)
-        compute="_compute_dates",
-    )
-    sale_month = fields.Char(
-        'Month',  # (Prom Vta)
-        compute="_compute_dates",
-    )
-    sale_year = fields.Char(
-        'Year',  # Año (Prom Vta)
-        compute="_compute_dates",
-    )
-    weeknum = fields.Char(
-        'Week (Order Reception)',
-        default=0,
-        compute="_compute_dates",
-    )
-    mrp_month = fields.Char(
-        'Month (Production Order)',  # Mes (Orden Producción)
-        compute="_compute_dates",
-    )
-    year = fields.Char(
-        'Year (Production Order)',  # Año (recepción - MRP)
-        default=0,
-        compute="_compute_dates",
+        store=True,
     )
     # Campos calculados (char)
     prod_delay_warehouse = fields.Char(
         'MRP - Warehouse Delay',  # Retraso Prod vs Almacén
         readonly=False,
         compute='_get_prod_delay',
+        store=True,
     )
     production = fields.Boolean(
         'Produced',  # Producción
         compute='_get_prod_delay',
+        store=True,
     )
     is_delivery = fields.Boolean(
         'Delivered',  # Entregado
         compute='_get_prod_delay',
+        store=True,
     )
     #
     diff_days_delivery = fields.Integer(
         'Warehouse - Delivery Delay',
         compute='_get_delivery_client_delay',  # Entrega Almacén vs Fecha Promesa
+        store=True,
     )
     full_delivered = fields.Boolean(
         'Fully Delivered',
         compute='_get_delivery_client_delay',
+        store=True,
     )  # Entregado 100%
 
     def _compute_mrp_date(self):
@@ -164,6 +159,15 @@ class MrpProductionPlanItem(models.Model):
             rec.mrp_date = (
                 rec.mrp_id.x_studio_fecha_inicio_fabrticacion or
                 rec.mrp_id.date_planned_start)
+
+    @api.depends('sale_line_id')
+    def _compute_client_delivery_date_formatted(self):
+        for rec in self:
+            result = ""
+            for picking in rec.sale_line_id.order_id.picking_ids.filtered(
+                    lambda p: p.state == 'done'):
+                result += ("%s - %s \n" % (picking.name, picking.date_done))
+            rec.client_delivery_date_formatted = result
 
     @api.multi
     def _get_delivery_client_delay(self):
@@ -219,24 +223,9 @@ class MrpProductionPlanItem(models.Model):
                 'delay_days': item.get_diff_dates(
                     item.client_delivery_date, item.in_date),
                 'sale_time': item.get_diff_dates(
-                    item.sale_date, item.planned_date),
-                'plant_time': str(
-                    item.mrp_date.strftime("%V")) if item.sale_date else False,
-                'sale_week': str(
-                    item.sale_date.strftime("%V")
-                ) if item.sale_date else False,
-                'sale_month': str(
-                    item.sale_date.month) if item.sale_date else False,
-                'sale_year': str(
-                    item.sale_date.year) if item.sale_date else False,
-                'sale_time': item.get_diff_dates(
-                    item.in_date, item.sale_date),
-                'weeknum': str(
-                    item.mrp_date.strftime("%V")) if item.mrp_date else False,
-                'mrp_month': str(
-                    item.mrp_date.month) if item.mrp_date else False,
-                'year': str(
-                    item.mrp_date.year) if item.mrp_date else False,
+                    item.sale_id.date_order, item.sale_date),
+                'plant_time': item.get_diff_dates(
+                    item.sale_id.date_order, item.comp_date),
             })
 
     def name_get(self):
@@ -265,9 +254,12 @@ class MrpProductionPlanItem(models.Model):
         current_rows = self.search([])
         # Create transient records based on sale orders and manufacture orders
         sale_domain = [('state', 'in', ['sale', 'done'])]
-        if current_rows and current_rows.mapped('sale_line_id'):
+        StockMove = self.env['stock.move'].sudo()
+        AccountInvoice = self.env['account.invoice'].sudo()
+        current_sol = current_rows.mapped('sale_line_id')
+        if current_rows and current_sol:
             sale_domain.append(
-                ('id', 'not in', current_rows.mapped('sale_line_id.id')))
+                ('id', 'not in', current_sol.ids))
 
         sale_line_ids = self.env['sale.order.line'].search(sale_domain)
         mrp_orders = self.env['mrp.production'].search(
@@ -286,15 +278,17 @@ class MrpProductionPlanItem(models.Model):
             if not sale_line_ids:
                 continue
             sale_line = sale_line_ids[:1]
-            sale_picking = sale_line.move_ids.filtered(
-                lambda move: move.picking_id.state == 'done' and
-                move.picking_code == 'outgoing')
+            if sale_line in current_sol:
+                continue
+            if sale_line.product_uom_qty == sale_line.qty_delivered:
+                continue
+            # sale_picking = sale_line.move_ids.filtered(
+            #     lambda move: move.picking_id.state == 'done' and
+            #     move.picking_code == 'outgoing')
             sale_picking_date_done = False
 
-            invoice_ids = sale_line.order_id.invoice_ids.filtered(
+            invoice_ids = sale_line.invoice_lines.mapped('invoice_id').filtered(
                 lambda invoice: invoice.state not in ['draft', 'cancel'])
-            if sale_picking:
-                sale_picking_date_done = sale_picking[:1].picking_id.date_done
 
             dest_location = mrp.location_dest_id
             sfp_pick = (
@@ -312,8 +306,7 @@ class MrpProductionPlanItem(models.Model):
                     invoice_ids.mapped('display_name')),
                 'in_date': incomming_date,
                 'completed': all(
-                    pick.state in ['done', 'cance'] for pick in sfp_pick),
-                'notes': mrp.sale_notes,
+                    pick.state in ['done', 'cancel'] for pick in sfp_pick),
             }
 
             hability_mrp_ids = self.env['mrp.production'].search(
@@ -362,7 +355,8 @@ class MrpProductionPlanSubproductLine(models.Model):
         string='Sub Product Production')  # Órden de habilitado
     hability_product_id = fields.Many2one(
         related="hability_mrp_id.product_id",
-        string='Sub Product'  # Código de habilitado
+        string='Sub Product',  # Código de habilitado
+        store=True,
     )
     hability_qty = fields.Float(
         related="hability_mrp_id.product_qty",

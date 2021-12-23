@@ -15,11 +15,12 @@
     'version': '0.1',
     'depends': [
         'mrp',
-        'sale',
+        'sale_stock',
     ],
     'data': [
         'security/ir.model.access.csv',
         'views/mrp_production_plan.xml',
         'views/mrp_views.xml',
+        'views/sale_order_views.xml',
     ],
 }
