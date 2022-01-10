@@ -25,6 +25,7 @@
                                 <field name="pack"/>
                                 <field name="status"/>
                                 <field name="client_delivery_date" readonly="1"/>
+                                <field name="client_delivery_date_formatted"/>
                                 <field name="invoice_list" readonly="1"/>
                                 <field name="delay" readonly="1"/>
                             </group>
@@ -69,7 +70,7 @@
             <field name="name">production_plan_tree_view</field>
             <field name="model">mrp.production.plan.item</field>
             <field name="arch" type="xml">
-                <tree create="0" delete="0" limit="10">
+                <tree create="0" delete="0" limit="10" editable="top">
                     <field name="sale_line_id" readonly="1" invisible="1"/>
                     <field name="in_date" readonly="1" invisible="1"/>
                     <field name="sale_id" readonly="1"/>
@@ -86,7 +87,8 @@
                     <field name="pack"/>
                     <field name="subproduct_line_ids"/>
                     <field name="status"/>
-                    <field name="client_delivery_date" readonly="1"/>
+                    <field name="client_delivery_date" readonly="1" invisible="1"/>
+                    <field name="client_delivery_date_formatted"/>
                     <field name="invoice_list" readonly="1"/>
                     <field name="delay" readonly="1"/>
                     <field name="completed" readonly="1"/>

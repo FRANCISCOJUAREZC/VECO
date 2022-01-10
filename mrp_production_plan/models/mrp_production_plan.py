@@ -160,13 +160,16 @@ class MrpProductionPlanItem(models.Model):
                 rec.mrp_id.x_studio_fecha_inicio_fabrticacion or
                 rec.mrp_id.date_planned_start)
 
-    @api.depends('sale_line_id')
+    @api.depends('sale_line_id', 'sale_id')
     def _compute_client_delivery_date_formatted(self):
         for rec in self:
             result = ""
             for picking in rec.sale_line_id.order_id.picking_ids.filtered(
-                    lambda p: p.state == 'done'):
-                result += ("%s - %s \n" % (picking.name, picking.date_done))
+                    lambda p: p.state == 'done' and
+                    p.picking_type_code == 'outgoing'):
+                result += ("%s - %s \n" % (
+                    picking.name, picking.date_done.strftime(
+                        '%d-%m-%Y %H:%M:%S')))
             rec.client_delivery_date_formatted = result
 
     @api.multi
@@ -217,15 +220,21 @@ class MrpProductionPlanItem(models.Model):
                 'is_delivery': item.status == "c. Facturado/Entregado",
             })
 
+    @api.multi
+    @api.depends('client_delivery_date', 'in_date',
+                 'sale_date', 'comp_date', 'sale_id')
     def _compute_dates(self):
         for item in self:
             item.update({
-                'delay_days': item.get_diff_dates(
-                    item.client_delivery_date, item.in_date),
-                'sale_time': item.get_diff_dates(
-                    item.sale_id.date_order, item.sale_date),
-                'plant_time': item.get_diff_dates(
-                    item.sale_id.date_order, item.comp_date),
+                'delay_days': abs(
+                    item.get_diff_dates(
+                        item.client_delivery_date, item.in_date)),
+                'sale_time': abs(
+                    item.get_diff_dates(
+                        item.sale_id.date_order, item.sale_date)),
+                'plant_time': abs(
+                    item.get_diff_dates(
+                        item.sale_id.date_order, item.comp_date)),
             })
 
     def name_get(self):
@@ -250,7 +259,7 @@ class MrpProductionPlanItem(models.Model):
 
     def _create_items(self):
         production_items = self
-        # self.search([]).unlink()
+        self.search([]).unlink()
         current_rows = self.search([])
         # Create transient records based on sale orders and manufacture orders
         sale_domain = [('state', 'in', ['sale', 'done'])]
@@ -282,17 +291,20 @@ class MrpProductionPlanItem(models.Model):
                 continue
             if sale_line.product_uom_qty == sale_line.qty_delivered:
                 continue
-            # sale_picking = sale_line.move_ids.filtered(
-            #     lambda move: move.picking_id.state == 'done' and
-            #     move.picking_code == 'outgoing')
+            sale_picking = sale_line.move_ids.filtered(
+                lambda move: move.picking_id.state == 'done' and
+                move.picking_code == 'outgoing')
             sale_picking_date_done = False
+            if sale_picking:
+                sale_picking_date_done = sale_picking[-1].picking_id.date_done
 
             invoice_ids = sale_line.invoice_lines.mapped('invoice_id').filtered(
                 lambda invoice: invoice.state not in ['draft', 'cancel'])
-
             dest_location = mrp.location_dest_id
             sfp_pick = (
                 mrp.picking_ids.filtered(
+                    lambda x: x.location_id == dest_location)
+                or sale_line.order_id.picking_ids.filtered(
                     lambda x: x.location_id == dest_location)
             )
             incomming_date = False
