@@ -341,8 +341,8 @@ class MrpProductionPlanItem(models.Model):
                 }))
             if hability_lines:
                 values['subproduct_line_ids'] = hability_lines
-
-            production_items += self.create(values)
+            if values['sale_line_id'] not in current_sol.ids:
+                production_items += self.create(values)
         return production_items + current_rows
 
     def run_production_plan(self):
