@@ -67,11 +67,6 @@ class MrpProductionPlanItem(models.Model):
         index=True,
     )  # Familia
     # MRP Fields
-    mrp_date = fields.Datetime(
-        compute="_compute_mrp_date",
-        string='Production Date',  # Fecha de fabricación
-        store=True,
-    )
     comp_date = fields.Datetime(
         related="sale_line_id.plant_commitment_date",
         string='Factory Commitment Date',  # Compromiso en planta
@@ -83,6 +78,12 @@ class MrpProductionPlanItem(models.Model):
         string='Production',
         index=True,
     )  # Órden de producción
+    mrp_date = fields.Datetime(
+        related="mrp_id.x_studio_fecha_inicio_fabrticacion",
+        string='Production Date',  # Fecha de fabricación
+        store=True,
+        readonly=False,
+    )
     pack = fields.Char()
     # Sub Productos
     subproduct_line_ids = fields.One2many(
@@ -154,11 +155,11 @@ class MrpProductionPlanItem(models.Model):
         store=True,
     )  # Entregado 100%
 
-    def _compute_mrp_date(self):
-        for rec in self:
-            rec.mrp_date = (
-                rec.mrp_id.x_studio_fecha_inicio_fabrticacion or
-                rec.mrp_id.date_planned_start)
+    # def _compute_mrp_date(self):
+    #     for rec in self:
+    #         rec.mrp_date = (
+    #             rec.mrp_id.x_studio_fecha_inicio_fabrticacion or
+    #             rec.mrp_id.date_planned_start)
 
     @api.depends('sale_line_id', 'sale_id')
     def _compute_client_delivery_date_formatted(self):
@@ -259,7 +260,7 @@ class MrpProductionPlanItem(models.Model):
 
     def _create_items(self):
         production_items = self
-        self.search([]).unlink()
+        # self.search([]).unlink()
         current_rows = self.search([])
         # Create transient records based on sale orders and manufacture orders
         sale_domain = [('state', 'in', ['sale', 'done'])]

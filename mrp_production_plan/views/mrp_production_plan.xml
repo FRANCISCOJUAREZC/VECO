@@ -18,7 +18,7 @@
                                 <field name="family" readonly="1"/>
                             </group>
                             <group>
-                                <field name="mrp_date" readonly="1"/>
+                                <field name="mrp_date" readonly="0"/>
                                 <field name="in_date" readonly="1" invisible="1"/>
                                 <field name="comp_date"/>
                                 <field name="mrp_id" readonly="1"/>
