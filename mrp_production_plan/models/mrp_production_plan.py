@@ -302,15 +302,21 @@ class MrpProductionPlanItem(models.Model):
             invoice_ids = sale_line.invoice_lines.mapped('invoice_id').filtered(
                 lambda invoice: invoice.state not in ['draft', 'cancel'])
             dest_location = mrp.location_dest_id
-            sfp_pick = (
+            sfp_picks = (
                 mrp.picking_ids.filtered(
-                    lambda x: x.location_id == dest_location)
+                    lambda x: x.location_id == dest_location
+                    and x.state == 'done')
                 or sale_line.order_id.picking_ids.filtered(
-                    lambda x: x.location_id == dest_location)
+                    lambda x: x.location_id == dest_location
+                    and x.state == 'done')
             )
+            for sfp_pick in sfp_picks:
+                if mrp.product_id in sfp_pick.move_lines.mapped('product_id'):
+                    sfp_picks = sfp_pick
+                    break
             incomming_date = False
-            if sfp_pick:
-                incomming_date = sfp_pick[:1].date_done
+            if sfp_picks:
+                incomming_date = sfp_picks[:1].date_done
             values = {
                 'sale_line_id': sale_line.id,
                 'mrp_id': mrp.id,
