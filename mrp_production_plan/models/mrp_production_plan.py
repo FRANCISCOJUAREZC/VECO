@@ -77,7 +77,7 @@ class MrpProductionPlanItem(models.Model):
         'mrp.production',
         string='Production',
         index=True,
-    )  # Órden de producción
+    )  # Órden de produccion
     mrp_date = fields.Datetime(
         related="mrp_id.x_studio_fecha_inicio_fabrticacion",
         string='Production Date',  # Fecha de fabricación
