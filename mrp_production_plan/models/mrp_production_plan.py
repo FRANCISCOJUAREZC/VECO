@@ -325,7 +325,7 @@ class MrpProductionPlanItem(models.Model):
                     invoice_ids.mapped('display_name')),
                 'in_date': incomming_date,
                 'completed': all(
-                    pick.state in ['done', 'cancel'] for pick in sfp_pick),
+                    pick.state in ['done', 'cancel'] for pick in sfp_picks),
             }
 
             hability_mrp_ids = self.env['mrp.production'].search(
