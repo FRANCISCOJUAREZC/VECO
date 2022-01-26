@@ -199,11 +199,11 @@
                        </div>
                     </div>
             </div>
-            <t t-if="o.company_id.modo_prueba == True">
+            <!--<t t-if="o.company_id.modo_prueba == True">
                         <div style="position:absolute;opacity:0.2;z-index:99;width:100%;text-align:center;margin:auto;">
                             <center><span style="font-size:100px;color:red;">NÓMINA DE PRUEBA</span></center>
                         </div>
-                      </t>
+                      </t>-->
             <div class="row mt32 mb32" style="padding-top: 1px;" >
                     <div  class="col-6" font-size="10px;">
                     <table width="100%" border="5" frame="rhs">
@@ -224,7 +224,7 @@
                               <t t-if= "line.total > 0">
                                 <t t-set="total_percepciones" t-value="total_percepciones + line.total"/>
                                 <td height="0"><span t-field="line.name"/></td>
-                                <td height="0" class="text-right"> <span t-esc="line.total"
+                                <td height="0" class="text-right"> <span t-esc="'%.2f'% line.total"
                                           t-esc-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
                                 <td height="0" class="text-right">
                                     <t t-if= "line.code == 'P001'"><!-- días trabajados -->
@@ -272,6 +272,11 @@
 				</div>
 
         <!--TABLA OTROS PAGOS -->
+        <t t-if="o.company_id.modo_prueba == True">
+                        <div style="position:absolute;opacity:0.2;z-index:99;width:100%;text-align:center;margin:auto;">
+                            <center><span style="font-size:100px;color:red;">NÓMINA DE PRUEBA</span></center>
+                        </div>
+                      </t>
         <div class="row mt32 mb32" style="padding-top: 1px;" >
                     <div  class="col-6" font-size="10px;">
                     <table width="100%" border="5" frame="rhs">
@@ -292,7 +297,7 @@
                               <!--<t t-if= "line.total > 0">-->
                                 <t t-set="total_otros_pagos" t-value="total_otros_pagos + line.total"/>
                                 <td height="0"><span t-field="line.name"/></td>
-                                <td height="0" class="text-right"> <span t-esc="line.total"
+                                <td height="0" class="text-right"> <span t-esc="'%.2f'% line.total"
                                           t-esc-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
                                 <td height="0" class="text-right">  
                                 </td>
