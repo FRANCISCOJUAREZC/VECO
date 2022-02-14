@@ -34,7 +34,7 @@ class CfdiTrasladoLine(models.Model):
     price_total = fields.Monetary(string='Cantidad (con Impuestos)',
         store=True, readonly=True, compute='_compute_price', help="Cantidad total con impuestos")
     pesoenkg = fields.Float(string='Peso Kg', digits=dp.get_precision('Product Price'))
-    pedimento = fields.Many2many('stock.production.lot', string='Lote / Serie', copy=False)
+    pedimento = fields.Many2many('stock.production.lot', string='Pedimentos', copy=False)
     guiaid_numero = fields.Char(string=_('No. Guia'))
     guiaid_descrip = fields.Char(string=_('Descr. guia'))
     guiaid_peso = fields.Float(string='Peso guia')
@@ -49,7 +49,8 @@ class CfdiTrasladoLine(models.Model):
         self.invoice_line_tax_ids = fp_taxes = taxes
         fix_price = self.env['account.tax']._fix_tax_included_price
         self.price_unit = fix_price(self.product_id.lst_price, taxes, fp_taxes)
-        
+        self.pesoenkg = self.product_id.weight
+
     @api.depends('price_unit', 'invoice_line_tax_ids', 'quantity',
         'product_id', 'cfdi_traslado_id.partner_id', 'cfdi_traslado_id.currency_id',)
     def _compute_price(self):
@@ -62,6 +63,10 @@ class CfdiTrasladoLine(models.Model):
             line.price_subtotal = taxes['total_excluded'] if taxes else line.quantity * price
             line.price_total = taxes['total_included'] if taxes else line.price_subtotal
 
+    @api.onchange('quantity')
+    def _onchange_quantity(self):
+        self.pesoenkg = self.product_id.weight * self.quantity
+
 class CCPUbicacionesLine(models.Model):
     _name = "ccp.ubicaciones.line"
     
@@ -69,11 +74,11 @@ class CCPUbicacionesLine(models.Model):
     tipoubicacion = fields.Selection(
         selection=[('Origen', 'Origen'), 
                    ('Destino', 'Destino'),],
-        string=_('Tipo Ubicación'),
+        string=_('Tipo Ubicación'), required=True
     )
-    contacto = fields.Many2one('res.partner',string="Remitente / Destinatario")
+    contacto = fields.Many2one('res.partner',string="Remitente / Destinatario", required=True)
     numestacion = fields.Many2one('cve.estaciones',string='Número de estación')
-    fecha = fields.Datetime(string=_('Fecha Salida / Llegada'))
+    fecha = fields.Datetime(string=_('Fecha Salida / Llegada'), required=True)
     tipoestacion = fields.Many2one('cve.estacion',string='Tipo estación')
     distanciarecorrida = fields.Float(string='Distancia recorrida')
     tipo_transporte = fields.Selection(
@@ -166,6 +171,7 @@ class CfdiTraslado(models.Model):
                    ('D10', _('Pagos por servicios educativos (colegiaturas)')),
                    ('P01', _('Por definir')),],
         string=_('Uso CFDI (cliente)'),
+        default = 'P01',
     )
 
     tipo_comprobante = fields.Selection(
@@ -225,17 +231,14 @@ class CfdiTraslado(models.Model):
     qr_value = fields.Char(string=_('QR Code Value'))
     qrcode_image = fields.Binary("QRCode")
     comment = fields.Text("Comentario")
-    partner_id = fields.Many2one('res.partner', string="Cliente", required=True, )
+    partner_id = fields.Many2one('res.partner', string="Cliente", required=True, default=lambda self: self.env.user.company_id.id)
     source_document = fields.Char(string="Documento origen")
     invoice_date = fields.Datetime(string="Fecha de factura")
     factura_line_ids = fields.One2many('cfdi.traslado.line', 'cfdi_traslado_id', string='CFDI Traslado Line', copy=True)
-    currency_id = fields.Many2one('res.currency',string='Moneda',default=lambda self: self.env.user.company_id.currency_id)
-    amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_compute_amount',
-                                     currency_field='currency_id')
-    amount_tax = fields.Monetary(string='Tax', store=True, readonly=True, compute='_compute_amount',
-                                 currency_field='currency_id')
-    amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_compute_amount',
-                                   currency_field='currency_id')
+    currency_id = fields.Many2one('res.currency',string='Moneda',default=lambda self: self.env.user.company_id.currency_id, required=True)
+    amount_untaxed = fields.Float(string='Untaxed Amount', store=True, readonly=True, default=0)
+    amount_tax = fields.Float(string='Tax', store=True, readonly=True, default=0)
+    amount_total = fields.Float(string='Total', store=True, readonly=True, default=0)
 
     numero_cetificado = fields.Char(string=_('Numero de cetificado'))
     cetificaso_sat = fields.Char(string=_('Cetificao SAT'))
@@ -289,9 +292,9 @@ class CfdiTraslado(models.Model):
     ubicaciones_line_ids = fields.One2many('ccp.ubicaciones.line', 'cfdi_traslado_id', string='Ubicaciones', copy=True)
 
     ##### mercancias CP
-    pesobrutototal = fields.Float(string='Peso bruto total')
+    pesobrutototal = fields.Float(string='Peso bruto total', compute='_compute_pesobruto')
     unidadpeso = fields.Many2one('cve.clave.unidad',string='Unidad peso')
-    pesonetototal = fields.Float(string='Peso neto total', compute='_compute_pesoneto')
+    pesonetototal = fields.Float(string='Peso neto total')
     numerototalmercancias = fields.Float(string='Numero total de mercancías', compute='_compute_mercancia')
     cargoportasacion = fields.Float(string='Cargo por tasación')
 
@@ -305,6 +308,8 @@ class CfdiTraslado(models.Model):
     nombreaseg_merc = fields.Char(string=_('Nombre de la aseguradora'))
     numpoliza_merc = fields.Char(string=_('Número de póliza'))
     primaseguro_merc = fields.Float(string=_('Prima del seguro'))
+    seguro_ambiente = fields.Char(string=_('Nombre aseguradora'))
+    poliza_ambiente = fields.Char(string=_('Póliza no.'))
 
     ##### Aereo CP
     numeroguia = fields.Char(string=_('Número de guía'))
@@ -339,33 +344,13 @@ class CfdiTraslado(models.Model):
     def _get_amount_2_text(self, amount_total):
         return amount_to_text_es_MX.get_amount_to_text(self, amount_total, 'es_cheque', self.currency_id.name)
 
-    @api.depends('factura_line_ids.price_subtotal')
-    def _compute_amount(self):
-        round_curr = self.currency_id.round
-        self.amount_untaxed = 0.0
-        self.amount_total = 0.0
-        self.amount_tax = 0.0
-
-    #@api.onchange('partner_id')
-    #def _onchange_product_id(self):
-    #    if not self.partner_id:
-    #        return
-    #    self.pricelist_id = self.partner_id.pricelist_id
-
     @api.model
     def _default_journal(self):
         if not self.journal_id:
-            return self.env['account.journal'].search([('type','=','sale')],limit=1)
-
-#    @api.model
-#    def _default_currency(self):
-#        journal = self._default_journal()
-#        return journal.company_id.currency_id
+            company_id = self._context.get('default_company_id', self.env.company.id)
+            return self.env['account.journal'].search([('type','=','sale'),('company_id', '=', company_id)],limit=1)
 
     journal_id = fields.Many2one('account.journal', 'Diario', default=_default_journal)
-#    currency_id = fields.Many2one("res.currency", string="Moneda", store=True, readonly=True, tracking=True,
-#                                  required=True,
-#                                  states={'draft': [('readonly', False)]}, default=_default_currency)
 
     @api.model
     def create(self, vals):
@@ -391,11 +376,12 @@ class CfdiTraslado(models.Model):
         self.write({'state': 'draft'})
 
     @api.onchange('factura_line_ids')
-    def _compute_pesoneto(self):
+    def _compute_pesobruto(self):
         peso = 0
         if self.factura_line_ids:
             for line in self.factura_line_ids:
                peso += line.pesoenkg
+        self.pesobrutototal = peso
         self.pesonetototal = peso
 
     @api.onchange('factura_line_ids')
@@ -409,11 +395,6 @@ class CfdiTraslado(models.Model):
 
     @api.model
     def to_json(self):
-        if self.partner_id.name == 'Factura global CFDI 33':
-            nombre = ''
-        else:
-            nombre = self.partner_id.name
-
         no_decimales_prod = 2
 
         #corregir hora
@@ -437,9 +418,9 @@ class CfdiTraslado(models.Model):
                       'serie': self.company_id.serie_timbrado,
                       'folio': self.number.replace('CT','').replace('/',''),
                       'fecha_expedicion': date_from,
-                      'forma_pago': self.forma_pago,
+                      'forma_pago':'',
                       'subtotal': self.amount_untaxed,
-                      'descuento': 0,
+                     # 'descuento': 0,
                       'moneda': 'XXX', #self.currency_id.name,
                      # 'tipocambio': tipocambio,
                       'total': self.amount_total,
@@ -451,10 +432,10 @@ class CfdiTraslado(models.Model):
                 },
                 'emisor': {
                       'rfc': self.company_id.vat,
-                      'nombre': self.company_id.nombre_fiscal,
+                      'nombre': self.clean_text(self.company_id.nombre_fiscal),
                 },
                 'receptor': {
-                      'nombre': nombre,
+                      'nombre': self.clean_text(self.partner_id.name),
                       'rfc': self.partner_id.vat,
                       'ResidenciaFiscal': self.partner_id.country_id.l10n_mx_edi_code if self.partner_id.country_id.l10n_mx_edi_code != 'MEX' else '',
                       'NumRegIdTrib': self.partner_id.vat if self.partner_id.country_id.l10n_mx_edi_code != 'MEX' else '',
@@ -477,9 +458,9 @@ class CfdiTraslado(models.Model):
                                       'NoIdentificacion': line.product_id.default_code,
                                       'valorunitario': self.set_decimals(line.price_unit, no_decimales_prod),
                                       'importe': self.set_decimals(line.price_unit * line.quantity, no_decimales_prod),
-                                      'descripcion': line.product_id.name[:1000],
-                                      'ClaveProdServ': line.product_id.l10n_mx_edi_code_sat_id.code,
-                                      'ClaveUnidad': line.product_id.uom_id.l10n_mx_edi_code_sat_id.code})
+                                      'descripcion': self.clean_text(line.product_id.name),
+                                      'ClaveProdServ': line.product_id.unspsc_code_id.code,
+                                      'ClaveUnidad': line.product_id.uom_id.unspsc_code_id.code})
 
         request_params['factura'].update({'subtotal': '0','total': '0'})
 
@@ -573,7 +554,7 @@ class CfdiTraslado(models.Model):
             #corregir hora
             timezone = self._context.get('tz')
             if not timezone:
-               timezone = self.env.user.partner_id.tz or 'America/Mexico_City'
+               timezone = self.journal_id.tz or self.env.user.partner_id.tz or 'America/Mexico_City'
             local = pytz.timezone(timezone)
             local_dt_from = ubicacion.fecha.replace(tzinfo=pytz.UTC).astimezone(local)
             date_fecha = local_dt_from.strftime ("%Y-%m-%dT%H:%M:%S")
@@ -631,9 +612,9 @@ class CfdiTraslado(models.Model):
         mercancias = { 
                        'PesoBrutoTotal': self.pesobrutototal, #solo si es aereo o ferroviario
                        'UnidadPeso': self.unidadpeso.clave,
-                       'PesoNetoTotal': self.pesonetototal,
+                       'PesoNetoTotal': self.pesonetototal if self.pesonetototal > 0 else '',
                        'NumTotalMercancias': self.numerototalmercancias,
-                       'CargoPorTasacion': self.cargoportasacion,
+                       'CargoPorTasacion': self.cargoportasacion if self.cargoportasacion > 0 else '',
         }
 
         mercancia = []
@@ -641,21 +622,21 @@ class CfdiTraslado(models.Model):
             if line.quantity <= 0:
                 continue
             mercancia_atributos = {
-                            'BienesTransp': line.product_id.l10n_mx_edi_code_sat_id.code,
+                            'BienesTransp': line.product_id.unspsc_code_id.code,
                             'ClaveSTCC': line.product_id.clavestcc.clave,
-                            'Descripcion':line.product_id.name,
+                            'Descripcion': self.clean_text(line.product_id.name),
                             'Cantidad': line.quantity,
-                            'ClaveUnidad': line.product_id.uom_id.l10n_mx_edi_code_sat_id.code,
+                            'ClaveUnidad': line.product_id.uom_id.unspsc_code_id.code,
                             'Unidad': line.product_id.uom_id.name,
                             'Dimensiones': line.product_id.dimensiones,
                             'MaterialPeligroso': line.product_id.materialpeligroso,
                             'CveMaterialPeligroso': line.product_id.clavematpeligroso.clave,
-                           # 'Embalaje': line.product_id.embalaje.clave,
-                            'DescripEmbalaje': line.product_id.desc_embalaje,
+                            'Embalaje': line.product_id.embalaje and line.product_id.embalaje.clave or '',
+                            'DescripEmbalaje': line.product_id.desc_embalaje and line.product_id.desc_embalaje or '',
                             'PesoEnKg': line.pesoenkg,
-                            'ValorMercancia': line.price_subtotal if self.tipo_transporte == '03' else '',
+                            'ValorMercancia': line.price_subtotal,
                             'Moneda': self.currency_id.name,
-                            'FraccionArancelaria': ' ', #line.product_id.l10n_mx_edi_umt_aduana_id.name,
+                            'FraccionArancelaria': '', #line.product_id.l10n_mx_edi_umt_aduana_id.name,
                             'UUIDComercioExt': self.uuidcomercioext,
             }
             pedimentos = []
@@ -711,6 +692,8 @@ class CfdiTraslado(models.Model):
                                  'AseguraCarga': self.nombreaseg_merc,
                                  'PolizaCarga': self.numpoliza_merc,
                                  'PrimaSeguro': self.primaseguro_merc,
+                                 'AseguraMedAmbiente': self.seguro_ambiente,
+                                 'PolizaMedAmbiente': self.poliza_ambiente,
                             },
               }
               remolques = []
@@ -851,6 +834,11 @@ class CfdiTraslado(models.Model):
             invoice.message_post(body="CFDI emitido")
         return True
 
+    def clean_text(self, text):
+        clean_text = text.replace('\n', ' ').replace('\\', ' ').replace('-', ' ').replace('/', ' ').replace('|', ' ')
+        clean_text = clean_text.replace(',', ' ').replace(';', ' ').replace('>', ' ').replace('<', ' ')
+        return clean_text[:1000]
+
     def action_cfdi_cancel(self):
         for invoice in self:
             if invoice.factura_cfdi:
@@ -922,7 +910,7 @@ class CfdiTraslado(models.Model):
                         {
                             'name': file_name,
                             'datas': json_response['factura_xml'],
-                            'datas_fname': file_name,
+                            # 'datas_fname': file_name,
                             'res_model': self._name,
                             'res_id': invoice.id,
                             'type': 'binary'
@@ -983,16 +971,9 @@ class MailTemplate(models.Model):
 
         if isinstance(res_ids, (int)):
             res_ids = [res_ids]
-        res_ids_to_templates = super(MailTemplate, self).get_email_template(res_ids)
-
-        # templates: res_id -> template; template -> res_ids
-        templates_to_res_ids = {}
-        for res_id, template in res_ids_to_templates.items():
-            templates_to_res_ids.setdefault(template, []).append(res_id)
-
-        template_id = self.env.ref('l10n_mx_traslado.email_template_factura_traslado')
-        for template, template_res_ids in templates_to_res_ids.items():
-            if template.id  == template_id.id:
+        
+        for lang, (template, template_res_ids) in self._classify_per_lang(res_ids).items():
+            if template.report_template and template.report_template.report_name == 'l10n_mx_traslado.report_facturatraslado1':
                 for res_id in template_res_ids:
                     invoice = self.env[template.model].browse(res_id)
                     if not invoice.factura_cfdi:

@@ -18,7 +18,7 @@ class AutoTransporte(models.Model):
     nombreaseg = fields.Char(string=_('Nombre de la aseguradora'))
     numpoliza = fields.Char(string=_('Número de póliza'))
 
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('ccp.autotransporte'))
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
 
     @api.model
     def init(self):

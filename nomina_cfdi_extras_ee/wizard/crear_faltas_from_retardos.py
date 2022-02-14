@@ -13,7 +13,7 @@ class CrearFaltasFromRetardos(models.TransientModel):
     start_date = fields.Date("Fecha inicio")
     end_date = fields.Date("Fecha fin")
     
-    @api.multi
+    
     def action_crear_faltas_from_ratardos(self):
         start_date = self.start_date
         end_date = self.end_date

@@ -35,7 +35,7 @@
 							</div>
 							<div style="width:33%;float:right;text-align:right;">
 								R.F.C.
-                                <span t-esc="slip.company_id.rfc" />
+                                <span t-esc="slip.company_id.vat" />
 							</div>
 							<div style="width:33%;float:right;">
 								<span t-esc="slip.company_id.name" />

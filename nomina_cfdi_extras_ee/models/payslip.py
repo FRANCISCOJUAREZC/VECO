@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 import xlwt
 from xlwt import easyxf
 import io
 from docutils.nodes import line
+from odoo.exceptions import UserError, Warning
+
 class Payslip(models.Model):
     _inherit = 'hr.payslip'
 
-    @api.one
     def get_amount_from_rule_code(self, rule_code):
-        line = self.env['hr.payslip.line'].search([('slip_id', '=', self.id), ('code', '=', rule_code)])
-        if line:
-            return round(sum(line.mapped('total')), 2)
-        else:
+        for slip in self:
+            for line in slip.line_ids:
+                if line.code == rule_code:
+                   return round(line.total,2)
             return 0.0
 
-    @api.one
     def get_total_work_days(self):
         total = 0
         for line in self.worked_days_line_ids:
@@ -23,7 +23,6 @@ class Payslip(models.Model):
                total += line.number_of_days
         return total
     
-    @api.one
     def get_total_code_value(self,special_code):
         line_ids = self.line_ids.filtered(lambda l: l.salary_rule_id.forma_pago == special_code)
         total = 0.0
@@ -45,7 +44,7 @@ class PayslipBatches(models.Model):
 
     file_data = fields.Binary('File')
 
-    @api.one
+    
     def get_department(self):
         result = {}
         department = self.env['hr.department'].search([])
@@ -53,7 +52,7 @@ class PayslipBatches(models.Model):
             result[dept.id] = dept.name
         return result
 
-    @api.one
+    
     def get_dept_total(self, dept_id):
         result = {}
         for rule in self.env['hr.salary.rule'].search([]):
@@ -67,7 +66,7 @@ class PayslipBatches(models.Model):
                         result[line.code] = round(line.total, 2)
         return result
 
-    @api.one
+    
     def get_grand_total(self):
         result = {}
         for rule in self.env['hr.salary.rule'].search([]):
@@ -80,8 +79,7 @@ class PayslipBatches(models.Model):
                    else:
                        result[line.code] = round(line.total, 2)
         return result
-
-    @api.one
+    
     def get_payslip_group_by_department(self):
         result = {}
         start_range = self._context.get('start_range')
@@ -108,7 +106,7 @@ class PayslipBatches(models.Model):
                 result[line.employee_id.department_id.id] = [line]
         return result
 
-    @api.multi
+   
     def get_all_columns(self):
         result = {}
         all_col_list_seq = []
@@ -141,7 +139,7 @@ class PayslipBatches(models.Model):
         return [result, all_col_list_seq]
 
     def export_report_xlsx_button(self):
-        view = self.env.ref('nomina_cfdi_extras.listado_de_monin_wizard')
+        view = self.env.ref('nomina_cfdi_extras_ee.listado_de_monin_wizard')
         ctx = self.env.context.copy()
         ctx .update({'default_payslip_batch_id':self.id})
         return {
@@ -169,7 +167,12 @@ class PayslipBatches(models.Model):
         worksheet.write(0, 1, 'Empleado', header_style)
         worksheet.write(0, 2, 'Dias Pag', header_style)
         col_nm = 3
-        
+
+        noms = self.slip_ids
+        for nom in noms:
+            if not nom.employee_id.department_id:
+                raise UserError(_('%s no tiene departamento configurado') % (nom.employee_id.name))
+
         all_column = self.get_all_columns()
         all_col_dict = all_column[0]
         all_col_list = all_column[1]
@@ -180,7 +183,7 @@ class PayslipBatches(models.Model):
             worksheet.write(0, col_nm, t, header_style)
             col_nm += 1
 
-        payslip_group_by_department = self.get_payslip_group_by_department()[0]
+        payslip_group_by_department = self.get_payslip_group_by_department()
         row = 1
         grand_total = {}
         for dept in self.env['hr.department'].browse(payslip_group_by_department.keys()).sorted(lambda x:x.name):
@@ -208,7 +211,7 @@ class PayslipBatches(models.Model):
                 if slip.employee_id.no_empleado:
                     worksheet.write(row, 0, slip.employee_id.no_empleado, text_left)
                 worksheet.write(row, 1, slip.employee_id.name, text_left)
-                work_day = slip.get_total_work_days()[0]
+                work_day = slip.get_total_work_days()
                 worksheet.write(row, 2, work_day, text_right)
                 code_col = 3
                 for code in all_col_list:
@@ -216,16 +219,16 @@ class PayslipBatches(models.Model):
                     if code in total.keys():
                         for line in slip.details_by_salary_rule_category:
                            if line.code == code:
-                               amt = line.total
-#                        amt = slip.get_amount_from_rule_code(code)[0]
+                               amt = round(line.total,2)
+#                        amt = slip.get_amount_from_rule_code(code)
 #                        if amt:
                                grand_total[code] = grand_total.get(code) + amt
                                total[code] = total.get(code) + amt
                     else:
-                        #amt = slip.get_amount_from_rule_code(code)[0]
+                        #amt = slip.get_amount_from_rule_code(code)
                         for line in slip.details_by_salary_rule_category:
                            if line.code == code:
-                               amt = line.total
+                               amt = round(line.total,2)
                                total[code] = amt or 0
                         if code in grand_total.keys():
                             grand_total[code] = amt + grand_total.get(code) or 0.0
@@ -233,9 +236,9 @@ class PayslipBatches(models.Model):
                             grand_total[code] = amt or 0
                     worksheet.write(row, code_col, amt, text_right)
                     code_col += 1
-                worksheet.write(row, code_col, slip.get_total_code_value('001')[0], text_right)
+                worksheet.write(row, code_col, slip.get_total_code_value('001'), text_right)
                 code_col += 1
-                worksheet.write(row, code_col, slip.get_total_code_value('002')[0], text_right)
+                worksheet.write(row, code_col, slip.get_total_code_value('002'), text_right)
                 row += 1
             worksheet.write_merge(row, row, 0, 2, 'Total Departamento', text_bold_left)
             code_col = 3

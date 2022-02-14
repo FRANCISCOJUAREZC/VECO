@@ -10,3 +10,7 @@ from . import importar_dias_wizard
 from . import altas_y_bajas
 from . import total_por_empleado
 from . import total_por_departamento
+from . import wizard_caja_ahorro
+from . import reporte_nominas
+from . import reporte_imss
+from . import wizard_isn

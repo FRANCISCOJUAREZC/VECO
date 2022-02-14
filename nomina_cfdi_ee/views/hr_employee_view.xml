@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
            <xpath expr="//notebook" position="inside">
-                <page name="info_cdfi" string="CFDI 3.3" groups="hr_payroll.group_hr_payroll_user">
+                <page name="info_cdfi" string="CFDI 3.3" groups="om_hr_payroll.group_hr_payroll_user">
                         <group cols="4">
                             <group string="Detalles de Pago">
                                 <field name="no_empleado"/>
@@ -20,6 +20,7 @@
                                 <field name="regimen"/>
                                 <field name="contrato"/>
                                 <field name="jornada"/>
+                                <field name="sindicalizado"/>
                             </group>
                         </group>
                         <group cols="4">
@@ -29,7 +30,7 @@
                                 <field name="segurosocial"/>
                                 <field name="correo_electronico"/>
                                 <field name="estado"/>
-                                <field name="registro_patronal"/>
+                                <field name="registro_patronal_id"/>
                             </group>
                         </group>
                 </page><!--
@@ -38,12 +39,11 @@
                             <field name="fondo_ahorro"/>
                         </group>
                 </page>-->
-                <page name="utilidades" string="Reparto de utilidades" groups="hr_payroll.group_hr_payroll_user">
+                <page name="nombre" string="Nombre" groups="om_hr_payroll.group_hr_payroll_user">
                    <group cols="4">
-                      <field name="fecha_utilidad_inicio"/>
-                      <field name="fecha_utilidad_fin"/>
-                      <field name="dias_utilidad"/>
-                      <field name="sueldo_utilidad"/>
+                      <field name="empleado_nombre"/>
+                      <field name="empleado_paterno"/>
+                      <field name="empleado_materno"/>
                    </group>
                 </page>
            </xpath>

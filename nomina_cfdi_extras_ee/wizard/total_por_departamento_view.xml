@@ -30,7 +30,7 @@
                 name="Total por departamento"
                 action="action_wizard_total_por_departamento"
                 parent="menu_payroll_payslip_reportes" 
-                groups="hr_payroll.group_hr_payroll_user"
+                groups="om_hr_payroll.group_hr_payroll_user"
                 sequence="22"/>
 
 </odoo>

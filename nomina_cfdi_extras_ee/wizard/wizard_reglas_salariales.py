@@ -21,7 +21,7 @@ class WizardReglasSalariales(models.TransientModel):
     rule_ids = fields.Many2many('hr.salary.rule', 'hr_salary_rule_regalas_salarieles_rel','wizard_id','rule_id', string='Conceptos')
     file_data = fields.Binary("File Data")
     
-    @api.multi
+   
     def print_reglas_salariales_report(self):
         domain=[('state','=', 'done')]
         if self.date_from:

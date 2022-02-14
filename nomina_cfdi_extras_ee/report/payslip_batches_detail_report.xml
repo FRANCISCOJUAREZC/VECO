@@ -38,8 +38,8 @@
 										</tr>
 									</thead>
 									
-									<t t-set="dept" t-value="o.get_department()[0]"/>
-									<t t-set="slips" t-value="o.get_payslip_group_by_department()[0]"/>
+									<t t-set="dept" t-value="o.get_department()"/>
+									<t t-set="slips" t-value="o.get_payslip_group_by_department()"/>
 									<t t-foreach="slips.keys()" t-as="dept_id">
 										<t t-set="total_val" t-value="all_col_dict"/>
 										<t t-foreach="total_val" t-as="t_v">
@@ -59,13 +59,13 @@
 													<span t-esc="slip.employee_id.name"/>
 												</td>
 												<td>
-													<span t-esc="slip.get_total_work_days()[0]"/>
+													<span t-esc="slip.get_total_work_days()"/>
 												</td>
 												<t t-set="count_size_inside" t-value="0" />
 												<t t-foreach="all_col_list" t-as="col">
 													<t t-if="count_size_inside &lt; 12">
 														<td>
-															<span t-esc="'{:,}'.format(slip.get_amount_from_rule_code(col)[0])"/>
+															<span t-esc="'{:,}'.format(slip.get_amount_from_rule_code(col))"/>
 															<t t-set="count_size_inside" t-value="count_size_inside + 1" />
 														</td>
 													</t>	
@@ -78,7 +78,7 @@
 													<span>Total Departamento</span>
 												</strong>
 											</td>						
-											<t t-set="total_dept" t-value="o.get_dept_total(dept_id)[0]"/>
+											<t t-set="total_dept" t-value="o.get_dept_total(dept_id)"/>
 												<t t-set="count_size_total_dept" t-value="0" />
 												<t t-foreach="all_col_list" t-as="col">
 													<t t-if="count_size_total_dept &lt; 12">
@@ -96,7 +96,7 @@
 													<span>Gran Total</span>
 												</strong>
 											</td>						
-											<t t-set="grand_total" t-value="o.get_grand_total()[0]"/>
+											<t t-set="grand_total" t-value="o.get_grand_total()"/>
 											<t t-set="count_size_grand_total" t-value="0" />
 												<t t-foreach="all_col_list" t-as="col">
 												<t t-if="count_size_grand_total &lt; 12">	
@@ -130,8 +130,8 @@
 										</tr>
 									</thead>
 									
-									<t t-set="dept" t-value="o.get_department()[0]"/>
-									<t t-set="slips" t-value="o.get_payslip_group_by_department()[0]"/>
+									<t t-set="dept" t-value="o.get_department()"/>
+									<t t-set="slips" t-value="o.get_payslip_group_by_department()"/>
 									<t t-foreach="slips.keys()" t-as="dept_id">
 										<t t-set="total_val" t-value="all_col_dict"/>
 										<t t-foreach="total_val" t-as="t_v">
@@ -159,7 +159,7 @@
 												<t t-foreach="all_col_list" t-as="col">
 													<t t-if="count_size_inside &gt;= 12">
 														<td>
-															<span t-esc="'{:,}'.format(slip.get_amount_from_rule_code(col)[0])"/>
+															<span t-esc="'{:,}'.format(slip.get_amount_from_rule_code(col))"/>
 															<t t-set="count_size_inside" t-value="count_size_inside + 1" />
 														</td>
 													</t>
@@ -175,7 +175,7 @@
 													<span>Total Departamento</span>
 												</strong>
 											</td>		-->				
-											<t t-set="total_dept" t-value="o.get_dept_total(dept_id)[0]"/>
+											<t t-set="total_dept" t-value="o.get_dept_total(dept_id)"/>
 												<t t-set="count_size_total_dept" t-value="0" />
 												<t t-foreach="all_col_list" t-as="col">
 													<t t-if="count_size_total_dept &gt;= 12">
@@ -198,7 +198,7 @@
 												</strong>
 											</td>
 											-->							
-											<t t-set="grand_total" t-value="o.get_grand_total()[0]"/>
+											<t t-set="grand_total" t-value="o.get_grand_total()"/>
 											<t t-set="count_size_grand_total" t-value="0" />
 												<t t-foreach="all_col_list" t-as="col">
 												<t t-if="count_size_grand_total &gt;= 12">
@@ -223,17 +223,17 @@
 											<th>Cod</th>
 											<th>Empleado</th>
 											<th>Dias Pag</th>
-											
-										    <t t-foreach="all_col_list" t-as="col">
-												<th><t t-esc="all_col_dict[col]"/></th>
-											</t>	
-										    
+											<th> 	
+											    <t t-foreach="all_col_list" t-as="col">
+													<th><t t-esc="all_col_dict[col]"/></th>
+												</t>	
+										    </th>
 											
 										</tr>
 									</thead>
 									
-									<t t-set="dept" t-value="o.get_department()[0]"/>
-									<t t-set="slips" t-value="o.get_payslip_group_by_department()[0]"/>
+									<t t-set="dept" t-value="o.get_department()"/>
+									<t t-set="slips" t-value="o.get_payslip_group_by_department()"/>
 									<t t-foreach="slips.keys()" t-as="dept_id">
 										<t t-set="total_val" t-value="all_col_dict"/>
 										<t t-foreach="total_val" t-as="t_v">
@@ -253,11 +253,11 @@
 													<span t-esc="slip.employee_id.name"/>
 												</td>
 												<td>
-													<span t-esc="slip.get_total_work_days()[0]"/>
+													<span t-esc="slip.get_total_work_days()"/>
 												</td>
 												<t t-foreach="all_col_list" t-as="col">
 													<td>
-														<span t-esc="'{:,}'.format(slip.get_amount_from_rule_code(col)[0])"/>
+														<span t-esc="'{:,}'.format(slip.get_amount_from_rule_code(col))"/>
 													</td>
 												</t>
 											</t>
@@ -268,7 +268,7 @@
 													<span>Total Departamento</span>
 												</strong>
 											</td>						
-											<t t-set="total_dept" t-value="o.get_dept_total(dept_id)[0]"/>
+											<t t-set="total_dept" t-value="o.get_dept_total(dept_id)"/>
 											<t t-foreach="all_col_list" t-as="col">
 												<th>
 													<span t-esc="'{:,}'.format(total_dept[col])"/>
@@ -283,7 +283,7 @@
 												</strong>
 											</td>
 																	
-											<t t-set="grand_total" t-value="o.get_grand_total()[0]"/>
+											<t t-set="grand_total" t-value="o.get_grand_total()"/>
 											<t t-foreach="all_col_list" t-as="col">
 												<th>
 													<span t-esc="'{:,}'.format(grand_total[col])"/>

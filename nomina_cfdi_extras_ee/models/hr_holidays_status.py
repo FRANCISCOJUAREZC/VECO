@@ -5,7 +5,7 @@ from odoo.exceptions import Warning
 class HrHolidaysStatus(models.Model):
     _inherit = 'hr.leave.type'
     
-    @api.multi
+   
     def unlink(self):
         for leave_type in self:
            auto_created_leaves = []

@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+from datetime import datetime
 
 class TablasAntiguedadesLine(models.Model):
     _name = 'tablas.antiguedades.line'
@@ -30,22 +31,31 @@ class TablasSubsidiolLine(models.Model):
     lim_inf = fields.Float('Límite inferior') 
     s_mensual = fields.Float('Subsidio mensual')
 
-class TablasSubsidio2lLine(models.Model):
-    _name = 'tablas.subsidio2.line'
-    _description = 'TablasSubsidio2lLine'
+class TablasPeriodoISR(models.Model):
+    _name = 'tablas.isr.periodo'
+    _description = 'TablasGeneralLine'
 
-    form_id = fields.Many2one('tablas.cfdi', string='Subsidio Mensual Art. 114 LISR', required=True)
+    form_id = fields.Many2one('tablas.cfdi', string='ISR Semanal / Quincenal', required=True)
     lim_inf = fields.Float('Límite inferior') 
     c_fija = fields.Float('Cuota fija') 
-    s_imp_marginal = fields.Float('Sobre imp. marginal (%)')
+    s_excedente = fields.Float('Sobre excedente (%)')
 
-class TablasSubsidioAcreditablelLine(models.Model):
-    _name = 'tablas.subsidioacreditable.line'
-    _description = 'TablasSubsidioAcreditablelLine'
+#class TablasSubsidio2lLine(models.Model):
+#    _name = 'tablas.subsidio2.line'
+#    _description = 'TablasSubsidio2lLine'
 
-    form_id = fields.Many2one('tablas.cfdi', string='Subsidio acreditable', required=True)
-    ano = fields.Float('Año') 
-    s_mensual = fields.Float('Subsidio (%)')
+#    form_id = fields.Many2one('tablas.cfdi', string='Subsidio Mensual Art. 114 LISR', required=True)
+#    lim_inf = fields.Float('Límite inferior') 
+#    c_fija = fields.Float('Cuota fija') 
+#    s_imp_marginal = fields.Float('Sobre imp. marginal (%)')
+
+#class TablasSubsidioAcreditablelLine(models.Model):
+#    _name = 'tablas.subsidioacreditable.line'
+#    _description = 'TablasSubsidioAcreditablelLine'
+
+#    form_id = fields.Many2one('tablas.cfdi', string='Subsidio acreditable', required=True)
+#    ano = fields.Float('Año') 
+#    s_mensual = fields.Float('Subsidio (%)')
 
 class TablasPeriodoBimestrallLine(models.Model):
     _name = 'tablas.periodo.bimestral'
@@ -59,69 +69,38 @@ class TablasPeriodoBimestrallLine(models.Model):
     @api.onchange('dia_inicio', 'dia_fin')
     def compute_dias(self):
         if self.dia_fin and self.dia_inicio:
-            delta = self.dia_fin - self.dia_inicio
-            self.no_dias = delta.days + 1
+           delta = self.dia_fin - self.dia_inicio
+           self.no_dias = delta.days + 1
 
 class TablasPeriodoMensuallLine(models.Model):
     _name = 'tablas.periodo.mensual'
     _description = 'TablasPeriodoMensuallLine'
 
     form_id = fields.Many2one('tablas.cfdi', string='Periodo mensual', required=True)
-    dia_inicio = fields.Date('Primer día del periodo') 
-    dia_fin = fields.Date('Ultímo día del periodo') 
+    dia_inicio = fields.Date('Primer día del mes / periodo') 
+    dia_fin = fields.Date('Ultímo día del mes / periodo') 
     mes = fields.Selection(
-        selection=[('01', 'Enero'), 
-                   ('02', 'Febrero'), 
-                   ('03', 'Marzo'),
-                   ('04', 'Abril'), 
-                   ('05', 'Mayo'),
-                   ('06', 'Junio'),
-                   ('07', 'Julio'),
-                   ('08', 'Agosto'),
-                   ('09', 'Septiembre'),
-                   ('10', 'Octubre'),
-                   ('11', 'Noviembre'),
-                   ('12', 'Diciembre'),
+        selection=[('01', 'Enero / Periodo 1'), 
+                   ('02', 'Febrero / Periodo 2'), 
+                   ('03', 'Marzo / Periodo 3'),
+                   ('04', 'Abril / Periodo 4'), 
+                   ('05', 'Mayo / Periodo 5'),
+                   ('06', 'Junio / Periodo 6'),
+                   ('07', 'Julio / Periodo 7'),
+                   ('08', 'Agosto / Periodo 8'),
+                   ('09', 'Septiembre / Periodo 9' ),
+                   ('10', 'Octubre / Periodo 10'),
+                   ('11', 'Noviembre / Periodo 11'),
+                   ('12', 'Diciembre / Periodo 12'),
                    ],
-        string=_('Mes'),)
-    no_dias = fields.Float('Dias en el mes', store=True) 
-    
-    @api.onchange('dia_inicio', 'dia_fin')
-    def compute_dias(self):
-        if self.dia_fin and self.dia_inicio:
-            delta = self.dia_fin - self.dia_inicio
-            self.no_dias = delta.days + 1
-
-class TablasPeriodoSemanalLine(models.Model):
-    _name = 'tablas.periodo.semanal'
-    _description = 'TablasPeriodoSemanalLine'
-
-    form_id = fields.Many2one('tablas.cfdi', string='Calendario semanal', required=True)
-    no_periodo = fields.Selection(
-        selection=[('1', 'Periodo 1'), 
-                   ('2', 'Periodo 2'), 
-                   ('3', 'Periodo 3'),
-                   ('4', 'Periodo 4'), 
-                   ('5', 'Periodo 5'),
-                   ('6', 'Periodo 6'),
-                   ('7', 'Periodo 7'),
-                   ('8', 'Periodo 8'),
-                   ('9', 'Periodo 9'),
-                   ('10', 'Periodo 10'),
-                   ('11', 'Periodo 11'),
-                   ('12', 'Periodo 12'),
-                   ],
-        string=_('No. Periodo'),)
-    dia_inicio = fields.Date('Primer día del peridoo') 
-    dia_fin = fields.Date('Ultímo día del peridoo') 
-    no_dias = fields.Float('Dias en el periodo', store=True)
+        string=_('Mes / Periodo'),)
+    no_dias = fields.Float('Número de dias', store=True) 
 
     @api.onchange('dia_inicio', 'dia_fin')
     def compute_dias(self):
         if self.dia_fin and self.dia_inicio:
-            delta = self.dia_fin - self.dia_inicio
-            self.no_dias = delta.days + 1
-
+           delta = self.dia_fin - self.dia_inicio
+           self.no_dias = delta.days + 1
 
 class TablasAnualISR(models.Model):
     _name = 'tablas.isr.anual'
@@ -142,11 +121,12 @@ class TablasCFDI(models.Model):
     tabla_LISR = fields.One2many('tablas.general.line', 'form_id', copy=True)
     tabla_ISR_anual = fields.One2many('tablas.isr.anual', 'form_id', copy=True)
     tabla_subem = fields.One2many('tablas.subsidio.line', 'form_id', copy=True)
-    tabla_subsidio = fields.One2many('tablas.subsidio2.line', 'form_id', copy=True)
-    tabla_subsidio_acreditable = fields.One2many('tablas.subsidioacreditable.line', 'form_id', copy=True)
+    tabla_ISR_periodo = fields.One2many('tablas.isr.periodo', 'form_id', copy=True)
+#    tabla_subsidio = fields.One2many('tablas.subsidio2.line', 'form_id', copy=True)
+#    tabla_subsidio_acreditable = fields.One2many('tablas.subsidioacreditable.line', 'form_id', copy=True)
     tabla_bimestral = fields.One2many('tablas.periodo.bimestral', 'form_id', copy=True)
     tabla_mensual = fields.One2many('tablas.periodo.mensual', 'form_id', copy=True)
-    tabla_semanal = fields.One2many('tablas.periodo.semanal', 'form_id', copy=True)
+    #tabla_semanal = fields.One2many('tablas.periodo.semanal', 'form_id', copy=True)
 
     uma = fields.Float(string=_('UMA'), default='84.49')
     salario_minimo = fields.Float(string=_('Salario mínimo'))
@@ -191,14 +171,17 @@ class TablasCFDI(models.Model):
     retiro_p = fields.Float(string=_('Retiro (%)'), default=2, digits = (12,3))
     guarderia_p = fields.Float(string=_('Guardería y prestaciones sociales (%)'), default=1, digits = (12,3))
 
-    @api.one
+    caja_ahorro_abono = fields.Many2one('hr.salary.rule', string='Caja / Fondo Ahorro abono')
+    caja_ahorro_retiro = fields.Many2one('hr.salary.rule', string='Caja / Fondo Ahorro retiro')
+
+    isn =  fields.Float(string=_('Impuesto sobre nómina'), default='2.0', digits = (12,2))
+
     @api.constrains('name')
     def _check_name(self):
         if self.name:
             if self.search([('id', '!=', self.id),('name','=',self.name)]):
                 raise ValidationError(_('Reference with same name already exist.'))
             
-    @api.one
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         default = dict(default or {})
@@ -212,22 +195,23 @@ class TablasCFDI(models.Model):
             res['name'] = self.env['ir.sequence'].next_by_code('tablas.cfdi.reference')
         return res
 
-    @api.one
     @api.depends('funcion_ingresos')
     def _compute_funcion_dias(self):
         self.funcion_dias = 100 - self.funcion_ingresos
 
-    @api.one
     @api.depends('total_dias_trabajados', 'total_sueldo_percibido')
     def _factor_dias(self):
         if self.total_dias_trabajados > 0:
             self.factor_dias = (self.importe_utilidades*(self.funcion_dias/100)) / self.total_dias_trabajados
+        else:
+            self.factor_dias = 0 
 
-    @api.one
     @api.depends('total_dias_trabajados', 'total_sueldo_percibido')
     def _factor_sueldo(self):
         if self.total_sueldo_percibido > 0:
             self.factor_sueldo = (self.importe_utilidades*(self.funcion_ingresos/100)) / self.total_sueldo_percibido
+        else:
+            self.factor_sueldo = 0 
 
     def calcular_reparto_utilidades(self):
         payslips = self.env['hr.payslip'].search([('date_from', '>=', self.fecha_inicio), ('date_to', '<=', self.fecha_fin),('tipo_nomina','=', 'O')])
@@ -258,7 +242,6 @@ class TablasCFDI(models.Model):
         
         return True
 
-    @api.multi
     def button_dummy(self):
         self.calcular_reparto_utilidades()
         return True

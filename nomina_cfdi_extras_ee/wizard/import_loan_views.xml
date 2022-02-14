@@ -12,7 +12,7 @@
                 </group>
                 <footer>
                 	<button class="oe_highlight" name="import_loan" string="Importar" type="object" />
-                    ó
+                    
                     <button string="Cancelar" class="oe_link" special="cancel" />
                 </footer>
             </form>
@@ -23,7 +23,7 @@
         <field name="name">Importar prestamos</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">import.loan</field>
-        <field name="view_type">form</field>
+        <!-- <field name="view_type">form</field> -->
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>

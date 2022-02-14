@@ -26,7 +26,7 @@
         <field name="name">Reglas salariales</field>
         <field name="res_model">wizard.regalas.salarieles</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="view_type">form</field>
+        <!-- <field name="view_type">form</field> -->
         <field name="view_mode">form</field>
         <field name="view_id" ref="wizard_reglas_salariales_form_view"/>
         <field name="target">new</field>
@@ -34,15 +34,15 @@
 
 	<menuitem  name="Reportes"
                 id="menu_payroll_payslip_reportes" 
-                parent="hr_payroll.menu_hr_payroll_root" 
+                parent="om_hr_payroll.menu_hr_payroll_root" 
                 sequence="15" 
-                groups="hr_payroll.group_hr_payroll_user"/>
+                groups="om_hr_payroll.group_hr_payroll_user"/>
 
     <menuitem id="menu_action_wizard_reglas_salariales"
                 name="Reglas salariales"
                 action="action_wizard_reglas_salariales"
-                parent="menu_payroll_payslip_reportes" 
-                groups="hr_payroll.group_hr_payroll_user"
+                parent="nomina_cfdi_extras_ee.menu_payroll_payslip_reportes" 
+                groups="om_hr_payroll.group_hr_payroll_user"
                 sequence="10"/>
 
 </odoo>

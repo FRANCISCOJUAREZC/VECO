@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 {
-    'name': 'Nomina CFDI Extras',
+    'name': 'Nomina CFDI Extras EE',
     'summary': '',
     'description': '''
-Create new module for Odoo 11 called nomina_cfdi_extras_ee. 
+Create new module for Odoo 15 called nomina_cfdi_extras_ee. 
 This new module will create 2 new models: incidencias and incapacidades, they will have a tree view and will be located on Employees view. For both create sequential numbers for each register. Will have only 2 states: draft and done.
     ''',
     'author': 'IT Admin',
-    'version': '12.14',
+    'version': '15.01',
     'category': 'Employees',
     'depends': [
-        'hr','nomina_cfdi_ee',"account_cancel",
-        "hr_payroll_account",'hr_payroll', 'report_xlsx'
+        'hr','nomina_cfdi_ee',
+        'report_xlsx', 'om_hr_payroll', #"om_hr_payroll_account",
     ],
     'data': [
         'data/hr_data.xml',
@@ -24,7 +24,6 @@ This new module will create 2 new models: incidencias and incapacidades, they wi
         'views/incidencias_view.xml',
         'views/retardos_view.xml',
         'views/res_config_settings_views.xml',
-        'views/templates.xml',
         'views/viaticos_nomina_view.xml',
         'wizard/crear_faltas_from_retardos.xml',
         'views/hr_payslip_view.xml',
@@ -33,6 +32,7 @@ This new module will create 2 new models: incidencias and incapacidades, they wi
         'views/hr_loan_view.xml',
         'views/ir_sequence_data.xml',
         'views/employee_loan_type_views.xml',
+        'views/prima_dominical_view.xml',
        # 'edi/mail_template.xml',
        # 'edi/skip_installment_mail_template.xml',
         'views/pay_slip_view.xml',
@@ -52,7 +52,6 @@ This new module will create 2 new models: incidencias and incapacidades, they wi
         'wizard/wizard_reglas_salariales_view.xml',
         'wizard/calculo_isr_anual_view.xml', 
         'wizard/listado_de_nomina_wizard_view.xml',
-        #'security/ir.model.access.csv',
         'report/calculo_isr_anual_report.xml',
         'wizard/importar_dias_wizard.xml',
         'report/reporte_isr_imss.xml',
@@ -62,11 +61,17 @@ This new module will create 2 new models: incidencias and incapacidades, they wi
         'wizard/total_por_empleado_view.xml',
         'wizard/total_por_departamento_view.xml',
         'views/credito_infonavit_view.xml',
+        'report/reporte_caja_ahorro.xml',
+        'wizard/wizard_caja_ahorro_view.xml',
+        'wizard/reporte_nominas.xml',
+        'wizard/reporte_imss.xml',
+        'wizard/wizard_isn.xml',
     ],
-
-#     'external_dependencies' : {
-#         'python' : ['tzlocal'],
-#     },
+    'assets': {
+        'web.assets_backend': [
+            'nomina_cfdi_extras_ee/static/src/js/list_controller.js',
+        ],
+    },
     'installable': True,
     'application': False,
     'license': 'AGPL-3',

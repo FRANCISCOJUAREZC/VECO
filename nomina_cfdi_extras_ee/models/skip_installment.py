@@ -38,7 +38,7 @@ class dev_skip_installment(models.Model):
                               ('done','Hecho'),
                               ('reject','Rechazar'),
                               ('cancel','Cancelar'),], string='Estado', default='draft', track_visibility='onchange')
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('dev.skip.installment'))
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
 
     @api.depends('installment_id')
     def get_url(self):
@@ -65,7 +65,7 @@ class dev_skip_installment(models.Model):
 #        if self.loan_id:
 #            self.manager_id = self.loan_id.manager_id
 
-    @api.multi
+   
     def action_send_request(self):
 #        if not self.manager_id:
 #            raise ValidationError(_('Por favor seleccione el gerente del departamento'))
@@ -82,7 +82,7 @@ class dev_skip_installment(models.Model):
         self.state = 'confirm'
         
         
-#    @api.multi
+#   
 #    def get_hr_manager_email(self):
 #        group_id = self.env['ir.model.data'].get_object_reference('hr', 'group_hr_manager')[1]
 #        group_ids = self.env['res.groups'].browse(group_id)
@@ -96,7 +96,7 @@ class dev_skip_installment(models.Model):
 #                    email= emp.work_email
 #        return email
 
-    @api.multi
+   
     def approve_skip_installment(self):
         #email = self.get_hr_manager_email()
         #if email:
@@ -109,7 +109,7 @@ class dev_skip_installment(models.Model):
         #    template_id.send_mail(self.ids[0], True)
         self.state = 'approve'
 
-    @api.multi
+   
     def dep_reject_skip_installment(self):
         #if self.employee_id.work_email:
         #    ir_model_data = self.env['ir.model.data']
@@ -123,7 +123,7 @@ class dev_skip_installment(models.Model):
             
         self.state = 'reject'
 
-    @api.multi
+   
     def hr_reject_skip_installment(self):
         #employee_id = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)], limit=1)
         #self.hr_manager_id = employee_id and employee_id.id or False
@@ -138,7 +138,7 @@ class dev_skip_installment(models.Model):
         #    template_id.send_mail(self.ids[0], True)
         self.state = 'reject'
 
-    @api.multi
+   
     def confirm_skip_installment(self):
         #employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         #self.hr_manager_id = employee_id and employee_id.id or False
@@ -154,7 +154,6 @@ class dev_skip_installment(models.Model):
             
         self.state = 'confirm'
     
-    @api.multi
     def done_skip_installment(self):
         date = self.loan_id.start_date
         #date = datetime.strptime(date, '%Y-%m-%d')
@@ -175,27 +174,38 @@ class dev_skip_installment(models.Model):
             date = loan.nearest_date(items,date)
         else:
             date = date+relativedelta(months=1)
-        
+
         vals={
-            'name':str(self.installment_id.name) + ' - COPIA',
-            'employee_id':self.employee_id and self.employee_id.id or False,
-            'date':date,
-            'amount':self.installment_id.amount,
-            'interest':0.0,
-            'installment_amt':self.installment_id.installment_amt,
-            'ins_interest':0.0,
+            'name': str(self.installment_id.name) + ' - COPIA',
+            'employee_id': self.employee_id and self.employee_id.id or False,
+            'date': date,
+            'amount': self.installment_id.amount,
+            'interest': 0.0,
+            'installment_amt': self.installment_id.installment_amt,
+            'ins_interest': 0.0,
             'loan_id': loan.id,
+            'tipo_deduccion': self.installment_id.tipo_deduccion,
             }
         new_inst = self.env['installment.line'].create(vals)
         if new_inst:
             self.installment_id.is_skip = True
         self.state = 'done'
-        
-    @api.multi
+
     def cancel_skip_installment(self):
-        self.state = 'cancel'
-    
-    @api.multi
+        for skp_installment in self:
+            if skp_installment.state == 'done':
+                line_name = str(self.installment_id.name) + ' - COPIA'
+                line = self.env['installment.line'].search([('name','=',line_name)],limit=1)
+                if line:
+                    if not line.is_paid:
+                       line.unlink()
+                       self.installment_id.is_skip = False
+                       self.state = 'cancel'
+                    else:
+                       raise ValidationError(_('No se puede cancelar un salto ya pagado'))
+            else:
+                self.state = 'cancel'
+
     def set_to_draft(self):
         self.state = 'draft'
     
@@ -217,25 +227,23 @@ class dev_skip_installment(models.Model):
     def create(self, vals):
         if vals.get('name', '/') == '/':
             if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code(
+                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code(
                     'dev.skip.installment') or '/'
             else:
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'dev.skip.installment') or '/'
         return super(dev_skip_installment, self).create(vals)
         
-    @api.multi
+   
     def copy(self, default=None):
         if default is None:
             default = {}
         default['name'] = '/'
         return super(dev_skip_installment, self).copy(default=default)
 
-    @api.multi
+   
     def unlink(self):
         for skp_installment in self:
             if skp_installment.state != 'draft':
-                raise ValidationError(_('¡Omitir la eliminación de cuotas solo en el estado borrador!'))
+                raise ValidationError(_('Solo se pueden eliminar los saltos en el estado borrador'))
         return super(dev_skip_installment,self).unlink()
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

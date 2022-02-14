@@ -6,7 +6,7 @@
 
 {
     'name': 'Catalogos para timbrado CFDI 3.3',
-    'version': '14.2',
+    'version': '15.01',
     'description': ''' Agrega catalogos para realizar el timbrado de facturas CFDI 3.3
     ''',
     'category': 'Accounting',

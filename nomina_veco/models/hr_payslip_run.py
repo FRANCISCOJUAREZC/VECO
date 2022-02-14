@@ -23,7 +23,7 @@ class HrPayslipRun(models.Model):
                     self.dias_pagar = 15
                     self.imss_dias = self.imss_mes / 2
                 elif self.tipo_configuracion.tipo_pago == '02':
-                    delta = datetime.datetime.strptime(self.date_end, '%Y-%m-%d') - datetime.datetime.strptime(self.date_start, '%Y-%m-%d')
+                    delta = self.date_end - self.date_start
                     self.dias_pagar = delta.days + 1
                     self.imss_dias = delta.days + 1
                 else:
@@ -33,12 +33,12 @@ class HrPayslipRun(models.Model):
                 if self.tipo_configuracion.tipo_pago == '01':
                     self.dias_pagar = 30
                 elif self.tipo_configuracion.tipo_pago == '02':
-                    delta = datetime.datetime.strptime(self.date_end, '%Y-%m-%d') - datetime.datetime.strptime(self.date_start, '%Y-%m-%d')
+                    delta = self.date_end - self.date_start
                     self.dias_pagar = delta.days + 1
                 else:
                     self.dias_pagar = 30.4166
             else:
-                delta = datetime.datetime.strptime(self.date_end, '%Y-%m-%d') - datetime.datetime.strptime(self.date_start, '%Y-%m-%d')
+                delta = self.date_end - self.date_start
                 self.dias_pagar = delta.days + 1
     
 class HrPayslipWorkedDays(models.Model):
