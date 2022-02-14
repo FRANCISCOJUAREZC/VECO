@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                  <field name="bic" position="after">
                      <field name="c_banco" />
+                     <field name="c_rfc" />
                  </field>
             </field>
         </record>

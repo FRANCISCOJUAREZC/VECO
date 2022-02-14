@@ -4,7 +4,7 @@
     <record id="dev_hr_payslip_adv_payment_inherit_form" model="ir.ui.view">
          <field name="name">dev.hr.payslip.adv.pay.inheri.form</field>
          <field name="model">hr.payslip</field>
-         <field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
+         <field name="inherit_id" ref="om_hr_payroll.view_hr_payslip_form"/>
          <field name="arch" type="xml">
             <xpath expr="//field[@name='credit_note']" position="after">
                 <field name="installment_ids" widget="many2many_tags" attrs="{'readonly':[('state','!=','draft')]}"/>
@@ -15,20 +15,18 @@
     </record>
     
     <act_window 
-    	id="act_importar_dias_trabajo"
-    	name="Importar dias trabajo"
-        res_model="importar.dias.wizard.xls"
-        src_model="hr.payslip.run"
-        view_type="form"
-        view_mode="form"
-        target="new"
-    />
+    		name="Importar dias trabajo"
+    		res_model="importar.dias.wizard.xls"
+    		view_mode="form"
+    		target="new"
+    		id="act_importar_dias_trabajo"
+        	binding_model="hr.payslip.run"
+       />
     <act_window 
     	id="act_importar_otras_entradas"
     	name="Importar otras entradas"
         res_model="importar.dias.wizard.xls"
-        src_model="hr.payslip.run"
-        view_type="form"
+        binding_model="hr.payslip.run"
         view_mode="form"
         target="new"
         context="{'other_inputs': True}"

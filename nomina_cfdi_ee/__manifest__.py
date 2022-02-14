@@ -7,13 +7,14 @@
     Nomina CFDI Module
     ''',
     'author': 'IT Admin',
-    'version': '12.31',
+    'version': '15.01',
     'category': 'Employees',
     'depends': [
-        'base', 'hr', 'hr_payroll', 'hr_payroll_account'
+        'om_hr_payroll',
     ],
     'data': [
-#        'data/hr_payroll_data.xml',
+        'security/security.xml',
+        'security/ir.model.access.csv',
         'data/sequence_data.xml',
         'data/cron.xml',
         'data/nomina.otropago.csv',
@@ -28,8 +29,6 @@
         'report/report_payslip.xml',
         'views/res_bank_view.xml',
         'data/mail_template_data.xml',
-        'security/security.xml',
-        'security/ir.model.access.csv',
         'data/res.bank.csv',
         'views/menu.xml',
         'views/horas_extras_view.xml',
@@ -39,7 +38,16 @@
         'wizard/generar_recibo_nomina.xml',
         'views/confirmar_cancelar_nomina.xml',
         'wizard/dar_baja_view.xml',
+        'wizard/enviar_nomina_view.xml',
+        'views/registro_patronal.xml',
+        'views/caja_ahorro_view.xml',
+        'wizard/entrega_fondo_caja_view.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'nomina_cfdi_ee/static/src/js/caja_nomina.js',
+        ],
+    },
     'installable': True,
     'application': False,
     'license': 'AGPL-3',

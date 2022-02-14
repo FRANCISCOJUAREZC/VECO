@@ -95,19 +95,12 @@ class TablasPeriodoMensuallLine(models.Model):
                    ],
         string=_('Mes / Periodo'),)
     no_dias = fields.Float('Número de dias', store=True) 
-#    @api.multi
-    @api.onchange('dia_inicio', 'dia_fin')
-    def compute_dias(self):
-        if self.dia_fin and self.dia_inicio:
-           delta = self.dia_fin - self.dia_inicio
-           self.no_dias = delta.days + 1
 
     @api.onchange('dia_inicio', 'dia_fin')
     def compute_dias(self):
         if self.dia_fin and self.dia_inicio:
            delta = self.dia_fin - self.dia_inicio
            self.no_dias = delta.days + 1
-
 
 class TablasAnualISR(models.Model):
     _name = 'tablas.isr.anual'
@@ -178,14 +171,17 @@ class TablasCFDI(models.Model):
     retiro_p = fields.Float(string=_('Retiro (%)'), default=2, digits = (12,3))
     guarderia_p = fields.Float(string=_('Guardería y prestaciones sociales (%)'), default=1, digits = (12,3))
 
-    @api.one
+    caja_ahorro_abono = fields.Many2one('hr.salary.rule', string='Caja / Fondo Ahorro abono')
+    caja_ahorro_retiro = fields.Many2one('hr.salary.rule', string='Caja / Fondo Ahorro retiro')
+
+    isn =  fields.Float(string=_('Impuesto sobre nómina'), default='2.0', digits = (12,2))
+
     @api.constrains('name')
     def _check_name(self):
         if self.name:
             if self.search([('id', '!=', self.id),('name','=',self.name)]):
                 raise ValidationError(_('Reference with same name already exist.'))
             
-    @api.one
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         default = dict(default or {})
@@ -199,12 +195,10 @@ class TablasCFDI(models.Model):
             res['name'] = self.env['ir.sequence'].next_by_code('tablas.cfdi.reference')
         return res
 
-    @api.one
     @api.depends('funcion_ingresos')
     def _compute_funcion_dias(self):
         self.funcion_dias = 100 - self.funcion_ingresos
 
-    @api.one
     @api.depends('total_dias_trabajados', 'total_sueldo_percibido')
     def _factor_dias(self):
         if self.total_dias_trabajados > 0:
@@ -212,7 +206,6 @@ class TablasCFDI(models.Model):
         else:
             self.factor_dias = 0 
 
-    @api.one
     @api.depends('total_dias_trabajados', 'total_sueldo_percibido')
     def _factor_sueldo(self):
         if self.total_sueldo_percibido > 0:
@@ -249,7 +242,6 @@ class TablasCFDI(models.Model):
         
         return True
 
-    @api.multi
     def button_dummy(self):
         self.calcular_reparto_utilidades()
         return True

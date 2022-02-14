@@ -12,12 +12,12 @@ from reportlab.lib.units import mm
 
 class import_nomina_from_xml(models.TransientModel):
     _name ='import.nomina.from.xml'
+    _description = 'Importar Nomina'
     
     import_file = fields.Binary("Importar Archivo",required=False)
     file_name = fields.Char("Nombre del archivo")
     #nomina_id = fields.Many2one("hr.payslip",'Nomina')
     
-    @api.multi
     def import_xml_nomina_button(self):
         self.ensure_one()
         nomina_id = self.env['hr.payslip'].browse(self._context.get('active_id'))

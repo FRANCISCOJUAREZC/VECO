@@ -9,7 +9,7 @@ class employee_loan_type(models.Model):
     _description = 'employee_loan_type'
 
     name = fields.Char('Nombre', required="1")
-    loan_limit = fields.Float('Límite del monto del deducción', default=50000, required="1")
+    loan_limit = fields.Float('Límite del monto del deducción', default=5000, required="1")
     loan_term = fields.Integer('Plazo de la deducción', default=12, required="1")
     is_apply_interest = fields.Boolean('Aplicar interés', default=False)
     interest_rate = fields.Float('Taza de interés',default=10)
@@ -37,7 +37,7 @@ class employee_loan_type(models.Model):
                                        ('14','Descuento periodico 13'),
                                        ('15','Descuento periodico 14'),
                                        ('16','Descuento periodico 15'),], string='Tipo de deducción', required="1")
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('employee.loan.type'))
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
 
     @api.constrains('is_apply_interest','interest_rate','interest_type')
     def _check_interest_rate(self):

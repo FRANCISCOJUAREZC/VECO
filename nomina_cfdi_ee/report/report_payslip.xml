@@ -8,12 +8,12 @@
             <field name="page_height">0</field>
             <field name="page_width">0</field>
             <field name="orientation">Portrait</field>
-            <field name="margin_top">20</field>
+            <field name="margin_top">5</field>
             <field name="margin_bottom">20</field>
             <field name="margin_left">7</field>
             <field name="margin_right">7</field>
             <field name="header_line" eval="False" />
-            <field name="header_spacing">15</field>
+            <field name="header_spacing">5</field>
             <field name="dpi">90</field>
         </record>
 
@@ -69,12 +69,17 @@
     <t t-call="nomina_cfdi_ee.cfdi_payroll_layout">
         <t t-set="o" t-value="o.with_context({'lang':'es_MX'})" />
             <div class="page" style="padding-top: 1px;">
-		       <div class="row" font-size="10px;" >
-					<div class="col-2">
-						<img t-if="o.company_id.logo" t-att-src="'data:image/png;base64,%s' % to_text(o.company_id.logo)"
-							style="max-height: 130px;max-width: 130px;" />
-					</div>
-                       <div class="col-5" font-size="10px;">
+           <div class="row">
+
+          <!--INICIA LOGO DE LA EMPRESA-->
+               <div class="col-4">
+                       <img t-if="o.company_id.logo" t-att-src="'data:image/png;base64,%s' % to_text(o.company_id.logo)"
+                                style="max-height: 130px;max-width: 130px;" />
+               </div>
+          <!--TERMINA LOGO DE LA EMPRESA-->
+
+          <!--EMPIEZA DATOS DEL EMISOR-->
+                       <div class="col-4" style="font-size:10px;margin:0px;padding:0px;">
                           <div>
                              <strong>Emisor</strong>
                           </div>
@@ -82,36 +87,41 @@
                              <span t-field="o.company_id.nombre_fiscal" />
                           </div>
                           <div>
-                             <strong>RFC</strong>:<span t-field="o.company_id.rfc" />
+                             <strong>RFC</strong>:<span t-field="o.company_id.vat" />
                           </div>
                           <div>
-                             <strong>Registro Patronal</strong>: <span t-field="o.employee_id.registro_patronal" />
+                             <strong>Registro Patronal</strong>: <span t-field="o.employee_id.registro_patronal_id.registro_patronal" />
                           </div>
                        </div>
-			<div class="col-4" font-size="10px;">
-							<div>
-								<strong>Folio:</strong>
-								<strong><span t-if="not o.company_id.serie_nomina=='false'" t-field="o.company_id.serie_nomina" /></strong>
-								<span t-field="o.folio" />
-							</div>
-							<div>
-								<strong>Fecha emisión: </strong>
-								<span t-field="o.invoice_datetime" />
-							</div>
-							<div>
-								<strong>Lugar de expedición: </strong>
-								<span t-field="o.company_id.partner_id.zip"/>
-							</div>
-							<!--<div>
-								<strong>Tipo de comprobante: </strong>
-								<span t-field="o.tipo_comprobante" />
-							</div>-->
-							<div>
-								<strong>Periodo: </strong>
-								<span t-field="o.date_from" /> - <span t-field="o.date_to" />
-							</div>
-                       </div>
-					</div>
+
+            <!--TERMINA DATOS DEL EMISOR-->
+
+            <!--INFORMACIÓN GENERAL NOMINA-->
+            <div class="col-4" style="font-size:10px;">
+              <div>
+                <strong>Folio:</strong>
+                <strong><span t-if="not o.company_id.serie_nomina=='false'" t-field="o.company_id.serie_nomina" /></strong>
+                <span t-field="o.folio" />
+              </div>
+              <div>
+                <strong>Fecha emisión: </strong>
+                <span t-field="o.invoice_datetime" />
+              </div>
+              <div>
+                <strong>Lugar de expedición: </strong>
+                <span t-field="o.company_id.partner_id.zip"/>
+              </div>
+              <!--<div>
+                <strong>Tipo de comprobante: </strong>
+                <span t-field="o.tipo_comprobante" />
+              </div>-->
+              <div>
+                <strong>Periodo: </strong>
+                <span t-field="o.date_from" /> - <span t-field="o.date_to" />
+              </div>
+            </div>
+            <!--TERMINA INFORMACIÓN GENERAL DE LA NOMINA-->
+          </div>
             <t t-set="dias_trabajados" t-value="0.0"/>
             <t t-set="dias_vacaiones" t-value="0.0"/>
             <t t-set="septimo_dia" t-value="0.0"/>
@@ -150,9 +160,12 @@
                  <t t-set="prima_dominical" t-value="worked_days[0].number_of_days"/>
             </t>
 
-            <h2>Recibo de nómina</h2>
-            <div class="row mt32 mb32"  font-size="10px;" style="padding-top: 2px;">
-			<div  class="col-5"  font-size="10px;">
+            <h2 style="margin:0px;padding:0px;height:10px;">Recibo de nómina</h2>
+
+            <div class="row mt32 mb32" style="padding: 2px;">
+        <!--PARTE DEL RECEPTOR-->
+          <div class="col-5"  style="font-size:10px;">
+                      <br/>
                        <div >
                           <strong>Receptor</strong>
                        </div>
@@ -175,12 +188,15 @@
                           <strong>Número de empleado</strong>: <span t-field="o.employee_id.no_empleado" />
                        </div>
                     </div>
-                    <div class="col-7" font-size="10px;">
+          <!--TERMINA PARTE DEL RECEPTOR-->
+
+          <!--PARTE DATOS DE NOMINA-->
+          <div class="col-7" style="font-size:10px;">
                        <div >
                           <strong>Datos de la nómina</strong>
                        </div>
                        <div>
-                          <strong>Periodicidad de pago</strong>: <span t-field="o.contract_id.periodicidad_pago" />
+                          <strong>Periodicidad de pago</strong>: <span t-field="o.periodicidad" />
                        </div>
                        <div>
                           <strong>Seguro social</strong>: <span t-field="o.employee_id.segurosocial" />
@@ -198,20 +214,23 @@
                           <strong>Total de días laborados</strong>: <span t-esc="dias_trabajados" />
                        </div>
                     </div>
+          <!--TERMINA DATOS DE NOMINA-->
             </div>
             <t t-if="o.company_id.modo_prueba == True">
                         <div style="position:absolute;opacity:0.2;z-index:99;width:100%;text-align:center;margin:auto;">
                             <center><span style="font-size:100px;color:red;">NÓMINA DE PRUEBA</span></center>
                         </div>
                       </t>
+                      
             <div class="row mt32 mb32" style="padding-top: 1px;" >
-                    <div  class="col-6" font-size="10px;">
+                    <div  class="col-6" style="font-size:10px;">
                     <table width="100%" border="5" frame="rhs">
-						<colgroup>
-							<col width='60%' />
-							<col width='25%' />
-							<col width='15%' />
-						</colgroup>
+            <colgroup>
+              <col width='60%' />
+              <col width='25%' />
+              <col width='15%' />
+            </colgroup>
+
                         <thead>
                             <tr>
                                 <th>Percepciones</th>
@@ -225,19 +244,19 @@
                                 <t t-set="total_percepciones" t-value="total_percepciones + line.total"/>
                                 <td height="0"><span t-field="line.name"/></td>
                                 <td height="0" class="text-right"> <span t-esc="line.total"
-                                          t-esc-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                          t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
                                 <td height="0" class="text-right">
                                     <t t-if= "line.code == 'P001'"><!-- días trabajados -->
-                                       <span t-esc="round(dias_trabajados,2)"/>
+                                       <span t-esc="'%.2f'% dias_trabajados"/>
                                     </t>
                                     <t t-if= "line.code == 'P019'"> <!-- vacaciones -->
-                                       <span t-esc="round(dias_vacaiones,2)"/>
+                                       <span t-esc="'%.2f'% dias_vacaiones"/>
                                     </t>
                                     <t t-if= "line.code == 'P010'"> <!-- prima dominical -->
-                                       <span t-esc="round(prima_dominical,2)"/>
+                                       <span t-esc="'%.2f'% prima_dominical"/>
                                     </t>
                                     <t t-if= "line.code == 'P003'"><!-- septimo día-->
-                                       <span t-esc="round(septimo_dia,2)"/>
+                                       <span t-esc="'%.2f'% septimo_dia"/>
                                     </t>
                                 </td>
                               </t>
@@ -245,12 +264,12 @@
                         </tbody>
                     </table>
                     </div>
-                    <div  class="col-6" font-size="10px;">
+                    <div  class="col-6" style="font-size:10px;">
                     <table width="100%" border="5" frame="rhs">
-						<colgroup>
-							<col width='70%' />
-							<col width='30%' />
-						</colgroup>
+            <colgroup>
+              <col width='70%' />
+              <col width='30%' />
+            </colgroup>
                         <thead>
                             <tr>
                                 <th>Deducciones</th>
@@ -262,18 +281,16 @@
                             <t t-if= "line.total > 0 "> <!-- and line.salary_rule_id.tipo_deduccion != '002' and line.salary_rule_id.tipo_deduccion != '001'-->
                                 <t t-set="total_deducciones" t-value="total_deducciones + line.total"/>
                                 <td height="0"><span t-field="line.name"/></td>
-                                <td height="0" class="text-right"><span t-esc="line.total"
-                                          t-esc-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
+                                <td height="0" class="text-right"><span t-esc="line.total" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
                             </t>
                           </tr> 
                         </tbody>
                     </table>
                     </div>
-				</div>
-
+        </div>
         <!--TABLA OTROS PAGOS -->
         <div class="row mt32 mb32" style="padding-top: 1px;" >
-                    <div  class="col-6" font-size="10px;">
+                    <div  class="col-6" style="font-size:10px;">
                     <table width="100%" border="5" frame="rhs">
             <colgroup>
               <col width='60%' />
@@ -293,7 +310,7 @@
                                 <t t-set="total_otros_pagos" t-value="total_otros_pagos + line.total"/>
                                 <td height="0"><span t-field="line.name"/></td>
                                 <td height="0" class="text-right"> <span t-esc="line.total"
-                                          t-esc-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
+                                          t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
                                 <td height="0" class="text-right">  
                                 </td>
                            <!-- </t>-->
@@ -301,83 +318,92 @@
                         </tbody>
                     </table>
                     </div>
-             <div  class="col-6" font-size="10px;"> </div>
+             <div  class="col-6" style="font-size:10px;"> </div>
         </div>
 
         <!--TERMINA TABLA OTROS PAGOS-->
+        <t t-if="o.acum_fondo_ahorro > 0">
+            <div style="font-size:10px;">
+                 Fondo de ahorro: <span t-esc="o.acum_fondo_ahorro" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+            </div>
+        </t>
 
-				<table  width="100%"  font-size="10px;">
-						<colgroup>
-							<col width='60%' />
-							<col width='10%' />
-							<col width='30%' />
-						</colgroup>
-					<tr>
-						<td font-size="10px;">
-					Recibí de esta empresa la cantidad que señala este recibo de pago, estando conforme con las
+        <table  width="100%"  style="font-size:10px;">
+            <colgroup>
+              <col width='60%' />
+              <col width='10%' />
+              <col width='30%' />
+            </colgroup>
+          <tr>
+            <td style="font-size:10px;">
+          Recibí de esta empresa la cantidad que señala este recibo de pago, estando conforme con las
                     percepciones y las retenciones descritas, por lo que certifico que no se me adeuda cantidad alguna
                     por ningún concepto. <br/> <br/>
-							<center>______________________________</center>
-                    <center font-size="10px;"><p><strong>Firma del empleado</strong></p></center>
-						</td>
-						<td>
-						</td>
-						<td>
-							<table width="100%">
-						<colgroup>
-							<col width='70%' />
-							<col width='30%' />
-						</colgroup>
-								<tr>
-									<td font-size="10px;">
-										Total de percepciones:
-									</td>
-									<td class="text-right">
-										<span t-esc="round(total_percepciones,2)" t-esc-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
-									</td>
-								</tr>
-								<tr>
-									<td>
-										Total de otros pagos:
-									</td>
-									<td class="text-right">
-										<span t-esc="round(total_otros_pagos,2)" t-esc-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
-									</td>
-								</tr>
-								<tr>
-									<td font-size="10px;">
-										Total de deducciones:
-									</td>
-									<td class="text-right">
-										<span t-esc="round(total_deducciones,2)" t-esc-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}' />
-									</td>
-								</tr>
-								<tr class="border-black">
-									<td>
-										Total:
-									</td>
-									<td class="text-right">
-										<span t-esc="round(total_percepciones + total_otros_pagos- total_deducciones,2)" t-esc-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
-									</td>
-								</tr>
-								<tr class="border-black">
-									<td>
-										Neto a pagar:
-									</td>
-									<td class="text-right">
-										<span t-esc="round(neto_pagar,2)" t-esc-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
-									</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-				</table>
+              <center>______________________________</center>
+                    <center style="font-size:10px;"><p><strong>Firma del empleado</strong></p></center>
+            </td>
+            <td>
+            </td>
+            <td>
+              <table width="100%">
+            <colgroup>
+              <col width='70%' />
+              <col width='30%' />
+            </colgroup>
+                <tr>
+                  <td style="font-size:10px;">
+                    Total de percepciones:
+                  </td>
+                  <td class="text-right">
+                    <span t-esc="total_percepciones" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    Total de otros pagos:
+                  </td>
+                  <td class="text-right">
+                    <span t-esc="total_otros_pagos" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-size:10px;">
+                    Total de deducciones:
+                  </td>
+                  <td class="text-right">
+                    <span t-esc="total_deducciones" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}' />
+                  </td>
+                </tr>
+                <tr class="border-black">
+                  <td>
+                    Total:
+                  </td>
+                  <td class="text-right">
+                    <span t-esc="(total_percepciones + total_otros_pagos- total_deducciones)" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                  </td>
+                </tr>
+                <tr class="border-black">
+                  <td>
+                    Neto a pagar:
+                  </td>
+                  <td class="text-right">
+                    <span t-esc="neto_pagar" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
 
-				<div class="row" style="page-break-inside: avoid">
-						<div class="col-1">
-						<img t-if="o.qrcode_image" t-att-src="'data:image/png;base64,%s' % to_text(o.qrcode_image)"
-								style="height: 190px;width: 190px;padding-left:10px;" />
-						</div>
+        <div class="row" style="page-break-inside: avoid">
+            <!--INICIA CODIGO QR-->
+            <div class="col-3">
+            <img t-if="o.qrcode_image" t-att-src="'data:image/png;base64,%s' % to_text(o.qrcode_image)"
+                style="height: 190px;width: 190px;padding-left:10px;" />
+            </div>
+            <!--TERMINA CODIGO QR-->
+
+            <!--CADENA ORIGINAL>  -->
           <div class="col-9" style="font-size:11px;">
             <div>
               <strong>Cadena Original del Complemento digital del SAT</strong>
@@ -440,12 +466,14 @@
                 <span t-field="o.uso_cfdi"/>
             </div>
         </div>
-					<p>
-						<center>
-							<strong>ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI</strong>
-						</center>
-					</p>
-		</div>
+
+        <!--DOCUMENTO LEGAL-->
+          <p>
+            <center>
+              <strong>ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI</strong>
+            </center>
+          </p>
+    </div>
   </t>
 </template>
 

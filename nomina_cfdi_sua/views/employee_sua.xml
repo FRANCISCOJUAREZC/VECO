@@ -8,11 +8,6 @@
            <xpath expr="//notebook" position="inside">
             <page name="info_idse" string="SUA / IDSE">
                 <group cols="4">
-                    <group string="Datos personales trabajador">
-                        <field name="nombreEmpleado"/>
-                        <field name="apellido_Paterno"/>
-                        <field name="apellido_Materno"/>
-                    </group>
                     <group string="Información IDSE">
                         <field name="tipoDeTrabajador"/>
                         <field name="tipoDeSalario"/>
@@ -20,8 +15,11 @@
                         <field name="unidadMedicina"/>
                         <field name="no_guia"/>
                     </group>
+                    <group string="Información SUA">
+                        <field name="codigo_postal"/>
+                    </group>
                 </group>
-            </page>        
+            </page>
            </xpath>
         </field>
     </record>

@@ -1,24 +1,25 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, models, fields
+from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 from datetime import datetime
 
 class HrPayslipEmployeesExt(models.TransientModel):
     _inherit = 'hr.payslip.employees'
-    
-    @api.multi
+
     def compute_sheet(self):
         payslips = self.env['hr.payslip']
         [data] = self.read()
         active_id = self.env.context.get('active_id')
         if active_id:
             [run_data] = self.env['hr.payslip.run'].browse(active_id).read(['date_start', 'date_end', 'credit_note'])
+        else:
+            return
         from_date = run_data.get('date_start')
         to_date = run_data.get('date_end')
         if not data['employee_ids']:
             raise UserError(_("You must select employee(s) to generate payslip(s)."))
-        payslip_batch = self.env['hr.payslip.run'].sudo().browse(active_id)
+        payslip_batch = self.env['hr.payslip.run'].browse(active_id)
         struct_id = payslip_batch.estructura and payslip_batch.estructura.id or False
         other_inputs = []
         for other in payslip_batch.tabla_otras_entradas:
@@ -26,7 +27,7 @@ class HrPayslipEmployeesExt(models.TransientModel):
                 other_inputs.append((0,0,{'name':other.descripcion, 'code': other.codigo, 'amount':other.monto}))
             
         for employee in self.env['hr.employee'].browse(data['employee_ids']):
-            slip_data = self.env['hr.payslip'].sudo().onchange_employee_id(from_date, to_date, employee.id, contract_id=False)
+            slip_data = self.env['hr.payslip'].onchange_employee_id(from_date, to_date, employee.id, contract_id=False)
             res = {
                 'employee_id': employee.id,
                 'name': slip_data['value'].get('name'),
@@ -42,7 +43,7 @@ class HrPayslipEmployeesExt(models.TransientModel):
                 #Added
                 'tipo_nomina' : payslip_batch.tipo_nomina,
                 'fecha_pago' : payslip_batch.fecha_pago,
-                'journal_id': payslip_batch.journal_id.id
+                #'journal_id': payslip_batch.journal_id.id
             }
             if other_inputs and res.get('contract_id'):
                 contract_id = res.get('contract_id')
@@ -51,6 +52,9 @@ class HrPayslipEmployeesExt(models.TransientModel):
                     line[2].update({'contract_id':contract_id})
                 #input_lines = map(lambda x: x[2].update({'contract_id':contract_id}),input_lines)
                 res.update({'input_line_ids': input_lines,})
+
+            if not slip_data['value'].get('contract_id'):
+               raise UserError(_("El contrato de %s no está en el rango de fechas de la nomina o no está en proceso.") % (employee.name))
 
             #si está habilitado revisar si tiene todas las nominas del periodo
             employ_contract_id = self.env['hr.contract'].search([('id', '=', slip_data['value'].get('contract_id'))])
@@ -64,7 +68,7 @@ class HrPayslipEmployeesExt(models.TransientModel):
                         domain.append(('date_from','>=',line.dia_inicio))
                         domain.append(('date_to','<=',line.dia_fin))
                     domain.append(('employee_id','=',employee.id))
-                    payslips = self.env['hr.payslip'].sudo().search(domain)
+                    payslips = self.env['hr.payslip'].search(domain)
                     if payslips:
                         no_slips = len(payslips)
                         if payslip_batch.periodicidad_pago == '04':
@@ -102,7 +106,25 @@ class HrPayslipEmployeesExt(models.TransientModel):
             else:
                res.update({'imss_dias': payslip_batch.imss_dias,})
 
-            payslips += self.env['hr.payslip'].sudo().create(res)
+            #Compute caja ahorro
+            other_inputsb = []
+            caja = self.env['caja.nomina'].search([('employee_id','=',employee.id),('fecha_aplicacion','>=',from_date), ('fecha_aplicacion', '<=', to_date),('state','=','done')])
+            if caja:
+               for other in caja:
+                  if other.descripcion and other.clave: 
+                      other_inputsb.append((0,0,{'name':other.descripcion, 'code': other.clave, 'amount':other.importe, 'contract_id':employ_contract_id.id}))
+                      res.update({'input_line_ids': other_inputsb,})
+
+            #Compute days for attendance module
+            module = self.env['ir.module.module'].sudo().search([('name','=','hr_attendance_sheet')])
+            if module and module.state == 'installed':
+               if payslip_batch.attendance_report:
+                   asistencia_lines = payslip_batch.attendance_report.mapped('attendent_sheet_ids')
+                   emp_line_exist = asistencia_lines.filtered(lambda x: x.employee_id.id==employee.id)
+                   if emp_line_exist:
+                        res.update({'worked_days_line_ids': [(0, 0, x) for x in emp_line_exist.create_worklines(slip_data['value'].get('worked_days_line_ids'))],})
+
+            payslips += self.env['hr.payslip'].create(res)
 
         payslips.compute_sheet()
         

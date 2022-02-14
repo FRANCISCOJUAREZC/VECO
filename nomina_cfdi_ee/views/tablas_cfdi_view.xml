@@ -104,6 +104,16 @@
                             </group>
                         </group>
              </page>
+             <page name="caja_ahorro" string="Caja / Fondo Ahorro">
+                    <group cols="4" string="Reglas de abono y retiro">
+                       <group>
+                         <field name="caja_ahorro_abono"/>
+                         <field name="caja_ahorro_retiro"/>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+             </page><!--
              <page name="utilidades" string="Reparto de utilidades">
                     <group string="Configuración" cols="4">
                          <field name="importe_utilidades"/>
@@ -120,6 +130,15 @@
                          <field name="factor_sueldo"/>
                          <button name="button_dummy"
                             string="Calcular" type="object" class="oe_edit_only oe_inline oe_highlight" style="margin-left: 10px;"/>
+                    </group>
+             </page> -->
+             <page name="isn" string="ISN">
+                    <group cols="4">
+                      <group>
+                         <field name="isn"/>
+                      </group>
+                      <group>
+                      </group>
                     </group>
              </page>
              <page name="periodos" string="Periodos">
@@ -169,7 +188,6 @@
     <record id="action_tree_tablas_cfdi" model="ir.actions.act_window">
         <field name="name">Tablas CFDI</field>
         <field name="res_model">tablas.cfdi</field>
-        <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="tree_tablas_cfdi_view" />
         <field name="search_view_id" ref="search_tablas_cfdi_view" />
@@ -178,11 +196,11 @@
 
     <menuitem
           name="Tablas CFDI"
-          parent="hr_payroll.menu_hr_payroll_configuration"
+          parent="om_hr_payroll.menu_hr_payroll_configuration"
           id="menu_action_tree_tablas_cfdi"
           action="action_tree_tablas_cfdi"
           sequence="20"
-          groups="hr_payroll.group_hr_payroll_user"
+          groups="om_hr_payroll.group_hr_payroll_user"
       />
 
 </odoo>

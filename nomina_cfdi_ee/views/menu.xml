@@ -5,6 +5,6 @@
           parent="hr.menu_hr_root"
           id="menu_main_movimivientos"
           sequence="80"
-          groups="hr_payroll.group_hr_payroll_user"
+          groups="om_hr_payroll.group_hr_payroll_user"
       />
 </odoo>

@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 from calendar import monthrange
 import logging
 _logger = logging.getLogger(__name__)
+from odoo.exceptions import UserError
 
 class HrPayslipRun(models.Model):
     _inherit = 'hr.payslip.run'
@@ -164,14 +165,13 @@ class HrPayslipRun(models.Model):
                 if self.periodicidad_pago == '04':
                     batch.nominas_mes = 2
 
-    @api.multi
     def recalcular_nomina_payslip_batch(self):
         for batch in self:
-            batch.slip_ids.compute_sheet()
-            
+            for slip in batch.slip_ids:
+                if slip.state == 'draft':
+                    slip.compute_sheet()
         return True
      
-    @api.one
     @api.depends('slip_ids.state','slip_ids.nomina_cfdi')
     def _compute_payslip_cgdi_generated(self):
         cfdi_generated = True
@@ -182,7 +182,6 @@ class HrPayslipRun(models.Model):
         self.all_payslip_generated = cfdi_generated 
    
     
-    @api.one
     @api.depends('slip_ids.state')
     def _compute_payslip_cgdi_generated_draft(self):
         cfdi_generated_draft = True
@@ -193,7 +192,6 @@ class HrPayslipRun(models.Model):
         self.all_payslip_generated_draft = cfdi_generated_draft 
        
         
-    @api.multi
     def enviar_nomina(self):
         self.ensure_one()
         ctx = self._context.copy()
@@ -207,49 +205,72 @@ class HrPayslipRun(models.Model):
                 'default_composition_mode': 'comment',
             })
             
-            vals = self.env['mail.compose.message'].onchange_template_id(template.id, 'comment', 'hr.payslip', payslip.id)
+            vals = self.env['mail.compose.message']._onchange_template_id(template.id, 'comment', 'hr.payslip', payslip.id)
             mail_message  = self.env['mail.compose.message'].with_context(ctx).create(vals.get('value',{}))
-            mail_message.send_mail()
+            mail_message._action_send_mail()
         return True
-    
-    @api.multi
-    def enviar_prenomina(self):
-        self.ensure_one()
-        ctx = self._context.copy()
-        template = self.env.ref('nomina_cfdi_ee.email_template_payroll', False)
-        for payslip in self.slip_ids: 
-            ctx.update({
-                'default_model': 'hr.payslip',
-                'default_res_id': payslip.id,
-                'default_use_template': bool(template),
-                'default_template_id': template.id,
-                'default_composition_mode': 'comment',
-            })
-            
-            vals = self.env['mail.compose.message'].onchange_template_id(template.id, 'comment', 'hr.payslip', payslip.id)
-            mail_message  = self.env['mail.compose.message'].with_context(ctx).create(vals.get('value',{}))
-            mail_message.send_mail()
-        return True
-    
-    @api.multi
+
     def timbrar_nomina(self):
         self.ensure_one()
+        view = self.env.ref('nomina_cfdi_ee.timbrado_nomina_wizard')
+        ctx = self.env.context.copy()
+        ctx .update({'default_payslip_batch_id':self.id})
+        return {
+            'name': 'Timbrado De Nomina',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'timbrado.de.nomina',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'context': ctx,
+        }
+
+    def timbrar_nomina_wizard(self):
+        self.ensure_one()
         #cr = self._cr
+        err_msg = ''
+        correct = 0
+        errors = 0
         payslip_obj = self.env['hr.payslip']
+        start_range = self._context.get('start_range')
+        end_range = self._context.get('end_range')
         for payslip_id in self.slip_ids.ids:
             payslip = payslip_obj.browse(payslip_id)
-            if payslip.state in ['draft','verify']:
-               payslip.action_payslip_done()
-            try:
-               if not payslip.nomina_cfdi:
-                  payslip.action_cfdi_nomina_generate()
-            except Exception as e:
-               pass
+            if start_range and end_range:
+                emp_no = int(payslip.employee_id.no_empleado)
+                if emp_no >= start_range and emp_no <= end_range:
+                    if payslip.state in ['draft','verify']:
+                        payslip.action_payslip_done()
+                    try:
+                        if not payslip.nomina_cfdi:
+                           payslip.action_cfdi_nomina_generate()
+                           correct += 1
+                    except Exception as e:
+                       err_msg += payslip.employee_id.name + ' ' + e.args[0] + '\n'
+                       errors += 1
+                       pass
+            else:
+                if payslip.state in ['draft','verify']:
+                   payslip.action_payslip_done()
+                try:
+                   if not payslip.nomina_cfdi:
+                      payslip.action_cfdi_nomina_generate()
+                except Exception as e:
+                   err_msg += payslip.employee_id.name + ' ' + e.args[0] + '\n'
+                   errors += 1
+                   pass
+            self.env.cr.commit()
+        if errors > 0:
+           raise UserError(_('Nóminas timbradas correctamente %s \n Nóminas no timbradas %s \n Errores: \n %s') % (correct, errors, err_msg))
+        else:
+           raise UserError(_('Nóminas timbradas correctamente %s \n Nóminas no timbradas %s \n') % (correct, errors, err_msg))
         return
 
     def confirmar_nomina(self):
         self.ensure_one()
-        view = self.env.ref('nomina_cfdi.confirmado_nomina_wizard')
+        view = self.env.ref('nomina_cfdi_ee.confirmado_nomina_wizard')
         ctx = self.env.context.copy()
         ctx .update({'default_payslip_batch_id':self.id})
         return {
@@ -313,7 +334,6 @@ class HrPayslipRun(models.Model):
     def nearest_date(self, items, pivot):
         return min(items, key=lambda x: abs(x - pivot))
 
-    @api.multi
     @api.onchange('estructura')
     def _set_aguinaldo_dates(self):
         if self.estructura:

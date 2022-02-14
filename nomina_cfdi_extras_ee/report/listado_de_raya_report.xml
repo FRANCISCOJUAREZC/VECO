@@ -128,8 +128,8 @@
 						<th>CANTIDAD REBIDIDA</th>
 						<th>FIRMA DE RECIBIDO</th>
 					</tr>
-						<t t-set="dept" t-value="o.get_department()[0]"/>
-						<t t-set="slips" t-value="o.get_payslip_group_by_department()[0]"/>
+						<t t-set="dept" t-value="o.get_department()"/>
+						<t t-set="slips" t-value="o.get_payslip_group_by_department()"/>
 						<t t-foreach="slips.keys()" t-as="dept_id">
 							<tr t-foreach="slips[dept_id]" t-as="slip">
 								<t t-if="not slip.state =='cancel'">  

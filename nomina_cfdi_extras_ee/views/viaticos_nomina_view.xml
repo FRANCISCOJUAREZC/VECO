@@ -34,41 +34,42 @@
                  </div>
                  <group>
                      <group>
-                         <field name="fecha" required="1" attrs="{'readonly' : [('state', '!=','draft')]}"/>
-                         <field name="employee_id" required="1" attrs="{'readonly' : [('state', '!=','draft')]}"/>
-                         <field name="description" attrs="{'readonly' : [('state', '!=','draft')]}"/>
-                     	<field name="company_id" groups="base.group_multi_company"/>
+                        <field name="fecha" required="1" attrs="{'readonly' : [('state', '!=','draft')]}"/>
+                        <field name="employee_id" required="1" attrs="{'readonly' : [('state', '!=','draft')]}"/>
+                        <field name="description" attrs="{'readonly' : [('state', '!=','draft')]}"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
                      </group>
                      <group>
-                     	 <field name="entregas" />
-                     	 <field name="comprobaciones" />
-                     	 <field name="por_comprobar" />
+                        <field name="entregas" />
+                        <field name="comprobaciones" />
+                        <field name="por_comprobar" />
                      </group>
                  </group>
                  <notebook>
-                 	<page name="observaciones" string="Observaciones" >
-                 		<field name="observaciones" colspan="4" />
-                 	</page>
-                 	<page name="entregas" string="Entregas" >
-                 		<field name="entregas_ids" colspan="4" attrs="{'readonly' : [('state', '!=','draft')]}">
-                 			<tree editable="bottom">
-                 				<field name="fecha" />
-                 				<field name="referencia" required="1"/>
-                 				<field name="cfdi" />
-                 				<field name="importe" sum="Importe Total"/>
-                 			</tree>
-                 		</field>
-                 	</page>
-                 	<page name="comprobaciones" string="Comprobaciones">
-                 		<field name="comprobaciones_ids" colspan="4" attrs="{'readonly' : [('state', '!=','open')]}">
-                 			<tree editable="bottom">
-                 				<field name="fecha" />
-                 				<field name="referencia" required="1"/>
-                 				<field name="cfdi" />
-                 				<field name="importe" sum="Importe Total"/>
-                 			</tree>
-                 		</field>
-                 	</page>
+                    <page name="observaciones" string="Observaciones" >
+                        <field name="observaciones" colspan="4" />
+                    </page>
+                    <page name="entregas" string="Entregas" >
+                        <field name="entregas_ids" colspan="4" attrs="{'readonly' : [('state', '!=','draft')]}">
+                            <tree editable="bottom">
+                                <field name="fecha" />
+                                <field name="referencia" required="1"/>
+                                <field name="cfdi" />
+                                <field name="importe" sum="Importe Total"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page name="comprobaciones" string="Comprobaciones">
+                        <field name="comprobaciones_ids" colspan="4" attrs="{'readonly' : [('state', '!=','open')]}">
+                            <tree editable="bottom">
+                                <field name="fecha" />
+                                <field name="referencia" required="1"/>
+                                <field name="cfdi" />
+                                <field name="generado" attrs="{'readonly' : True}"/>
+                                <field name="importe" sum="Importe Total"/>
+                            </tree>
+                        </field>
+                    </page>
                  </notebook>
              </sheet>
          </form> 
@@ -90,7 +91,7 @@
     <record id="action_tree_viaticos_nomina" model="ir.actions.act_window">
         <field name="name">Viaticos</field>
         <field name="res_model">viaticos.nomina</field>
-        <field name="view_type">form</field>
+       <!--  <field name="view_type">form</field> -->
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="tree_viaticos_nomina_view" />
         <field name="search_view_id" ref="search_viaticos_nomina_view" />
@@ -102,7 +103,7 @@
           parent="hr.menu_hr_root"
           id="menu_main_viaticos"
           sequence="82"
-          groups="hr_payroll.group_hr_payroll_user"
+          groups="om_hr_payroll.group_hr_payroll_user"
       />
       
     <menuitem
@@ -111,7 +112,7 @@
           id="menu_action_tree_viaticos_nomina"
           action="action_tree_viaticos_nomina"
           sequence="4"
-          groups="hr_payroll.group_hr_payroll_user"
+          groups="om_hr_payroll.group_hr_payroll_user"
       />
 
 </odoo>

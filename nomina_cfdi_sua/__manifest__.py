@@ -2,11 +2,12 @@
 {
     "name": "Nomina CFDI SUA/IDSE",
     "author": "IT Admin",
-    "version": "12.0.1.0.1",
+    "version": "14.09",
     "category": "Other",
     "description":"Genera un archivo texto para la carga de de incapacidades, faltas e incidencias para el sistema SUA",
-    "depends": ["nomina_cfdi_extras_ee"],
+    "depends": ["nomina_cfdi_extras_ee", "om_hr_payroll", 'hr',],
     "data": [
+        'security/ir.model.access.csv',
         "wizard/exportar_cfdi_sua_view.xml",
         "views/employee_sua.xml"
     ],

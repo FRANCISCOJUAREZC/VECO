@@ -113,13 +113,13 @@
                         <strong>ISR</strong>
                   </div>
                   Gravado mensual: <br/>
-                  <t t-if="o.no_nomina != '1'">
+                  <t t-if="o.ultima_nomina">
                       Gravado en perido + Gravado acumulado <br/>
                       <span t-field="o.rp_gravado" /> + <span t-field="o.acum_per_grav" /> <br/>
                       <span t-esc="o.rp_gravado + o.acum_per_grav" /><br/><br/>
                       <t t-set="gravado_mensual" t-value="o.rp_gravado + o.acum_per_grav"/>
                   </t>
-                  <t t-if="o.no_nomina == '1'">
+                  <t t-if="o.ultima_nomina">
                       Gravado en periodo / días a pagar * dias en el mes <br/>
                       <span t-field="o.rp_gravado" /> / <span t-field="o.dias_pagar" /> * <span t-field="o.contract_id.tablas_cfdi_id.imss_mes" /> <br/>
                       <span t-esc="round(o.rp_gravado / o.dias_pagar * o.contract_id.tablas_cfdi_id.imss_mes,2)" /><br/><br/>
@@ -149,7 +149,7 @@
                   <span t-esc="round(impuesto_marginal + o.rp_cuota_fija,2)" /><br/><br/>
 
                   <t t-if="o.contract_id.periodicidad_pago == '04'" >
-                       <t t-if="o.no_nomina == '2' and o.isr_ajustar" >
+                       <t t-if="o.ultima_nomina and o.isr_ajustar" >
                             <t t-if="o.rp_subsidio > 0" > 
                                 <t t-set="subsidio_pagado" t-value="isr_tarifa_113 - abs(o.acum_isr_antes_subem) - o.rp_subsidio + abs(o.acum_subsidio_aplicado)" />
                             </t>
@@ -159,7 +159,7 @@
                             <t t-set="total" t-value="o.acum_isr - isr_tarifa_113" />
                             <t t-set="total2" t-value="subsidio_pagado" />
                        </t>
-                       <t t-if="o.no_nomina != '2' and not o.isr_ajustar" >
+                       <t t-if="o.ultima_nomina and not o.isr_ajustar" >
                             <t t-set="subsidio_pagado" t-value="isr_tarifa_113 - o.rp_subsidio" />
                             <t t-set="total" t-value="(isr_tarifa_113 / o.contract_id.tablas_cfdi_id.imss_mes) * o.dias_pagar" />
                             <t t-set="total2" t-value="(subsidio_pagado / o.contract_id.tablas_cfdi_id.imss_mes) * o.dias_pagar" />

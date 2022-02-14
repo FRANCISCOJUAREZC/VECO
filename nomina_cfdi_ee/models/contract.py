@@ -57,8 +57,8 @@ class Contract(models.Model):
     infonavit_vsm = fields.Float(string=_('Infonavit (vsm)'), digits = (12,4))
     infonavit_porc = fields.Float(string=_('Infonavit (%)'), digits = (12,4))
     prestamo_fonacot = fields.Float('Prestamo FONACOT')
-    pens_alim = fields.Float('Pensión alimienticia (%)')
-    pens_alim_fijo = fields.Float('Pensión alimienticia (fijo)')
+    pens_alim = fields.Float('Pensión alimenticia (%)')
+    pens_alim_fijo = fields.Float('Pensión alimenticia (fijo)')
     caja_ahorro  = fields.Boolean('Caja de ahorro')
     caja_ahorro_amount  = fields.Float('Monto caja de ahorro')
     deduccion_adicional  = fields.Boolean('Deduccion adicional')
@@ -85,9 +85,8 @@ class Contract(models.Model):
     sept_dia = fields.Boolean(string='Séptimo día separado')
     semana_inglesa = fields.Boolean(string='Semana inglesa')
     prima_dominical = fields.Boolean(string='Prima dominical')
-    calc_isr_extra = fields.Boolean(string='Incluir nóminas extraordirias en calculo ISR mensual', default = False)
+    calc_isr_extra = fields.Boolean(string='Incluir nóminas extraordinarias en calculo ISR mensual', default = False)
 
-    @api.multi
     @api.onchange('wage')
     def _compute_sueldo(self):
         if self.wage:
@@ -99,17 +98,25 @@ class Contract(models.Model):
             }
             self.update(values)
 
-    @api.one
     @api.depends('date_start')
     def _compute_antiguedad_anos(self):
-        if self.date_start: 
-            date_start = self.date_start
-            today = datetime.today().date() 
-            diff_date = today - date_start 
-            years = diff_date.days /365.0
-            self.antiguedad_anos = int(years)
-        else:
-            self.antiguedad_anos = 0
+        for contract in self:
+           if contract.date_start:
+               date_start = contract.date_start
+               today = datetime.today().date()
+               diff_date = today - date_start
+               years = diff_date.days /365.0
+               contract.antiguedad_anos = int(years)
+           else:
+               contract.antiguedad_anos = 0
+
+    def antiguedad_to(self, contract_id, date_to):
+        antiguedad = 0
+        if contract_id.date_start: 
+            date_start = contract_id.date_start
+            diff_date = date_to - date_start 
+            antiguedad = diff_date.days / 365.0
+        return antiguedad
 
     @api.model
     def calcular_liquidacion(self):
@@ -119,7 +126,6 @@ class Contract(models.Model):
             self.antiguedad_anos = int(years)
             self.dias_totales = self.antiguedad_anos * self.dias_x_ano + self.dias_base
 
-    @api.multi
     def button_dummy(self):
         self.calcular_liquidacion()
         return True
@@ -179,9 +185,6 @@ class Contract(models.Model):
             sueldo_diario_integrado = 0
         return sueldo_diario_integrado
 
-
-
-
     #FUNCTION TO CREATE INCIDENTIA DAR ALTA
     def action_dar_alta(self):
         for contract in self:
@@ -199,12 +202,21 @@ class TablasVacacioneslLine(models.Model):
     _description = 'tablas vacaciones'
 
     form_id = fields.Many2one('hr.contract', string='Vacaciones', required=True)
-    dias = fields.Integer('Dias disponibles') 
+    dias = fields.Integer('Dias disponibles')
     ano = fields.Selection(
         selection=[('2018', '2018'),
                    ('2019', '2019'),
                    ('2020', '2020'),
                    ('2021', '2021'),
+                   ('2022', '2022'),
+                   ('2023', '2023'),
                    ],
         string=_('Año'),)
-        
+    estado = fields.Selection(
+        selection=[('activo', 'Activo'),
+                   ('inactivo', 'Inactivo'),
+                   ],
+        string=_('Estatus'),)
+    dias_consumido = fields.Integer('Dias consumidos')
+    dias_otorgados = fields.Integer('Dias otorgados') 
+    caducidad = fields.Date('Caducidad')

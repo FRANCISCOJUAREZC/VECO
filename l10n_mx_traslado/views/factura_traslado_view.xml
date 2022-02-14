@@ -108,7 +108,7 @@
                             </group>
                         </page>
 
-                        <page name="carta_porte" string="Carta Porte">
+                        <page name="carta_porte" string="Carta Porte" attrs="{'invisible': [('carta_porte','=',False)]}">
                             <group cols="4">
                                 <group string="Atributos de carta porte">
                                     <field name="transpinternac" attrs="{'readonly':[('state','=','valid')]}"/>
@@ -126,7 +126,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page name="ccp_ubicaciones" string="Ubicaciones">
+                        <page name="ccp_ubicaciones" string="Ubicaciones" attrs="{'invisible': [('carta_porte','=',False)]}">
                           <field name="ubicaciones_line_ids" attrs="{'readonly':[('state','=','valid')]}" context="{'default_tipo_transporte' : tipo_transporte}">
                            <control>
                                 <create string="Agregar línea"/>
@@ -142,7 +142,7 @@
                             </tree>
                           </field>
                         </page>
-                        <page name="ccp_autotransporte" string="Datos de transporte">
+                        <page name="ccp_autotransporte" string="Datos de transporte" attrs="{'invisible': [('carta_porte','=',False)]}">
                             <group cols="4">
                                 <group string="Generales">
                                     <field name="permisosct" attrs="{'readonly':[('state','=','valid')]}"/>
@@ -169,6 +169,10 @@
                                     <field name="numpoliza_merc" attrs="{'readonly':[('state','=','valid')]}"/>
                                     <field name="primaseguro_merc" attrs="{'readonly':[('state','=','valid')]}"/>
                                 </group>
+                                <group string="Seguro medioambiental" attrs="{'invisible':[('tipo_transporte','!=','01')]}">
+                                    <field name="seguro_ambiente" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="poliza_ambiente" attrs="{'readonly':[('state','=','valid')]}"/>
+                                </group>
                                 <group string="Aereo"  attrs="{'invisible':[('tipo_transporte','!=','03')]}">
                                     <field name="numeroguia" attrs="{'readonly':[('state','=','valid')]}"/>
                                     <field name="lugarcontrato" attrs="{'readonly':[('state','=','valid')]}"/>
@@ -179,7 +183,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page name="ccp_figuratrans" string="Figura transporte">
+                        <page name="ccp_figuratrans" string="Figura transporte" attrs="{'invisible': [('carta_porte','=',False)]}">
                                 <group string="Figura transporte">
                                     <field name="figuratransporte_ids" attrs="{'readonly':[('state','=','valid')]}">
                                         <control>
@@ -223,7 +227,7 @@
     	 <record id="action_fatura_global_tree" model="ir.actions.act_window">
             <field name="name">CFDI Traslado</field>
             <field name="res_model">cfdi.traslado</field>
-            <field name="view_type">form</field>
+            <!--<field name="view_type">form</field>-->
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_fatura_global_tree"/>
         </record>

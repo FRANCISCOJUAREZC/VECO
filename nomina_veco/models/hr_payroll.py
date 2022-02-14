@@ -127,17 +127,13 @@ class HrPayslip(models.Model):
             factor = 1
             proporcional = 0
             falta_days = 0
-            #if contract.semana_inglesa:
-            #    factor = 7.0/5.0
-            #if contract.septimo_dia:
-            #    factor = 1.0/6.0
 
             if contract.periodicidad_pago == '04':
                 dias_pagar = 15.2083
-                factor = 1.1667 #7.0192/6.0
+                factor = 1.16
             elif contract.periodicidad_pago == '02':
                 dias_pagar = 7.0192
-                factor = 1.1667
+                factor = 7.0192/6.0
             else:
                 dias_pagar = (date_to - date_from).days + 1
 
@@ -161,7 +157,7 @@ class HrPayslip(models.Model):
                     compute_leaves=False,
                 )
                 if work_hours and contract.periodicidad_pago == '02':
-                            if holiday.holiday_status_id.name == 'FJS' or holiday.holiday_status_id.name == 'FI' or holiday.holiday_status_id.name == 'FR' or holiday.holiday_status_id.name == 'FJC':
+                            if holiday.holiday_status_id.name == 'FJS' or holiday.holiday_status_id.name == 'FI' or holiday.holiday_status_id.name == 'FR':
                                 leave_days += (hours / work_hours)*factor
                                 current_leave_struct['number_of_days'] += (hours / work_hours)*factor
                                 if leave_days > dias_pagar:
@@ -180,7 +176,7 @@ class HrPayslip(models.Model):
                                     leave_days += hours / work_hours
                                 current_leave_struct['number_of_days'] += hours / work_hours
                 elif work_hours and contract.periodicidad_pago == '04':
-                            if holiday.holiday_status_id.name == 'FJS' or holiday.holiday_status_id.name == 'FI' or holiday.holiday_status_id.name == 'FR' or holiday.holiday_status_id.name == 'FJC':
+                            if holiday.holiday_status_id.name == 'FJS' or holiday.holiday_status_id.name == 'FI' or holiday.holiday_status_id.name == 'FR':
                                 leave_days += (hours / work_hours)*factor
                                 current_leave_struct['number_of_days'] += (hours / work_hours)*factor
                                 if leave_days > dias_pagar:
@@ -241,10 +237,7 @@ class HrPayslip(models.Model):
                          elif nvo_ingreso:
                             number_of_days = work_data['days'] * 15.2083 / 15 - leave_days
                          else:
-                            if leave_days >= 15:
-                                number_of_days = 0
-                            else:
-                                number_of_days = 15.2083 - leave_days
+                            number_of_days = 15.2083 - leave_days
                       else:
                          number_of_days = work_data['days'] * 15.2083 / 15
                    else:
@@ -270,10 +263,7 @@ class HrPayslip(models.Model):
                       elif nvo_ingreso:
                          number_of_days = work_data['days'] * 7.0192 / 7 - leave_days
                       else:
-                         if leave_days >= 7:
-                            number_of_days = 0
-                         else:
-                            number_of_days = 7.0192 - leave_days
+                         number_of_days = 7.0192 - leave_days
                    else:
                       number_of_days = work_data['days'] * 7.0192 / 7
                #calculo para nóminas mensuales

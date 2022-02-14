@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
+	<data>
     <record id="generar_pagos_banco_view_form" model="ir.ui.view">
         <field name="name">Generar.Pagos.Banco.form.view</field>
         <field name="model">generar.pagos.banco</field>
@@ -26,23 +26,20 @@
             </form>
         </field>
     </record>
-    <record id="generar_pagos_banco_form_action" model="ir.actions.act_window">
+    <!-- <record id="generar_pagos_banco_form_action" model="ir.actions.act_window">
         <field name="name">Generar Pagos Banco</field>
         <field name="res_model">generar.pagos.banco</field>
-        <field name="view_type">form</field>
+        <field name="type">ir.actions.act_window</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-    </record>
+    </record> -->
 
     <!-- Add action entry in the Action Menu for Partners -->
     <act_window id="generar_pagos_banco_action"
         name="Generar Pagos Banco"
-        src_model="hr.payslip.run"
         res_model="generar.pagos.banco"
-        view_type="form"
+        binding_model="hr.payslip.run"
         view_mode="form"
-        key2="client_action_multi"
         target="new"/>
-     
-
+        </data>
 </odoo>

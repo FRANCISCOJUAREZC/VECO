@@ -67,7 +67,11 @@
                           <field name="tabla_vacaciones" string="Días de vacaciones">
                             <tree editable="bottom">
                                 <field name="ano"/>
+                                <field name="estado"/>
+                                <field name="dias_consumido" sum="Total"/>
                                 <field name="dias" sum="Total Dias"/>
+                                <field name="dias_otorgados" sum="Total"/>
+                                <field name="caducidad"/>
                             </tree>
                         </field>
                    </group>

@@ -8,11 +8,6 @@
           <xpath expr="//notebook" position="inside">
             <page name="banco" string="Dispersión banco">
               <group cols="4" >
-                 <group  string="Nombre">
-                    <field name="dispersion_nombre" />
-                    <field name="dispersion_paterno" />
-                    <field name="dispersion_materno" />
-                 </group>
                  <group  string="Dispersión Santander">
                     <field name="clave_santander_banco" />
                     <field name="plaza_santander_banco" />

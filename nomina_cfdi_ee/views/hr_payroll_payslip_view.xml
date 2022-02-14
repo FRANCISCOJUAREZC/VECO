@@ -3,7 +3,7 @@
         <record id="view_hr_payslip_form" model="ir.ui.view">
             <field name="name">hr.payslip.nomina</field>
             <field name="model">hr.payslip</field>
-            <field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
+            <field name="inherit_id" ref="om_hr_payroll.view_hr_payslip_form"/>
             <field name="arch" type="xml">
               <field name="credit_note" position="after">
                     <field name="tipo_nomina" />
@@ -57,16 +57,15 @@
                             <group name="anual" string="Acumulados (anual)" attrs="{'invisible' : [('isr_anual','=',False)]}">
                                 <field name="acum_per_grav_anual" />
                                 <field name="acum_isr_anual" />
-                                <field name="acum_isr_antes_subem_anual" />
+                              <!--  <field name="acum_isr_antes_subem_anual" />-->
                                 <field name="acum_subsidio_aplicado_anual" />
                                 <field name="acum_dev_isr" />
                                 <field name="acum_dev_subem" />
                                 <field name="acum_dev_subem_entregado" />
                                 <field name="acum_isr_ajuste" />
                             </group>
-                            <group name="fondo_ahorro" string="Fondo de ahorro" >
+                            <group name="fondo_ahorro" string="Caja / Fondo de ahorro" >
                                 <field name="acum_fondo_ahorro" />
-                                <field name="acum_fondo_ahorro_anual" />
                             </group>
                         </group>
                 </page>
@@ -111,19 +110,19 @@
 
         
         <act_window 
-	        name="Dar de baja"
-	        res_model="wizard.dar.baja"
-	        view_mode="form"
-	        target="new"
-	        id="wizard_dar_baja_view"
-	        src_model="hr.payslip.run"
+        name="Dar de baja"
+        res_model="wizard.dar.baja"
+        view_mode="form"
+        target="new"
+        id="wizard_dar_baja_view"
+        binding_model="hr.payslip.run"
        />
 
        <record id="hr_payslip_run_form_nomina_cfdi" model="ir.ui.view">
             <field name="name">hr.payslip.run.form.nomina</field>
             <field name="model">hr.payslip.run</field>
             <field name="priority">50</field>
-            <field name="inherit_id" ref="hr_payroll.hr_payslip_run_form"/>
+            <field name="inherit_id" ref="om_hr_payroll.hr_payslip_run_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//sheet" position="replace">
                     <sheet>
@@ -148,7 +147,7 @@
                                        <field name="estructura" attrs="{'invisible' : [('tipo_nomina','!=','E')]}"/>
                                        <field name="periodicidad_pago"/>
                                        <field name="dias_pagar" />
-                                       <field name="journal_id" string="Diario de Nómina"/>
+                                     <!--  <field name="journal_id" string="Diario de Nómina"/>-->
                                     </group>
                                  </group>
                                 <!--<group>
@@ -191,11 +190,9 @@
                 <button name="draft_payslip_run" position="after">
                     <field name="all_payslip_generated" invisible="1" />
                     <field name="all_payslip_generated_draft" invisible="1" />
-                    <button string="Confirmar Nomina" name="confirmar_nomina" type="object" attrs="{'invisible':[('all_payslip_generated','!=',True)]}" class="oe_highlight"/>
-                    <button string="Timbrar Nomina" name="timbrar_nomina" type="object" attrs="{'invisible':[('all_payslip_generated','=',True)]}" class="oe_highlight"/>
-                    <button string="Enviar Nomina" name="enviar_nomina" type="object" attrs="{'invisible':[('all_payslip_generated','!=',True)]}" class="oe_highlight"/>
-                    <button string="Enviar PreNomina" name="enviar_prenomina" type="object" attrs="{'invisible':[('all_payslip_generated_draft','!=',True)]}" class="oe_highlight"/>
-                    <button string="Recalcular nómina" name="recalcular_nomina_payslip_batch" type="object" states='draft' class="oe_highlight"/>
+                    <button string="Timbrar Nomina" name="timbrar_nomina" type="object" attrs="{'invisible':['|', ('all_payslip_generated','=',True), ('state','=','close')]}" class="oe_highlight"/>
+                    <button string="Enviar Nomina" name="enviar_nomina" type="object" attrs="{'invisible':[('state','=','close')]}" class="oe_highlight"/>
+                    <button string="Recalcular nómina" name="recalcular_nomina_payslip_batch" type="object" attrs="{'invisible':['|', ('all_payslip_generated_draft','!=',True), ('state','=','close')]}" class="oe_highlight"/>
                 </button>
             </field>
        </record> 
@@ -203,7 +200,7 @@
     <record id="view_hr_payslip_tree" model="ir.ui.view">
         <field name="name">hr.payslip.inherit.tree</field>
         <field name="model">hr.payslip</field>
-        <field name="inherit_id" ref="hr_payroll.view_hr_payslip_tree" />
+        <field name="inherit_id" ref="om_hr_payroll.view_hr_payslip_tree" />
         <field name="arch" type="xml">
             <field name="state" position="before">
                 <field name="total_nom"/>
