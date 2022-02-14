@@ -5,19 +5,13 @@ from odoo.exceptions import ValidationError
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from calendar import monthrange
-import io
-import xlwt
-import itertools
-from odoo.tools.misc import xlwt
-import base64
 
 class employee_loan(models.Model):
     _name = 'employee.loan'
     _inherit = 'mail.thread'
     _order = 'name desc'
     _description = 'employee_loan'
-    
-    file_data = fields.Binary("File Data")
+
     loan_state=[('draft','Borrador'),
                # ('request','Enviar petición'),
                # ('dep_approval','Aprobación del departamento'),
@@ -62,16 +56,16 @@ class employee_loan(models.Model):
     def _get_end_date(self):
         
         for loan in self:
-            if loan.start_date and loan.loan_type_id:
-                periodo_de_pago = loan.loan_type_id.periodo_de_pago or ''
-                start_date =  loan.start_date #datetime.strptime(self.start_date, '%Y-%m-%d')
+            if loan.start_date and loan.term:
+                periodo_de_pago = self.loan_type_id.periodo_de_pago or ''
+                start_date =  self.start_date #datetime.strptime(self.start_date, '%Y-%m-%d')
                 
                 if periodo_de_pago=='Semanal':
-                    end_date = start_date+relativedelta(weeks=loan.term)
+                    end_date = start_date+relativedelta(weeks=self.term)
                 elif periodo_de_pago=='Quincenal':
-                    end_date = loan.get_quincenal_end_date(start_date, loan.term)
+                    end_date = self.get_quincenal_end_date(start_date, loan.term)
                 else:
-                    end_date = start_date+relativedelta(months=loan.term)
+                    end_date = start_date+relativedelta(months=self.term)
                 loan.end_date = end_date.strftime("%Y-%m-%d")
             else:
                loan.end_date = datetime.today().strftime("%Y-%m-%d")
@@ -104,18 +98,13 @@ class employee_loan(models.Model):
     notes = fields.Text('Razón', required="1")
     is_close = fields.Boolean('Esta cerrado',compute='is_ready_to_close')
     move_id = fields.Many2one('account.move',string='Diario')
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('employee.loan'))
 
     @api.depends('remaing_amount')
     def is_ready_to_close(self):
         for loan in self:
-            if loan.state == 'done':
-               if loan.remaing_amount <= 0.01:
-                   loan.is_close = True
-               else:
-                   loan.is_close = False
-            else:
-               loan.is_close = False
+            if loan.remaing_amount <= 0 and loan.state == 'done':
+                loan.is_close = True
 
     @api.depends('installment_lines')
     def get_paid_amount(self):
@@ -130,7 +119,7 @@ class employee_loan(models.Model):
                     
             loan.paid_amount = amt
 
-    
+    @api.multi
     def compute_installment(self):
         vals=[]
 
@@ -181,12 +170,12 @@ class employee_loan(models.Model):
                 l.unlink()
         self.installment_lines=vals
 
-    @api.depends('paid_amount','loan_amount')
+    @api.depends('paid_amount','loan_amount','interest_amount')
     def get_remaing_amount(self):
         for loan in self:
             loan.remaing_amount = (loan.loan_amount + loan.interest_amount) - loan.paid_amount
 
-    @api.depends('loan_amount') #,'interest_rate','is_apply_interest')
+    @api.depends('loan_amount','interest_rate','is_apply_interest')
     def get_interest_amount(self):
         for loan in self:
             if loan.loan_type_id:
@@ -287,93 +276,94 @@ class employee_loan(models.Model):
 
             self.job_id = self.employee_id.job_id and self.employee_id.job_id.id or False,
 
-    
+    @api.multi
     def action_send_request(self):
         self.state = 'hr_approval'
         if not self.installment_lines:
             self.compute_installment()
-    
+
+    @api.multi
     def dep_manager_approval_loan(self):
         self.state = 'dep_approval'
 
-    
+    @api.multi
     def hr_manager_approval_loan(self):
         self.state = 'hr_approval'
 
-    
+    @api.multi
     def dep_manager_reject_loan(self):
         self.state = 'reject'
 
-    
+    @api.multi
     def action_close_loan(self):
         self.state = 'close'
 
-    
+    @api.multi
     def hr_manager_reject_loan(self):
         self.state = 'reject'
 
 
-    
+    @api.multi
     def cancel_loan(self):
         self.state = 'cancel'
 
-    
+    @api.multi
     def set_to_draft(self):
         self.state = 'draft'
 #        self.hr_manager_id = False
 
-    
+    @api.multi
     def paid_loan(self):
         if self.loan_type_id.tipo_deduccion == '1':
-           if not self.employee_id.address_home_id:
-               raise ValidationError(_('Para realizar un préstamo el empleado debe tener una dirección asignada'))
+            if not self.employee_id.address_home_id:
+                raise ValidationError(_('Para realizar un préstamo el empleado debe tener una dirección asignada'))
 
-           self.state = 'paid'
-           vals={
-               'date':self.date,
-               'ref':self.name,
-               'journal_id':self.loan_type_id.journal_id and self.loan_type_id.journal_id.id,
-               'company_id':self.env.user.company_id.id
-           }
-           acc_move_id = self.env['account.move'].create(vals)
-           lst = []
-           lst.append((0,0,{
-                           'account_id':self.loan_type_id and self.loan_type_id.loan_account.id,
-                           'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
-                           'name':self.name,
-                           'credit':self.loan_amount or 0.0,
-                       }))
-
-           if self.interest_amount:
-               lst.append((0,0,{
-                               'account_id':self.loan_type_id and self.loan_type_id.interest_account.id,
-                               'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
-                               'name':str(self.name)+' - '+'Interes',
-                               'credit':self.interest_amount or 0.0,
-                           }))
-
-           credit_account=False
-           if self.employee_id.address_home_id and self.employee_id.address_home_id.property_account_payable_id:
-               credit_account = self.employee_id.address_home_id.property_account_payable_id.id or False
-                    
-           debit_amount = self.loan_amount
-           if self.interest_amount:
-               debit_amount += self.interest_amount
-
-           lst.append((0,0,{
-                           'account_id':credit_account or False,
-                           'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
-                           'name':'/',
-                           'debit':debit_amount  or 0.0,
-                       }))
-           acc_move_id.line_ids = lst
-           if acc_move_id:
-               self.move_id = acc_move_id.id
+            self.state = 'paid'
+            vals={
+                'date':self.date,
+                'ref':self.name,
+                'journal_id':self.loan_type_id.journal_id and self.loan_type_id.journal_id.id,
+                'company_id':self.env.user.company_id.id
+            }
+            acc_move_id = self.env['account.move'].create(vals)
+            lst = []
+            lst.append((0,0,{
+                            'account_id':self.loan_type_id and self.loan_type_id.loan_account.id,
+                            'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
+                            'name':self.name,
+                            'credit':self.loan_amount or 0.0,
+                        }))
+            
+            if self.interest_amount:
+                lst.append((0,0,{
+                                'account_id':self.loan_type_id and self.loan_type_id.interest_account.id,
+                                'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
+                                'name':str(self.name)+' - '+'Interes',
+                                'credit':self.interest_amount or 0.0,
+                            }))
+            
+            credit_account=False
+            if self.employee_id.address_home_id and self.employee_id.address_home_id.property_account_payable_id:
+                credit_account = self.employee_id.address_home_id.property_account_payable_id.id or False
+                     
+            debit_amount = self.loan_amount
+            if self.interest_amount:
+                debit_amount += self.interest_amount
+            
+            lst.append((0,0,{
+                            'account_id':credit_account or False,
+                            'partner_id':self.employee_id.address_home_id and self.employee_id.address_home_id.id or False,
+                            'name':'/',
+                            'debit':debit_amount  or 0.0,
+                        }))
+            acc_move_id.line_ids = lst
+            if acc_move_id:
+                self.move_id = acc_move_id.id
         else:
-           self.state = 'paid'
+            self.state = 'paid'
 
 
-    
+    @api.multi
     def view_journal_entry(self):
         if self.move_id:
             return {
@@ -384,7 +374,7 @@ class employee_loan(models.Model):
                 'type': 'ir.actions.act_window',
             }
 
-    
+    @api.multi
     def action_done_loan(self):
         self.state = 'done'
         
@@ -406,93 +396,25 @@ class employee_loan(models.Model):
     def create(self, vals):
         if vals.get('name', '/') == '/':
             if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code(
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code(
                     'employee.loan') or '/'
             else:
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'employee.loan') or '/'
         return super(employee_loan, self).create(vals)
 
-    
+    @api.multi
     def copy(self, default=None):
         if default is None:
             default = {}
         default['name'] = '/'
         return super(employee_loan, self).copy(default=default)
 
-    
+    @api.multi
     def unlink(self):
         for loan in self:
             if loan.state != 'draft':
                 raise ValidationError(_('El préstamo solo se puede eliminar si está en estaado de borrador'))
         return super(employee_loan,self).unlink()
-
-    
-    def xls_generate_for_employee_loans(self):
-        workbook = xlwt.Workbook()
-        worksheet = workbook.add_sheet('Reporte de préstamos')
-        col_width = 256 * 20
-        try:
-            for i in itertools.count():
-                worksheet.col(i).width = col_width
-        except ValueError:
-            pass
-        bold = xlwt.easyxf("font: bold on;")
-        
-        worksheet.write(0, 0, 'Numero de empleado', bold)
-        worksheet.write(0, 1, 'Nombre de empleado', bold)
-        worksheet.write(0, 2, 'Status', bold)
-        worksheet.write(0, 3, 'Monto de deducción', bold)
-        worksheet.write(0, 4, 'Monto de pago', bold)
-        worksheet.write(0, 5, 'Cantidad restante', bold)
-        worksheet.write(0, 6, 'Tipo', bold)
-        worksheet.write(0, 7, 'Referencia', bold)
-        worksheet.write(0, 8, 'Cantidad a plazos', bold)
-        worksheet.write(0, 9, 'Fecha de incio', bold)
-        
-        employee_loans = self.env['employee.loan'].search([], order="employee_id")
-        if not employee_loans:
-            return
-        
-        row = 1
-        for emp_loan in employee_loans:
-            numero_de_empleado = emp_loan.employee_id.no_empleado or ''
-            nombre_de_empleado = emp_loan.employee_id.name or ''
-            status = 'P' if emp_loan.remaing_amount == 0 else 'N'
-            monto_de_deduccion = emp_loan.loan_amount or ''
-            monto_de_pago = emp_loan.paid_amount or ''
-            cantidad_restante = emp_loan.remaing_amount or ''
-            tipo = emp_loan.loan_type_id and emp_loan.loan_type_id.name or ''
-            referencia = emp_loan.name or ''
-            cantidad_a_plazos = round(emp_loan.installment_amount,2) or ''
-            fecha_de_incio = emp_loan.start_date and emp_loan.start_date.strftime("%m/%d/%Y") or ''
-            
-            worksheet.write(row, 0, numero_de_empleado)
-            worksheet.write(row, 1, nombre_de_empleado)
-            worksheet.write(row, 2, status)
-            worksheet.write(row, 3, monto_de_deduccion)
-            worksheet.write(row, 4, monto_de_pago)
-            worksheet.write(row, 5, cantidad_restante)
-            worksheet.write(row, 6, tipo)
-            worksheet.write(row, 7, referencia)
-            worksheet.write(row, 8, cantidad_a_plazos)
-            worksheet.write(row, 9, fecha_de_incio)
-            row += 1
-        
-        fp = io.BytesIO()
-        workbook.save(fp)
-        fp.seek(0)
-        data = fp.read()
-        fp.close()
-        
-        employee_loans[0].write({'file_data':base64.b64encode(data)})
-        action = {
-            'name': 'Reporte de préstamos',
-            'type': 'ir.actions.act_url',
-            'url': "/web/content/?model="+self._name+"&id=" + str(employee_loans[0].id) + "&field=file_data&download=true&filename=reporte_de_prestamos.xls",
-            'target': 'self',
-            }
-        return action
-
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

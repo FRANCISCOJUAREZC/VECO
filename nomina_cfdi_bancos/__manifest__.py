@@ -2,12 +2,11 @@
 {
     "name": "Nomina CFDI bancos",
     "author": "IT Admin",
-    "version": "15.01",
+    "version": "12.5",
     "category": "Other",
     "description":"Genera dispersion de bancos para la nómina.",
-    "depends": ["nomina_cfdi_ee",'hr_payroll','hr'],
+    "depends": ["nomina_cfdi_ee"],
     "data": [
-        'security/ir.model.access.csv',
         "wizard/generar_pagos_banco.xml",
         "views/hr_employee_view.xml",
     ],

@@ -73,7 +73,7 @@ class AltasYBajas(models.TransientModel):
             salario = contract and contract.sueldo_diario or False
             sdi = contract and contract.sueldo_diario_integrado or False
             puesto = incidencia.employee_id and incidencia.employee_id.job_title or False
-            registro_patronal = incidencia.employee_id and incidencia.employee_id.registro_patronal_id.registro_patronal or False
+            registro_patronal = incidencia.employee_id and incidencia.employee_id.registro_patronal or False
             seguro_social = incidencia.employee_id and incidencia.employee_id.segurosocial or False
             curp = incidencia.employee_id and incidencia.employee_id.curp or False
             

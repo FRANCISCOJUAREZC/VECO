@@ -27,8 +27,7 @@ class Employee(models.Model):
     )
     diario_pago = fields.Many2one('account.journal', string='Cuenta de pago', domain=[('type', 'in', ('bank', 'cash'))])
 
-    #registro_patronal = fields.Char(string=_('Registro patronal'))
-    registro_patronal_id = fields.Many2one('registro.patronal', string='Registro patronal')
+    registro_patronal = fields.Char(string=_('Registro patronal'))
 
     regimen = fields.Selection(
         selection=[('02', '02 - Sueldos'),
@@ -74,29 +73,27 @@ class Employee(models.Model):
         string=_('Jornada'),
     )
     estado = fields.Many2one('res.country.state','Lugar donde labora (estado)')
-    #fondo_ahorro  = fields.Float(string=_('Fondo de ahorro'), readonly=True)
-    #dias_utilidad =  fields.Float(string=_('Dias para cálculo de Utilidad'))
-    #sueldo_utilidad =  fields.Float(string=_('Sueldo para cálculo de Utilidad'))
-    #fecha_utilidad_inicio = fields.Date(readonly=True)
-    #fecha_utilidad_fin = fields.Date(readonly=True)
+    fondo_ahorro  = fields.Float(string=_('Fondo de ahorro'), readonly=True)
+    dias_utilidad =  fields.Float(string=_('Dias para cálculo de Utilidad'))
+    sueldo_utilidad =  fields.Float(string=_('Sueldo para cálculo de Utilidad'))
+    fecha_utilidad_inicio = fields.Date(readonly=True)
+    fecha_utilidad_fin = fields.Date(readonly=True)
 
-    empleado_nombre = fields.Char("Nombre")
-    empleado_paterno = fields.Char("Apellido Paterno")
-    empleado_materno = fields.Char("Apellido Materno")
-    sindicalizado = fields.Boolean('Sindicalizado', default=False)
-
+    @api.multi
     @api.onchange('registro_patronal')
     def _check_registro_length(self):
         if self.registro_patronal:
             if len(self.registro_patronal) != 11:
                 raise UserError(_('La longitud del registro patronal es incorrecto'))
 
+    @api.multi
     @api.onchange('segurosocial')
     def _check_nss_length(self):
         if self.segurosocial:
             if len(self.segurosocial) != 11:
                 raise UserError(_('La longitud del número de seguro social es incorrecto'))
 
+    @api.multi
     @api.onchange('rfc')
     def _check_rfc_length(self):
         if self.rfc:

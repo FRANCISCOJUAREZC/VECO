@@ -14,7 +14,7 @@
                         <div class="o_setting_right_pane">
                         	<div class="content-group">
                                 <div class="row mt16">
-                                  <label for="numoer_de_retardos_x_falta" string="Número de retardos" class="col-md-5 o_light_label"/>
+                                  <label for="numoer_de_retardos_x_falta" string="Número de retardos" class="col-md-6 o_light_label"/>
                                   <span class="col-md-3"><field name="numoer_de_retardos_x_falta"/> falta</span>
                                 </div>
                             </div>

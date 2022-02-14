@@ -7,7 +7,7 @@ class HrContract(models.Model):
     
     historial_salario_ids = fields.One2many('contract.historial.salario','contract_id', 'Historial Salario')
     
-   
+    @api.multi
     def write(self, vals):
         res = super(HrContract, self).write(vals)
         if vals.get('state','')=='open':

@@ -25,15 +25,5 @@
             <field name="padding">4</field>
             <field name="company_id" eval="False"/>
         </record>
-
-        <!-- Sequences for caja ahorro -->
-        <record id="seq_caja_ahorro" model="ir.sequence">
-            <field name="name">Caja Ahorro</field>
-            <field name="code">caja.nomina</field>
-            <field name="prefix">CA/</field>
-            <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
-        </record>
-
     </data>
 </odoo>

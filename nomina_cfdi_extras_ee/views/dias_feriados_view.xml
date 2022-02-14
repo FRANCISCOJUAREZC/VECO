@@ -20,7 +20,8 @@
         <form string="Días feriados">
              <header>
                  <button name="action_validar" string="Validar" type="object" states="draft" class="btn-primary"/>
-                 <button name="action_cancelar" string="Cancelar" type="object" attrs="{'invisible': [('state','=','cancel')]}" confirm="¿Seguro que quiere cancelar el registro?"/>
+                 <button name="action_cancelar" string="Cancelar" type="object" states="done" confirm="¿Seguro que quiere cancelar el registro?"/>
+                 <button name="action_draft" string="Borrador" type="object" states="cancel"/>
                  <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
              </header>
              <sheet>
@@ -57,7 +58,7 @@
     <record id="action_tree_dias_feriados" model="ir.actions.act_window">
         <field name="name">Dias feriados</field>
         <field name="res_model">dias.feriados</field>
-        <!-- <field name="view_type">form</field> -->
+        <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="tree_dias_feriados_view" />
         <field name="search_view_id" ref="search_dias_feriados_view" />
@@ -70,7 +71,7 @@
           id="menu_action_tree_dias_feriados"
           action="action_tree_dias_feriados"
           sequence="90"
-          groups="om_hr_payroll.group_hr_payroll_user"
+          groups="hr_payroll.group_hr_payroll_user"
       />
 
     <record id="action_selected_dias_feriados" model="ir.actions.server">

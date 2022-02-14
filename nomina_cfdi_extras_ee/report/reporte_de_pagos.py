@@ -6,8 +6,8 @@ from collections import defaultdict
 
 class ReportPago(models.AbstractModel):
     _name = 'report.nomina_cfdi_extras_ee.report_payslip_batches_pagos2'
-    _description = 'Reporte de Pagos'
-    
+    _description = 'report_pago2'
+
     def slip_by_line(self, batche):
         slip_lines = batche.slip_ids.filtered(lambda x: x.state!='cancel').mapped('line_ids')
         slip_lines = slip_lines.sorted(lambda x: x.salary_rule_id.sequence)

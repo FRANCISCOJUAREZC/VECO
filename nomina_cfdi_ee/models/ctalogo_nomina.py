@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields
 
 class TipoDeduccion(models.Model):
     _name = 'nomina.deduccion'

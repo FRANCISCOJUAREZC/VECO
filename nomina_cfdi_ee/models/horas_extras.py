@@ -14,8 +14,8 @@ class HorasNomina(models.Model):
                                       ('2','Doble'),
                                       ('3', 'Triple')], string='Tipo de hora extra')
     state = fields.Selection([('draft', 'Borrador'), ('done', 'Hecho'), ('cancel', 'Cancelado')], string='Estado', default='draft')
-    horas = fields.Char("Horas", required=True)
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
+    horas = fields.Char("Horas")
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('horas.nomina'))
 
     @api.model
     def init(self):
@@ -34,22 +34,26 @@ class HorasNomina(models.Model):
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
             if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code('horas.nomina') or _('New')
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('horas.nomina') or _('New')
             else:
                 vals['name'] = self.env['ir.sequence'].next_by_code('horas.nomina') or _('New')
         result = super(HorasNomina, self).create(vals)
         return result
 
+    @api.multi
     def action_validar(self):
         self.write({'state':'done'})
         return
 
+    @api.multi
     def action_cancelar(self):
         self.write({'state':'cancel'})
 
+    @api.multi
     def action_draft(self):
         self.write({'state':'draft'})
 
+    @api.multi
     def unlink(self):
         raise UserError("Los registros no se pueden borrar, solo cancelar.")
 

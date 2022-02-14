@@ -51,7 +51,7 @@
     <record model="ir.actions.act_window" id="action_employee_loan_type">
         <field name="name">Tipo de deducción recurrente</field>
         <field name="res_model">employee.loan.type</field>
-        <!-- <field name="view_type">form</field> -->
+        <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
     </record>
     

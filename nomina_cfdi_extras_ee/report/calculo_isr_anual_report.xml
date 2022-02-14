@@ -3,8 +3,7 @@
 	<data>
 		<report string="ISR retenido y SUBEM" 
 			id="action_report_calculo_isr_anual"
-			model="calculo.isr.anual" 
-			report_type="qweb-pdf"
+			model="calculo.isr.anual" report_type="qweb-pdf"
 			name="nomina_cfdi_extras_ee.report_calculo_isr_anual" 
 			file="nomina_cfdi_extras_ee.report_calculo_isr_anual" 
 		/>

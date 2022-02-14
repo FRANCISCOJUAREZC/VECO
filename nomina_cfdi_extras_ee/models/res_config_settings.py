@@ -28,7 +28,6 @@ class ResConfigSettings(models.TransientModel):
         return res
 
     def set_values(self):
-        res = super(ResConfigSettings, self).set_values()
+        super(ResConfigSettings, self).set_values()
         self.env['ir.config_parameter'].sudo().set_param('nomina_cfdi_extras_ee.numoer_de_retardos_x_falta', self.numoer_de_retardos_x_falta)
-        return res
     

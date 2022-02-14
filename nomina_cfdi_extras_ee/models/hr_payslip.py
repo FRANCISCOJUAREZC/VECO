@@ -50,10 +50,10 @@ class hr_payslip(models.Model):
     rp_subsidio = fields.Float('rp_subsidio', compute='get_tablas_values')
     retardo = fields.Boolean(string=_('Retardo'), compute='_get_retardo', default = False)
 
-    
+    @api.multi
     def compute_sheet(self):
         for data in self:
-          if data.concepto_periodico and data.aplicar_descuentos:
+          if data.concepto_periodico:
               if data.nom_liquidacion:
                  installment_ids = data.env['installment.line'].search(
                       [('employee_id', '=', data.employee_id.id), ('loan_id.state', '=', 'done'),
@@ -68,7 +68,7 @@ class hr_payslip(models.Model):
               data.installment_ids = [(6, 0, [])]
         return super(hr_payslip,self).compute_sheet()
     
-#    
+#    @api.multi
 #    def compute_sheet(self):
 #        installment_ids = self.env['installment.line'].search(
 #                [('employee_id', '=', self.employee_id.id), ('loan_id.state', '=', 'done'),
@@ -304,7 +304,7 @@ class hr_payslip(models.Model):
             if installment_ids:
                 self.installment_ids = [(6, 0, installment_ids.ids)]
 
-    
+    @api.multi
     def action_payslip_done(self):
         res = super(hr_payslip, self).action_payslip_done()
         if self.installment_ids:
@@ -352,7 +352,7 @@ class hr_payslip(models.Model):
     def get_tablas_values(self):
         grabado_mensual = 0
         for payslip in self:
-            if payslip.ultima_nomina:
+            if payslip.no_nomina == '2':
                 grabado_mensual = payslip.rp_gravado + payslip.acum_per_grav
             else:
                 grabado_mensual = payslip.rp_gravado  / payslip.dias_pagar * payslip.contract_id.tablas_cfdi_id.imss_mes
@@ -366,7 +366,7 @@ class hr_payslip(models.Model):
             if lines2:
                payslip.rp_subsidio =  lines2.s_mensual
 
-
+    @api.multi
     @api.onchange('date_to')
     def _get_retardo(self):
         if self.date_to and self.date_from:
@@ -382,7 +382,7 @@ class hr_payslip(models.Model):
 class HrPayslipRun(models.Model):
     _inherit = 'hr.payslip.run'
     
-    
+    @api.multi
     @api.depends('slip_ids.state','slip_ids.estado_factura')
     def _compute_show_cancelar_button(self):
         for payslip_batch in self:
@@ -395,20 +395,20 @@ class HrPayslipRun(models.Model):
         
     show_cancelar_button = fields.Boolean('Show Cancelar CFDI/Payslip Button', compute='_compute_show_cancelar_button')
     
-    
+    @api.multi
     def action_cancelar_cfdi(self):
         if hasattr(self.slip_ids, 'action_cfdi_cancel'):
             self.slip_ids.action_cfdi_cancel()
         return True
     
-    
+    @api.multi
     def action_cancelar_nomina(self):
         self.slip_ids.action_payslip_cancel()
         return True
     
     
     
-   
+    @api.one
     def get_department(self):
         result = {}
         department = self.env['hr.department'].search([])
@@ -416,7 +416,7 @@ class HrPayslipRun(models.Model):
             result[dept.id] = dept.name
         return result
 
-  
+    @api.one
     def get_payslip_group_by_department(self):
         result = {}
         for line in self.slip_ids:
@@ -435,31 +435,22 @@ class HrPayslip(models.Model):
         readonly=True
     )
     
-    
+    @api.multi
     def refund_sheet(self):
         res = super(HrPayslip, self).refund_sheet()
         self.write({'refunded_id': eval(res['domain'])[0][2][0] or False})
         return res
 
-    
+    @api.multi
     def action_payslip_cancel(self):
         for payslip in self:
             if payslip.refunded_id and payslip.refunded_id.state != 'cancel':
-                raise ValidationError(_("""To cancel the Original Payslip the
-                    Refunded Payslip needs to be canceled first!"""))
-                """
-                     Change by tushar update_posted not availabel in account.journal
-                """
-            module = self.env['ir.module.module'].sudo().search([('name','=','om_hr_payroll_account_ee')])
-            if module and module.state == 'installed':
-               moves = payslip.mapped('move_id')
-               moves.filtered(lambda x: x.state == 'posted').button_cancel()
-               payslip.write({'move_id': None})
-            payslip.write({'acum_fondo_ahorro': 0})
-            #quitar los prestamos
-            if payslip.installment_ids:
-                for installment in payslip.installment_ids:
-                   installment.is_paid = False
-                   installment.payslip_id = None
-            payslip.write({'state': 'cancel'})
-        return
+                raise ValidationError(_("""Para cancelar la nómina, es necesario cancelar primero la nota de crédito."""))
+            if payslip.move_id.journal_id.update_posted:
+                payslip.move_id.button_cancel()
+                payslip.move_id.unlink()
+            else:
+                payslip.move_id.reverse_moves()
+                payslip.move_id = False
+
+        return self.write({'state': 'cancel'})

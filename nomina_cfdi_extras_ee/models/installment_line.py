@@ -43,7 +43,7 @@ class installment_line(models.Model):
             
             
         
-   
+    @api.multi
     def action_view_payslip(self):
         if self.payslip_id:
             return {

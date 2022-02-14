@@ -7,19 +7,19 @@ class ViaticosNomina(models.Model):
     _name = 'viaticos.nomina'
     _description = 'ViaticosNomina'
 
-    
+    @api.multi
     @api.depends('entregas_ids.importe')
     def _compute_entregas(self):
         for record in self:
             record.entregas = sum([entregas.importe for entregas in record.entregas_ids])
     
-    
+    @api.multi
     @api.depends('comprobaciones_ids.importe')
     def _compute_comprobaciones(self):
         for record in self:
             record.comprobaciones = sum([comprobaciones.importe for comprobaciones in record.comprobaciones_ids])
     
-    
+    @api.multi
     @api.depends('comprobaciones', 'entregas')
     def _compute_por_comprobar(self):
         for record in self:
@@ -37,7 +37,7 @@ class ViaticosNomina(models.Model):
     
     entregas_ids = fields.One2many('entregas.viaticos.nomina', 'viaticos_id', 'Entregas')
     comprobaciones_ids = fields.One2many('comprobaciones.viaticos.nomina', 'viaticos_id', 'Comprobaciones')
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('viaticos.nomina'))
     
     @api.model
     def init(self):
@@ -56,13 +56,13 @@ class ViaticosNomina(models.Model):
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
             if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code(
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code(
                     'viaticos.nomina') or _('New')
             else:
                 vals['name'] = self.env['ir.sequence'].next_by_code('viaticos.nomina') or _('New')
         return super(ViaticosNomina, self).create(vals)
     
-    
+    @api.multi
     def action_validar(self):
         payslip_obj = self.env['hr.payslip']
         
@@ -92,12 +92,15 @@ class ViaticosNomina(models.Model):
         self.write({'state': 'open'})
         return True
 
-    
+    @api.multi
     def action_cerrar(self):
-        payslip_obj = self.env['hr.payslip']
-        structure_rec = self.env['hr.payroll.structure'].search([('name', '=', 'Comprobación Viaticos')], limit=1)
-        amount = sum([r.importe for r in self.comprobaciones_ids.filtered(lambda x:x.cfdi and not x.generado)])
-        if amount > 0:
+        if self.por_comprobar != 0:
+            raise UserError(_('Los montos entregados no son iguales a los montos comprobados.'))
+        else:
+            payslip_obj = self.env['hr.payslip']
+            structure_rec = self.env['hr.payroll.structure'].search([('name', '=', 'Comprobación Viaticos')], limit=1)
+            amount = sum([r.importe for r in self.comprobaciones_ids.filtered(lambda x:x.cfdi)])
+            if amount > 0:
                 employee = self.employee_id
                 vals = {
                     'employee_id' : employee.id,
@@ -125,14 +128,7 @@ class ViaticosNomina(models.Model):
                                             ],
                         })
                 payslip_obj.create(vals)
-
-        for comp_line in self.comprobaciones_ids:
-            if comp_line.cfdi and not comp_line.generado:
-               comp_line.write({'generado': True})
-
-        if self.por_comprobar == 0:
             self.write({'state': 'closed'})
-
         return True
 
 class EntregasViaticosNomina(models.Model):
@@ -152,7 +148,6 @@ class ComprobacionesViaticosNomina(models.Model):
     fecha = fields.Date("Fecha")
     referencia = fields.Selection([('01','CFDI'), ('02','Documentos no fiscales'), ('03','Efectivo')], string='Tipo') #, ('04','Retención de nómina')
     cfdi = fields.Boolean("CFDI")
-    generado = fields.Boolean("Generado")
     importe = fields.Float("Importe")
     viaticos_id = fields.Many2one("viaticos.nomina",'Viaticos')
-
+        

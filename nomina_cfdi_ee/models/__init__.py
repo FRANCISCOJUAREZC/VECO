@@ -9,5 +9,3 @@ from . import hr_payslip_run
 from . import res_bank
 from . import horas_extras
 from . import ctalogo_nomina
-from . import registro_patronal
-from . import caja_ahorro

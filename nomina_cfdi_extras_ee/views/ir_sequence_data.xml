@@ -8,7 +8,7 @@
             <field name="code">employee.loan</field>
             <field name="prefix">PRES/</field>
             <field name="padding">4</field>
-            <field name="company_id" eval="True"/>
+            <field name="company_id" eval="False"/>
         </record>
         
         <!-- Sequences for Skipp installment -->
@@ -17,7 +17,7 @@
             <field name="code">dev.skip.installment</field>
             <field name="prefix">SAL-PRES/</field>
             <field name="padding">4</field>
-            <field name="company_id" eval="True"/>
+            <field name="company_id" eval="False"/>
         </record>
     </data>
 </odoo>

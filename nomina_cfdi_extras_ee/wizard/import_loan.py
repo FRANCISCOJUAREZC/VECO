@@ -13,7 +13,7 @@ class import_loan(models.TransientModel):
     file_type = fields.Selection([('excel','Excel'),('csv','CSV')],string='Tipo de archivo', default='csv')
     csv_file = fields.Binary(string='Archivo')
     
-   
+    @api.multi
     def get_employee_id(self,name):
         emp_id = self.env['hr.employee'].search([('name','=',name)],limit=1)
         if emp_id:
@@ -21,7 +21,7 @@ class import_loan(models.TransientModel):
         else:
             return False
             
-   
+    @api.multi
     def get_loan_type(self,name):
         type_id = self.env['employee.loan.type'].search([('name','=',name)],limit=1)
         if type_id:
@@ -30,7 +30,7 @@ class import_loan(models.TransientModel):
             return False
     
     
-   
+    @api.multi
     def add_in_remark(self,remark,coment):
         if remark:
             remark += ' , '+ coment
@@ -38,7 +38,7 @@ class import_loan(models.TransientModel):
             remark = coment
         return remark
         
-   
+    @api.multi
     def get_check_employee_loan(self,employee_id):
         now = datetime.now()
         year = now.year
@@ -49,7 +49,7 @@ class import_loan(models.TransientModel):
         
         
     
-   
+    @api.multi
     def import_loan(self):
         lines =[]
         if self.file_type == 'csv':

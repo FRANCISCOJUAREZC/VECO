@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api, _
+from odoo import models, fields, api
 from datetime import datetime
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.exceptions import Warning
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, pycompat
-from collections import MutableMapping
 
 import io, os
 import base64
@@ -43,7 +42,7 @@ class ImportarDiasWizard(models.TransientModel):
     file_name = fields.Char("Nombre de file")
     contract_id = fields.Many2one('hr.contract', string='Contract', help="The contract for which applied this input")
     
-    
+    @api.multi
     def import_xls_file(self):
         self.ensure_one()
         if not self.import_file:
@@ -100,7 +99,7 @@ class ImportarDiasWizard(models.TransientModel):
             if other_inputs:
                 vals['amount'] = row[3]
             else:
-                vals.update({'number_of_days':row[3] or '0', 'number_of_hours' : row[4] or '0'})
+                vals.update({'number_of_days':row[3], 'number_of_hours' : row[4] or '0'})
                 
             for payslip in payslips:
                 contract_id = payslip.contract_id and payslip.contract_id.id
@@ -137,7 +136,7 @@ class ImportarDiasWizard(models.TransientModel):
         
         return True
     
-    
+    @api.multi
     def _read_xls(self, options,import_file):
         """ Read file content, using xlrd lib """
         book = xlrd.open_workbook(file_contents=import_file)
@@ -147,7 +146,7 @@ class ImportarDiasWizard(models.TransientModel):
         sheet = book.sheet_by_index(0)
         # emulate Sheet.get_rows for pre-0.9.4
         is_header = False
-        for row in map(sheet.row, range(sheet.nrows)):
+        for row in pycompat.imap(sheet.row, range(sheet.nrows)):
             values = []
             is_first_cell = False
             first_cell_val = ''
@@ -159,7 +158,7 @@ class ImportarDiasWizard(models.TransientModel):
 #                         if is_float
 #                         else pycompat.text_type(int(cell.value))
 #                     )
-                    cell_value = str(cell.value) if is_float else str(int(cell.value))
+                    cell_value = pycompat.text_type(cell.value) if is_float else pycompat.text_type(int(cell.value))
                     
                 elif cell.ctype is xlrd.XL_CELL_DATE:
                     is_datetime = cell.value % 1 != 0.0
@@ -199,7 +198,7 @@ class ImportarDiasWizard(models.TransientModel):
     _read_xlsx = _read_xls
     
     
-    
+    @api.multi
     def _read_ods(self, options, import_file):
         """ Read file content using ODSReader custom lib """
         doc = odf_ods_reader.ODSReader(file=io.BytesIO(import_file))
@@ -210,7 +209,7 @@ class ImportarDiasWizard(models.TransientModel):
             if any(x for x in row if x.strip())
         )
 
-    
+    @api.multi
     def _read_csv(self, options, import_file):
         """ Returns a CSV-parsed iterator of all empty lines in the file
             :throws csv.Error: if an error is detected during CSV parsing

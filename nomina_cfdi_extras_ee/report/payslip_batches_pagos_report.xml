@@ -41,15 +41,15 @@
 								<t t-foreach="o.slip_ids" t-as="l">
 					             <t t-if="not l.state =='cancel'">
 								  <tr>
-									<t t-set="col1" t-value="l.get_amount_from_rule_code('TPER')" t-options='{"widget": "float", "precision": 2}'/>
-									<t t-set="col2" t-value="l.get_amount_from_rule_code('TDED')" t-options='{"widget": "float", "precision": 2}'/>
-									<t t-set="col3" t-value="l.get_amount_from_rule_code('NET')" t-options='{"widget": "float", "precision": 2}'/>
-									<t t-set="col4" t-value="l.get_amount_from_rule_code('TOP')" t-options='{"widget": "float", "precision": 2}'/>
+									<t t-set="col1" t-value="l.get_amount_from_rule_code('TPER')[0]" t-options='{"widget": "float", "precision": 2}'/>
+									<t t-set="col2" t-value="l.get_amount_from_rule_code('TDED')[0]" t-options='{"widget": "float", "precision": 2}'/>
+									<t t-set="col3" t-value="l.get_amount_from_rule_code('NET')[0]" t-options='{"widget": "float", "precision": 2}'/>
+									<t t-set="col4" t-value="l.get_amount_from_rule_code('TOP')[0]" t-options='{"widget": "float", "precision": 2}'/>
 									<t t-set="col1_tot" t-value="col1_tot + col1 + col4"/>
 									<t t-set="col2_tot" t-value="col2_tot + col2"/>
 									<t t-set="col3_tot" t-value="col3_tot + col3"/>
-									<t t-set="col4_efectivo" t-value="l.get_total_code_value('001')"/>
-									<t t-set="col5_especie" t-value="l.get_total_code_value('002')"/>
+									<t t-set="col4_efectivo" t-value="l.get_total_code_value('001')[0]"/>
+									<t t-set="col5_especie" t-value="l.get_total_code_value('002')[0]"/>
 									<t t-set="total_efectivo" t-value="total_efectivo + col4_efectivo"/>
 									<t t-set="total_especie" t-value="total_especie + col5_especie"/>
 									<td>

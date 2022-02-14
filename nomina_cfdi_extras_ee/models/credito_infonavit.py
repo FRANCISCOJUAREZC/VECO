@@ -8,7 +8,7 @@ class CreditoInfonavit(models.Model):
     _description = 'CreditoInfonavit'
 
     name = fields.Char("Name", required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('New'))
-    employee_id = fields.Many2one('hr.employee', string='Empleado', required=True)
+    employee_id = fields.Many2one('hr.employee', string='Empleado')
     no_credito = fields.Char(string="Número de crédito")
     tipo_de_movimiento = fields.Selection([('15', 'Inicio de crédito vivienda'), 
                                           ('16', 'Fecha de suspensión de descuento'),
@@ -21,53 +21,29 @@ class CreditoInfonavit(models.Model):
     tipo_de_descuento = fields.Selection([('1', 'Porcentaje %'), 
                                           ('2', 'Cuota fija'),
                                           ('3', 'Veces SMGV'),],
-                                            string='Tipo de descuento', default='1')
+                                            string='Tipo de movimiento', default='1')
 
     aplica_tabla = fields.Selection([('N', 'No'), 
                                      ('S', 'Si')],
                                      string='Aplica tabla disminución')
-    fecha = fields.Date(string="Fecha", required=True)
+    fecha = fields.Date(string="Fecha")
     valor_descuento = fields.Float(string="Valor descuento", digits = (12,4))
     state = fields.Selection([('draft', 'Borrador'), ('done', 'Hecho'), ('cancel', 'Cancelado')], string='Estado', default='draft')
     contract_id = fields.Many2one('hr.contract', string='Contrato')
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
-    valor_infonavit_ant = fields.Float(string="Valor Infonavit anterior", digits = (12,4))
 
     @api.model
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
-            if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code('credito.infonavit') or _('New')
-            else:
-                vals['name'] = self.env['ir.sequence'].next_by_code('credito.infonavit') or _('New')
+            vals['name'] = self.env['ir.sequence'].next_by_code('credito.infonavit') or _('New')
         result = super(CreditoInfonavit, self).create(vals)
         return result
 
     def action_validar(self):
-        for rec in self:
-            if rec.contract_id:
-               if rec.tipo_de_descuento == '1':
-                  rec.valor_infonavit_ant = rec.contract_id.infonavit_porc
-                  rec.contract_id.infonavit_porc = rec.valor_descuento
-               elif rec.tipo_de_descuento == '2':
-                  rec.valor_infonavit_ant = rec.contract_id.infonavit_fijo
-                  rec.contract_id.infonavit_fijo = rec.valor_descuento
-               else:
-                  rec.valor_infonavit_ant = rec.contract_id.infonavit_vsm
-                  rec.contract_id.infonavit_vsm = rec.valor_descuento
-            rec.write({'state':'done'})
+        self.write({'state':'done'})
         return
 
     def action_cancelar(self):
-        for rec in self:
-            if rec.contract_id:
-               if rec.tipo_de_descuento == '1':
-                  rec.contract_id.infonavit_porc = rec.valor_infonavit_ant
-               elif rec.tipo_de_descuento == '2':
-                  rec.contract_id.infonavit_fijo = rec.valor_infonavit_ant
-               else:
-                  rec.contract_id.infonavit_vsm = rec.valor_infonavit_ant
-            rec.write({'state':'cancel'})
+        self.write({'state':'cancel'})
 
     def action_draft(self):
         self.write({'state':'draft'})

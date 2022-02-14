@@ -30,6 +30,14 @@
         <field name="view_id" ref="wizard_altas_y_bajas_form_view"/>
         <field name="target">new</field>
     </record>
+    
+    <menuitem
+          name="Reportes"
+          parent="hr.menu_hr_root"
+          id="menu_main_reportes"
+          sequence="90"
+          groups="hr_payroll.group_hr_payroll_user"
+      />
 
     <menuitem id="menu_action_wizard_altas_y_bajas"
             name="Altas y Bajas"

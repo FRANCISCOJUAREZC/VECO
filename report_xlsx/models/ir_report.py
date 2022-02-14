@@ -1,26 +1,22 @@
 # Copyright 2015 ACSONE SA/NV (<http://acsone.eu>)
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
 
 class ReportAction(models.Model):
     _inherit = "ir.actions.report"
 
-    report_type = fields.Selection(
-        selection_add=[("xlsx", "XLSX")], ondelete={"xlsx": "set default"}
-    )
+    report_type = fields.Selection(selection_add=[("xlsx", "XLSX")])
 
     @api.model
-    def _render_xlsx(self, docids, data):
+    def render_xlsx(self, docids, data):
         report_model_name = "report.%s" % self.report_name
         report_model = self.env.get(report_model_name)
         if report_model is None:
-            raise UserError(_("%s model was not found") % report_model_name)
-        return report_model.with_context(
-            active_model=self.model
-        ).create_xlsx_report(  # noqa
+            raise UserError(_("%s model was not found" % report_model_name))
+        return report_model.with_context(active_model=self.model).create_xlsx_report(  # noqa
             docids, data
         )
 

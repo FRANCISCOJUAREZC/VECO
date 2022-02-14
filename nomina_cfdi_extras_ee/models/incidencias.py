@@ -16,7 +16,7 @@ class IncidenciasNomina(models.Model):
                                             string='Tipo de incidencia')
     employee_id = fields.Many2one('hr.employee', string='Empleado')
     fecha = fields.Date('Fecha')
-    registro_patronal = fields.Many2one('registro.patronal', string='Registro patronal')
+    registro_patronal = fields.Char("Registro patronal")
     sueldo_mensual = fields.Float('Sueldo mensual')
     sueldo_diario = fields.Float('Sueldo diario')
     sueldo_diario_integrado = fields.Float('Sueldo diario integrado')
@@ -34,15 +34,15 @@ class IncidenciasNomina(models.Model):
                                       ('9','Jubilación'),
                                       ('A', 'Pensión')], string='Tipo de baja')
     contract_id = fields.Many2one('hr.contract', string='Contrato')
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
-    registro_patronal_ant = fields.Many2one('registro.patronal', string='Registro patronal anterior')
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('incidencias.nomina'))
+    registro_patronal_ant = fields.Char("Registro patronal ant")
     sueldo_mensual_ant = fields.Float('Sueldo mensual ant')
     sueldo_diario_ant = fields.Float('Sueldo diario ant')
     sueldo_diario_integrado_ant = fields.Float('Sueldo diario integrado ant')
     sueldo_por_horas_ant = fields.Float("Sueldo por horas ant")
     sueldo_cotizacion_base_ant = fields.Float('Sueldo cotización base ant')
-    fecha_anterior = fields.Date('Fecha anterior')
 
+    @api.multi
     @api.onchange('tipo_de_incidencia')
     def _onchange_incidencia(self):
         if self.tipo_de_incidencia == 'Reingreso':
@@ -50,7 +50,7 @@ class IncidenciasNomina(models.Model):
         else:
             return {'domain': {'employee_id': [('active', '=', True)]}}
 
-    
+    @api.multi
     @api.onchange('sueldo_mensual')
     def _compute_sueldo(self):
         if self.sueldo_mensual:
@@ -142,19 +142,19 @@ class IncidenciasNomina(models.Model):
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
             if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code('incidencias.nomina') or _('New')
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('incidencias.nomina') or _('New')
             else:
                 vals['name'] = self.env['ir.sequence'].next_by_code('incidencias.nomina') or _('New')
         result = super(IncidenciasNomina, self).create(vals)
         return result
 
-    
+    @api.multi
     def action_validar(self):
         employee = self.employee_id
         if employee:
             if self.tipo_de_incidencia=='Cambio reg. patronal':
-                self.registro_patronal_ant = employee.registro_patronal_id.id
-                employee.write({'registro_patronal':self.registro_patronal.id})
+                self.registro_patronal_ant = employee.registro_patronal
+                employee.write({'registro_patronal':self.registro_patronal})
             elif self.tipo_de_incidencia=='Cambio salario':
                 if self.contract_id:
                     self.sueldo_mensual_ant = self.contract_id.wage
@@ -177,14 +177,8 @@ class IncidenciasNomina(models.Model):
                 if self.contract_id:
                     self.contract_id.write({'state':'cancel'})
             elif self.tipo_de_incidencia=='Reingreso':
-                employee.write({'active':True, 'registro_patronal_id': self.registro_patronal.id})
+                employee.write({'active':True, 'registro_patronal': self.registro_patronal})
                 if self.contract_id:
-                    self.sueldo_mensual_ant = self.contract_id.wage
-                    self.sueldo_diario_ant = self.contract_id.sueldo_diario
-                    self.sueldo_diario_integrado_ant = self.contract_id.sueldo_diario_integrado
-                    self.sueldo_por_horas_ant = self.contract_id.sueldo_hora
-                    self.sueldo_cotizacion_base_ant = self.contract_id.sueldo_base_cotizacion
-                    self.fecha_anterior = self.fecha
                     self.contract_id.write({'state':'open',
                                                  'sueldo_diario' : self.sueldo_diario,
                                                  'wage' : self.sueldo_mensual,
@@ -200,51 +194,51 @@ class IncidenciasNomina(models.Model):
         self.write({'state':'done'})
         return
 
-    
+    @api.multi
     def action_cancelar(self):
-       employee = self.employee_id
-       if self.state == 'draft':
-         self.write({'state':'cancel'})
-       else:
-          if self.tipo_de_incidencia == 'Reingreso':
-              historial = self.env['contract.historial.salario'].search([('fecha_sueldo', '=', self.fecha)], limit=1)
-              historial.unlink()
-              employee.write({'active':False})
-              if self.contract_id:
-                  self.contract_id.write({'state':'cancel',
-                                          'sueldo_diario' : self.sueldo_diario_ant,
-                                          'wage' : self.sueldo_mensual_ant,
-                                          'sueldo_diario_integrado' : self.sueldo_diario_integrado_ant,
-                                          'sueldo_base_cotizacion' : self.sueldo_cotizacion_base_ant,
-                                          'sueldo_hora': self.sueldo_por_horas_ant,
-                                          'date_start': self.fecha_anterior,
-                                          })
-          elif self.tipo_de_incidencia == 'Baja':
-              employee.write({'active':True})
-              if self.contract_id:
-                  self.contract_id.write({'state':'open'})
-          elif self.tipo_de_incidencia == 'Cambio reg. patronal':
-              employee.write({'registro_patronal_id': self.registro_patronal_ant.id})
-          elif self.tipo_de_incidencia == 'Cambio salario':
-              if self.contract_id:
-                 self.contract_id.write({
-                                         'sueldo_diario' : self.sueldo_diario_ant,
-                                         'wage' : self.sueldo_mensual_ant,
-                                         'sueldo_diario_integrado' : self.sueldo_diario_integrado_ant,
-                                         'sueldo_base_cotizacion' : self.sueldo_cotizacion_base_ant,
-                                         'sueldo_hora': self.sueldo_por_horas_ant,
-                                         })
-                 historial = self.env['contract.historial.salario'].search([('fecha_sueldo', '=', self.fecha)], limit=1)
-                 historial.unlink()
-          self.write({'state':'cancel'})
+       if self.tipo_de_incidencia == 'Reingreso':
+           employee.write({'active':False})
+           if self.contract_id:
+               self.contract_id.write({'state':'cancel'})
+       elif self.tipo_de_incidencia == 'Baja':
+           employee.write({'active':True})
+       elif self.tipo_de_incidencia == 'Cambio reg. patronal':
+           employee.write({'registro_patronal': self.registro_patronal_ant})
+           employee.write({'active':True})
+       elif self.tipo_de_incidencia == 'Cambio salario':
+           if self.contract_id:
+              self.contract_id.write({'state':'open',
+                                      'sueldo_diario' : self.sueldo_diario_ant,
+                                      'wage' : self.sueldo_mensual_ant,
+                                      'sueldo_diario_integrado' : self.sueldo_diario_integrado_ant,
+                                      'sueldo_base_cotizacion' : self.sueldo_cotizacion_base_ant,
+                                      'sueldo_hora': self.sueldo_por_horas_ant,
+                                      'date_start': self.fecha,
+                                      })
+              self.env['contract.historial.salario'].create({'sueldo_mensual': self.sueldo_mensual_ant, 
+                                      'sueldo_diario': self.sueldo_diario_ant, 
+                                      'fecha_sueldo': self.fecha,
+                                      'sueldo_por_hora' : self.sueldo_por_horas_ant, 
+                                      'sueldo_diario_integrado': self.sueldo_diario_integrado_ant,
+                                      'sueldo_base_cotizacion': self.sueldo_cotizacion_base_ant, 
+                                      'contract_id' : self.contract_id.id
+                                      })
+       self.write({'state':'cancel'})
 
+    @api.multi
     def action_draft(self):
         self.write({'state':'draft'})
 
+    @api.multi
     def unlink(self):
         raise UserError("Los registros no se pueden borrar, solo cancelar.")
     
+    @api.multi
     def action_change_state(self):
         for incidencias in self:
             if incidencias.state == 'draft':
                 incidencias.action_validar()
+                
+                
+            
+        

@@ -5,11 +5,11 @@
         <field name="model">vacaciones.nomina</field>
         <field name="arch" type="xml">
         <tree string="Vacaciones">
-            <field name="name" />
+        	<field name="name" />
             <field name="employee_id" />
             <field name="fecha_inicial" />
             <field name="dias" />
-            <field name="state"/>
+            <field name="state"/> 
          </tree> 
        </field>
     </record>
@@ -21,7 +21,8 @@
              
              <header>
                  <button name="action_validar" string="Validar" type="object" states="draft" class="btn-primary"/>
-                 <button name="action_cancelar" string="Cancelar" type="object" attrs="{'invisible': [('state','=','cancel')]}" confirm="¿Seguro que quiere cancelar el registro?"/>
+                 <button name="action_cancelar" string="Cancelar" type="object" states="done" confirm="¿Seguro que quiere cancelar el registro?"/>
+                 <button name="action_draft" string="Borrador" type="object" states="cancel"/>
                  <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
              </header>
              <sheet>
@@ -62,7 +63,7 @@
     <record id="action_tree_vacaciones_nomina" model="ir.actions.act_window">
         <field name="name">Vacaciones</field>
         <field name="res_model">vacaciones.nomina</field>
-       <!--  <field name="view_type">form</field> -->
+        <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="tree_vacaciones_nomina_view" />
         <field name="search_view_id" ref="search_vacaciones_nomina_view" />
@@ -75,7 +76,7 @@
           id="menu_action_tree_vacaciones_nomina"
           action="action_tree_vacaciones_nomina"
           sequence="4"
-          groups="om_hr_payroll.group_hr_payroll_user"
+          groups="hr_payroll.group_hr_payroll_user"
       />
 
 </odoo>

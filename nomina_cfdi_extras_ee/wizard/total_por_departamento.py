@@ -8,9 +8,8 @@ from docutils.nodes import line
 import base64
 class TotalPorDepartamento(models.TransientModel):
     _name = 'total.por.departamento'
-    _description = 'Total por departamento'
 
-    hr_payslip_run_ids = fields.Many2many('hr.payslip.run',string="Procesamientos de nómina")
+    hr_payslip_run_ids = fields.Many2many('hr.payslip.run',string="payslip batches")
     file_data = fields.Binary()
     payslip_batch_id = fields.Many2one('hr.payslip.run','Payslip Run')
 
@@ -30,7 +29,7 @@ class TotalPorDepartamento(models.TransientModel):
             #hr_payslip_line_ids=self.hr_payslip_run_ids.slip_ids.details_by_salary_rule_category
             result = {}
             all_col_list_seq = []
-            for line in self.hr_payslip_run_ids.slip_ids.mapped('line_ids').sorted(lambda x:x.sequence):
+            for line in self.hr_payslip_run_ids.mapped('slip_ids').mapped('line_ids').sorted(lambda x:x.sequence):
                 if line.code not in all_col_list_seq:
                     all_col_list_seq.append(line.code)
                 if line.code not in result.keys():
@@ -42,7 +41,7 @@ class TotalPorDepartamento(models.TransientModel):
                 worksheet.write(0, col_nm, t, header_style)
                 col_nm += 1    
             result_department={}        
-            for line in self.hr_payslip_run_ids.slip_ids:
+            for line in self.hr_payslip_run_ids.mapped('slip_ids'):
                 if line.employee_id.department_id.id in result_department.keys():
                     result_department[line.employee_id.department_id.id].append(line)
                 else:
@@ -129,4 +128,5 @@ class TotalPorDepartamento(models.TransientModel):
             'url': "/web/content/?model=total.por.departamento&id=" + str(self.id) + "&field=file_data&download=true&filename=total_por_departamento.xls",
             'target': 'self',
             }
-        return action
+        return action    
+                

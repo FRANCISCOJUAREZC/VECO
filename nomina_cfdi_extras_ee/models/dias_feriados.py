@@ -16,7 +16,7 @@ class DiasFeriados(models.Model):
     fecha = fields.Date('Fecha')
     state = fields.Selection([('draft', 'Borrador'), ('done', 'Hecho'), ('cancel', 'Cancelado')], string='Estado', default='draft')
     tipo = fields.Selection([('doble', 'Doble'), ('triple', 'Triple')], string='Tipo', default='doble')
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env['res.company']._company_default_get('dias.feriados'))
 
     @api.model
     def init(self):
@@ -35,38 +35,38 @@ class DiasFeriados(models.Model):
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
             if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code('dias.feriados') or _('New')
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('dias.feriados') or _('New')
             else:
                 vals['name'] = self.env['ir.sequence'].next_by_code('dias.feriados') or _('New')
         result = super(DiasFeriados, self).create(vals)
         return result
 
-   
+    @api.multi
     def action_validar(self):
         if self.fecha:
             fecha = self.fecha
-            date_from = fecha.strftime("%Y-%m-%d") #+ ' 00:00:00'
-            date_to = fecha.strftime("%Y-%m-%d") #+' 23:59:59'
+            date_from = fecha.strftime("%Y-%m-%d") + ' 00:00:00'
+            date_to = fecha.strftime("%Y-%m-%d") +' 23:59:59'
         else:
             date_from = datetime.today().strftime("%Y-%m-%d")
             date_to = date_from + ' 20:00:00'
             date_from += ' 06:00:00'
 
- #       timezone = self._context.get('tz')
- #       if not timezone:
- #           timezone = self.env.user.partner_id.tz or 'UTC'
+        timezone = self._context.get('tz')
+        if not timezone:
+            timezone = self.env.user.partner_id.tz or 'UTC'
        # timezone = tools.ustr(timezone).encode('utf-8')
 
- #       local = pytz.timezone(timezone) #get_localzone()
- #       naive_from = datetime.strptime (date_from, "%Y-%m-%d %H:%M:%S")
- #       local_dt_from = local.localize(naive_from, is_dst=None)
- #       utc_dt_from = local_dt_from.astimezone (pytz.utc)
- #       date_from = utc_dt_from.strftime ("%Y-%m-%d %H:%M:%S")
+        local = pytz.timezone(timezone) #get_localzone()
+        naive_from = datetime.strptime (date_from, "%Y-%m-%d %H:%M:%S")
+        local_dt_from = local.localize(naive_from, is_dst=None)
+        utc_dt_from = local_dt_from.astimezone (pytz.utc)
+        date_from = utc_dt_from.strftime ("%Y-%m-%d %H:%M:%S")
  
- #       naive_to = datetime.strptime (date_to, "%Y-%m-%d %H:%M:%S")
- #       local_dt_to = local.localize(naive_to, is_dst=None)
- #       utc_dt_to = local_dt_to.astimezone (pytz.utc)
- #       date_to = utc_dt_to.strftime ("%Y-%m-%d %H:%M:%S")
+        naive_to = datetime.strptime (date_to, "%Y-%m-%d %H:%M:%S")
+        local_dt_to = local.localize(naive_to, is_dst=None)
+        utc_dt_to = local_dt_to.astimezone (pytz.utc)
+        date_to = utc_dt_to.strftime ("%Y-%m-%d %H:%M:%S")
 
         leave_type = None
         if self.tipo=='doble':
@@ -74,7 +74,7 @@ class DiasFeriados(models.Model):
         elif self.tipo=='triple':
            leave_type = self.company_id.leave_type_dfes3 or False
         if not leave_type:
-           leave_type = self.env['hr.leave.type'].create({'name': 'DFES'})
+           leave_type = self.env['hr.holidays.status'].create({'name': 'DFES', 'limit': True})
 
         nombre = 'Feriado_'+self.name
         registro_falta = self.env['hr.leave'].search([('name','=', nombre)], limit=1)
@@ -95,14 +95,12 @@ class DiasFeriados(models.Model):
                'employee_id' : self.employee_id.id,
                'name' : 'Feriado_'+self.name,
                'date_to' : date_to,
-               'request_date_from' : date_from,
-               'request_date_to' : date_to,
                'state': 'confirm',
                }
 
            holiday = holidays_obj.new(vals)
-           holiday._compute_from_employee_id()
-           holiday._compute_number_of_days()
+           holiday._onchange_employee_id()
+           holiday._onchange_leave_dates()
            vals.update(holiday._convert_to_write({name: holiday[name] for name in holiday._cache}))
            vals.update({'holiday_status_id' : leave_type and leave_type.id,})
            feriado = self.env['hr.leave'].create(vals)
@@ -110,20 +108,20 @@ class DiasFeriados(models.Model):
         self.write({'state':'done'})
         return
 
-   
+    @api.multi
     def action_cancelar(self):
-        if self.state == 'draft':
-            self.write({'state':'cancel'})
-        else:
-            self.write({'state':'cancel'})
-            nombre = 'Feriado_'+self.name
-            registro_falta = self.env['hr.leave'].search([('name','=', nombre)], limit=1)
-            if registro_falta:
-               registro_falta.action_refuse()
+        self.write({'state':'cancel'})
+        nombre = 'Feriado_'+self.name
+        registro_falta = self.env['hr.leave'].search([('name','=', nombre)], limit=1)
+        if registro_falta:
+           registro_falta.action_refuse() #write({'state':'cancel'})
 
+
+    @api.multi
     def action_draft(self):
         self.write({'state':'draft'})
 
+    @api.multi
     def unlink(self):
         raise UserError("Los registros no se pueden borrar, solo cancelar.")
 
