@@ -14,13 +14,13 @@ Stock Disallow Negative
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fstock--logistics--workflow-lightgray.png?logo=github
-    :target: https://github.com/OCA/stock-logistics-workflow/tree/12.0/stock_no_negative
+    :target: https://github.com/OCA/stock-logistics-workflow/tree/15.0/stock_no_negative
     :alt: OCA/stock-logistics-workflow
 .. |badge4| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
-    :target: https://translation.odoo-community.org/projects/stock-logistics-workflow-12-0/stock-logistics-workflow-12-0-stock_no_negative
+    :target: https://translation.odoo-community.org/projects/stock-logistics-workflow-15-0/stock-logistics-workflow-15-0-stock_no_negative
     :alt: Translate me on Weblate
 .. |badge5| image:: https://img.shields.io/badge/runbot-Try%20me-875A7B.png
-    :target: https://runbot.odoo-community.org/runbot/154/12.0
+    :target: https://runbot.odoo-community.org/runbot/154/15.0
     :alt: Try me on Runbot
 
 |badge1| |badge2| |badge3| |badge4| |badge5| 
@@ -39,7 +39,6 @@ when trying to validate a stock operation that will set the stock level of
 a product and/or location as negative. So you will have to fix the
 wrong stock level of that product without delay, in order to validate the
 stock operation in Odoo...you can't forget it anymore !
-
 
 **Table of contents**
 
@@ -71,7 +70,6 @@ For individual locations:
    activate the option the option *Allow Negative Stock* for the locations you
    choose.
 
-
 Usage
 =====
 
@@ -82,6 +80,17 @@ The consumable products can still have a negative stock level.
 
 Changelog
 =========
+
+14.0.1.0.0 (2020-12-14)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* [14.0][MIG] stock_no_negative
+
+13.0.1.0.0 (2020-01-03)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* [13.0][MIG] stock_no_negative
+  Remove all decorators @api.multi
 
 11.0.1.1.0 (2018-12-13)
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,7 +103,7 @@ Bug Tracker
 Bugs are tracked on `GitHub Issues <https://github.com/OCA/stock-logistics-workflow/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us smashing it by providing a detailed and welcomed
-`feedback <https://github.com/OCA/stock-logistics-workflow/issues/new?body=module:%20stock_no_negative%0Aversion:%2012.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/OCA/stock-logistics-workflow/issues/new?body=module:%20stock_no_negative%0Aversion:%2015.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -110,11 +119,15 @@ Contributors
 ~~~~~~~~~~~~
 
 * Alexis de Lattre <alexis.delattre@akretion.com>
-* Eficent Business and IT Consulting Services S.L. <contact@eficent.com>
-  * Jordi Ballester
+* Vishnu Vanneri <vanneri.odoodev@gmail.com>
 * Serpent Consulting Services Pvt. Ltd. <support@serpentcs.com>
-* Tecnativa <https://www.tecnativa.com>
-  * Pedro M. Baeza
+* `ForgeFlow S.L. <contact@forgeflow.com>`_:
+    * Jordi Ballester
+    * Joan Mateu
+* `Tecnativa <https://www.tecnativa.com>`_:
+    * Pedro M. Baeza
+* `Spacefoot <https://www.spacefoot.com>`_:
+    * Quentin Delcourte
 
 Maintainers
 ~~~~~~~~~~~
@@ -129,6 +142,6 @@ OCA, or the Odoo Community Association, is a nonprofit organization whose
 mission is to support the collaborative development of Odoo features and
 promote its widespread use.
 
-This module is part of the `OCA/stock-logistics-workflow <https://github.com/OCA/stock-logistics-workflow/tree/12.0/stock_no_negative>`_ project on GitHub.
+This module is part of the `OCA/stock-logistics-workflow <https://github.com/OCA/stock-logistics-workflow/tree/15.0/stock_no_negative>`_ project on GitHub.
 
 You are welcome to contribute. To learn how please visit https://odoo-community.org/page/Contribute.

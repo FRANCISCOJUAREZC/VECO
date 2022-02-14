@@ -1,6 +1,10 @@
 * Alexis de Lattre <alexis.delattre@akretion.com>
-* Eficent Business and IT Consulting Services S.L. <contact@eficent.com>
-  * Jordi Ballester
+* Vishnu Vanneri <vanneri.odoodev@gmail.com>
 * Serpent Consulting Services Pvt. Ltd. <support@serpentcs.com>
-* Tecnativa <https://www.tecnativa.com>
-  * Pedro M. Baeza
+* `ForgeFlow S.L. <contact@forgeflow.com>`_:
+    * Jordi Ballester
+    * Joan Mateu
+* `Tecnativa <https://www.tecnativa.com>`_:
+    * Pedro M. Baeza
+* `Spacefoot <https://www.spacefoot.com>`_:
+    * Quentin Delcourte
