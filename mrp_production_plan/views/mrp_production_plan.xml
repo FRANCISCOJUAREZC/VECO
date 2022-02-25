@@ -127,7 +127,6 @@
             <field name="res_model">mrp.production.plan.item</field>
             <field name="type">ir.actions.act_window</field>
             <field name="view_mode">tree,form</field>
-            <field name="view_type">form</field>
             <field name="view_id" ref="production_plan_tree_view"/>
             <field name="target">current</field>
         </record>
