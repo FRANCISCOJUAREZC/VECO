@@ -20,11 +20,10 @@ class ProductProduct(models.Model):
             locations if operator == 'child_of' else locations.browse())
         wrong_locations = []
         for location in hierarchical_locations:
-            warehouse = location.get_warehouse()
             # Pre-Production
-            wrong_locations.append(warehouse.sam_loc_id.id)
+            wrong_locations.append(location.warehouse_id.sam_loc_id.id)
             # Post-Production
-            wrong_locations.append(warehouse.pbm_loc_id.id)
+            wrong_locations.append(location.warehouse_id.pbm_loc_id.id)
         domain_quant_loc.append(
             ('location_id', 'not in', wrong_locations))
         domain_move_in_loc.append(
