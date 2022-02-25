@@ -173,7 +173,6 @@ class MrpProductionPlanItem(models.Model):
                         '%d-%m-%Y %H:%M:%S')))
             rec.client_delivery_date_formatted = result
 
-    @api.multi
     def _get_delivery_client_delay(self):
         for item in self:
             # 'Warehouse - Commitment Delivery Date
@@ -221,7 +220,6 @@ class MrpProductionPlanItem(models.Model):
                 'is_delivery': item.status == "c. Facturado/Entregado",
             })
 
-    @api.multi
     @api.depends('client_delivery_date', 'in_date',
                  'sale_date', 'comp_date', 'sale_id')
     def _compute_dates(self):
