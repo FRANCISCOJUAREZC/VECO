@@ -3,7 +3,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 {
     'name': 'Veco Customizations',
-    'version': '12.0.1.0.0',
+    'version': '15.0.1.0.0',
     'author': 'Morwi Encoders Consulting SA DE CV',
     'category': 'Hidden',
     'website': 'http://www.morwi.mx/',

@@ -2,14 +2,13 @@
 # © 2020 Morwi Encoders Consulting SA DE CV
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
-from odoo import api, fields, models, _
+from odoo import fields, models, _
 from odoo.exceptions import UserError
 
 
 class AccountAnalyticLine(models.Model):
     _inherit = "account.analytic.line"
 
-    @api.multi
     def _sale_determine_order_line(self):
         """ Automatically set the SO line on the analytic line,
             for the expense/vendor bills flow. It retrives
