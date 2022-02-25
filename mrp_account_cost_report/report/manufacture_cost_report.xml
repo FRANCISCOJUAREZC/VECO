@@ -78,7 +78,6 @@
     <record id="action_manufacture_cost_report" model="ir.actions.act_window">
         <field name="name">Manufacture Cost</field>
         <field name="res_model">manufacture.cost.report</field>
-        <field name="view_type">form</field>
         <field name="view_mode">tree,pivot,graph</field>
         <field name="view_id"></field>  <!-- force empty -->
         <field name="search_view_id" ref="view_manufacture_cost_report_search"/>
