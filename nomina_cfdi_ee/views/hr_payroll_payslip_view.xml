@@ -108,16 +108,6 @@
             </field>
         </record>
 
-        
-        <act_window 
-        name="Dar de baja"
-        res_model="wizard.dar.baja"
-        view_mode="form"
-        target="new"
-        id="wizard_dar_baja_view"
-        binding_model="hr.payslip.run"
-       />
-
        <record id="hr_payslip_run_form_nomina_cfdi" model="ir.ui.view">
             <field name="name">hr.payslip.run.form.nomina</field>
             <field name="model">hr.payslip.run</field>
