@@ -12,7 +12,7 @@ This new module will create 2 new models: incidencias and incapacidades, they wi
     'category': 'Employees',
     'depends': [
         'hr','nomina_cfdi_ee',
-        'report_xlsx', 'om_hr_payroll', #"om_hr_payroll_account",
+        'report_xlsx', 'hr_payroll', #"om_hr_payroll_account",
     ],
     'data': [
         'data/hr_data.xml',

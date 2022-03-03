@@ -28,7 +28,7 @@
                 name="Total por empleado"
                 action="action_wizard_total_por_empleado"
                 parent="menu_payroll_payslip_reportes" 
-                groups="om_hr_payroll.group_hr_payroll_user"
+                groups="hr_payroll.group_hr_payroll_user"
                 sequence="21"/>
 
 </odoo>

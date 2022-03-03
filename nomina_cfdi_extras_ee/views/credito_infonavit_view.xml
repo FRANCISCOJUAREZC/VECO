@@ -78,7 +78,7 @@
           id="menu_action_tree_credito_infonavit"
           action="action_tree_credito_infonavit"
           sequence="200"
-          groups="om_hr_payroll.group_hr_payroll_user"
+          groups="hr_payroll.group_hr_payroll_user"
       />
 
         <record id="action_selected_credito_infonavit" model="ir.actions.server">

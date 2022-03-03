@@ -5,7 +5,7 @@
         <field name="name">Préstamo</field>
         <field name="sequence" eval="390"/>
         <field name="code">390</field>
-        <field name="category_id" ref="om_hr_payroll.DED"/>
+        <field name="category_id" ref="hr_payroll.DED"/>
         <field name="condition_select">none</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">result = (payslip.installment_amount or 0)</field>
@@ -15,7 +15,7 @@
         <field name="name">Interés del préstamo</field>
         <field name="sequence" eval="391"/>
         <field name="code">391</field>
-        <field name="category_id" ref="om_hr_payroll.DED"/>
+        <field name="category_id" ref="hr_payroll.DED"/>
         <field name="condition_select">none</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">result = (payslip.installment_int or 0)</field>

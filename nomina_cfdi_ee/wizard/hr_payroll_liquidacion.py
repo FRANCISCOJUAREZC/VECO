@@ -56,7 +56,7 @@ class GeneraLiquidaciones(models.TransientModel):
 
     def calculo_create(self):
         employee = self.employee_id
-        module = self.env['ir.module.module'].sudo().search([('name','=','om_hr_payroll_account_ee')])
+        module = self.env['ir.module.module'].sudo().search([('name','=','hr_payroll_account')])
         if not employee:
             raise Warning("Seleccione primero al empleado.")
         payslip_batch_nm = 'Liquidacion ' + employee.name

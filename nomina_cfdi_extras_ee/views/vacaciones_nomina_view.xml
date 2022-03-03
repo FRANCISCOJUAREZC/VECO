@@ -75,7 +75,7 @@
           id="menu_action_tree_vacaciones_nomina"
           action="action_tree_vacaciones_nomina"
           sequence="4"
-          groups="om_hr_payroll.group_hr_payroll_user"
+          groups="hr_payroll.group_hr_payroll_user"
       />
 
 </odoo>

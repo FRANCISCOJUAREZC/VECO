@@ -169,8 +169,8 @@
         </field>
     </record>
     
-    <menuitem id="menu_main_employee_loan" parent="hr.menu_hr_root" name="Deducciones recurrentes" sequence="15"  groups="om_hr_payroll.group_hr_payroll_user" /> 
-    <menuitem name="Deducción recurrente" id="menu_employee_loan" parent="menu_main_employee_loan" action="action_employee_loan" groups="om_hr_payroll.group_hr_payroll_user"/>
+    <menuitem id="menu_main_employee_loan" parent="hr.menu_hr_root" name="Deducciones recurrentes" sequence="15"  groups="hr_payroll.group_hr_payroll_user" /> 
+    <menuitem name="Deducción recurrente" id="menu_employee_loan" parent="menu_main_employee_loan" action="action_employee_loan" groups="hr_payroll.group_hr_payroll_user"/>
 
 	<record id="action_reporte_de_prestamos" model="ir.actions.server">
         <field name="name">Reporte de Prestamos</field>
@@ -186,7 +186,7 @@
           parent="hr.menu_hr_root"
           id="menu_main_reportes"
           sequence="90"
-          groups="om_hr_payroll.group_hr_payroll_user"
+          groups="hr_payroll.group_hr_payroll_user"
       />
 
 	<menuitem id="menu_action_reporte_de_prestamos"

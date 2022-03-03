@@ -36,7 +36,7 @@
             name="ISR retenido y SUBEM"
             action="action_wizard_calculo_isr_anual"
             parent="menu_payroll_payslip_reportes"
-            groups="om_hr_payroll.group_hr_payroll_user"
+            groups="hr_payroll.group_hr_payroll_user"
             sequence="20"/>
 
 </odoo>

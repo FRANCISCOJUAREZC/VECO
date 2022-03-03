@@ -10,7 +10,7 @@
     'version': '15.01',
     'category': 'Employees',
     'depends': [
-        'om_hr_payroll',
+        'hr_payroll',
     ],
     'data': [
         'security/security.xml',

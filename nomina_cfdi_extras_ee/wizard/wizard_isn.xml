@@ -34,7 +34,7 @@
             name="Impuesto sobre nómina"
             action="action_wizard_isn"
             parent="menu_payroll_payslip_reportes"
-            groups="om_hr_payroll.group_hr_payroll_user"
+            groups="hr_payroll.group_hr_payroll_user"
             sequence="90"/>
 
 </odoo>

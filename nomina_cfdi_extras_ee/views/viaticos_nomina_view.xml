@@ -103,7 +103,7 @@
           parent="hr.menu_hr_root"
           id="menu_main_viaticos"
           sequence="82"
-          groups="om_hr_payroll.group_hr_payroll_user"
+          groups="hr_payroll.group_hr_payroll_user"
       />
       
     <menuitem
@@ -112,7 +112,7 @@
           id="menu_action_tree_viaticos_nomina"
           action="action_tree_viaticos_nomina"
           sequence="4"
-          groups="om_hr_payroll.group_hr_payroll_user"
+          groups="hr_payroll.group_hr_payroll_user"
       />
 
 </odoo>

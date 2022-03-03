@@ -84,7 +84,7 @@
           id="menu_action_tree_incapacidades_nomina"
           action="action_tree_incapacidades_nomina"
           sequence="86"
-          groups="om_hr_payroll.group_hr_payroll_user"
+          groups="hr_payroll.group_hr_payroll_user"
       />
 
 </odoo>
