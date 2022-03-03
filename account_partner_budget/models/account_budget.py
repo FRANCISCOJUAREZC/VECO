@@ -14,7 +14,6 @@ class CrossoveredBudgetLines(models.Model):
          the partner on the analytic lines to achievement computation.'''
     )
 
-    @api.multi
     def _compute_practical_amount(self):
         """Method overriden in order to compute the practical amount
         filtered by the base filter adding the partner field"""
