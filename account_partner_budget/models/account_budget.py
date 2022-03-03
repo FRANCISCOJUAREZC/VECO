@@ -63,7 +63,6 @@ class CrossoveredBudgetLines(models.Model):
             self.env.cr.execute(select, where_clause_params)
             line.practical_amount = self.env.cr.fetchone()[0] or 0.0
 
-    @api.multi
     def action_open_budget_entries(self):
         """Super method overriden in order to
         add the partner to the action domain"""
