@@ -64,6 +64,6 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem id="menu_action_wizard_reglas_salariales" name="Genera liquidaciones"  action="action_wizard_liquidacion" parent="hr_work_entry_contract.menu_hr_payroll_root" sequence="80" groups="hr_payroll.group_hr_payroll_user"/>
+    <menuitem id="menu_action_wizard_reglas_salariales" name="Genera liquidaciones"  action="action_wizard_liquidacion" parent="hr_work_entry_contract_enterprise.menu_hr_payroll_root" sequence="80" groups="hr_payroll.group_hr_payroll_user"/>
 
 </odoo>

@@ -40,7 +40,7 @@
         id="exportar_cfdi_wizard_main_menu"
         name="Exportar"
         parent="hr.menu_hr_root"
-        groups="om_hr_payroll.group_hr_payroll_user"
+        groups="hr_payroll.group_hr_payroll_user"
         sequence="85"/>
 
     <menuitem

@@ -47,7 +47,7 @@
                 name="SBC Bimestral"
                 action="action_wizard_sbc_bimestral"
                 parent="nomina_cfdi_sbc.main_menu_wizard_sbc_bimestral"
-                groups="om_hr_payroll.group_hr_payroll_user"
+                groups="hr_payroll.group_hr_payroll_user"
                 sequence="20"/>
     
 

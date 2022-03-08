@@ -177,7 +177,7 @@
 		                </notebook>
             		</sheet>
             	</xpath>
-                <button name="draft_payslip_run" position="after">
+                <button name="action_draft" position="after">
                     <field name="all_payslip_generated" invisible="1" />
                     <field name="all_payslip_generated_draft" invisible="1" />
                     <button string="Timbrar Nomina" name="timbrar_nomina" type="object" attrs="{'invisible':['|', ('all_payslip_generated','=',True), ('state','=','close')]}" class="oe_highlight"/>

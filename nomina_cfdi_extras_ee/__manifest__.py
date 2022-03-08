@@ -36,7 +36,7 @@ This new module will create 2 new models: incidencias and incapacidades, they wi
        # 'edi/mail_template.xml',
        # 'edi/skip_installment_mail_template.xml',
         'views/pay_slip_view.xml',
-        'views/salary_structure.xml',
+       # 'views/salary_structure.xml',
         'views/hr_contract_view.xml',
         'views/dias_feriados_view.xml',
         #'wizard/import_loan_views.xml',
