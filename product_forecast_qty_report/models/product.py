@@ -9,7 +9,6 @@ from odoo.addons import decimal_precision as dp
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    @api.multi
     def action_product_forecast(self):
         self.ensure_one()
         ProductForecastReport = self.env['product.forecast.report']
@@ -26,7 +25,6 @@ class ProductTemplate(models.Model):
 class ProductProduct(models.Model):
     _inherit = "product.product"
 
-    @api.multi
     def generate_forecast_report(self, variants_available):
         self.ensure_one()
         ProductForecastReport = self.env['product.forecast.report']
@@ -103,7 +101,6 @@ class ProductProduct(models.Model):
         }
         return action
 
-    @api.multi
     def action_product_forecast(self):
         self.ensure_one()
         ProductForecastReport = self.env['product.forecast.report']

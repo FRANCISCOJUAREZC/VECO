@@ -10,7 +10,7 @@ class AccountMove(models.Model):
 
     mrp_timeline_id = fields.Many2one(
         comodel_name='mrp.workcenter.productivity',
-        # ondelete='cascade',
+        ondelete='cascade',
     )
 
 
