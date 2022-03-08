@@ -48,7 +48,7 @@ class DictDiffer(object):
 
 
 class AuditlogRule(models.Model):
-    _name = "auditlog.rule"
+    _name = 'auditlog.rule'
     _description = "Auditlog - Rule"
 
     name = fields.Char(required=True, states={"subscribed": [("readonly", True)]})
