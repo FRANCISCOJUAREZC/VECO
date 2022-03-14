@@ -120,14 +120,7 @@ class AuditlogRule(models.Model):
         ),
         states={"subscribed": [("readonly", True)]},
     )
-    # log_action = fields.Boolean(
-    #     "Log Action",
-    #     help=("Select this if you want to keep track of actions on the "
-    #           "model of this rule"))
-    # log_workflow = fields.Boolean(
-    #     "Log Workflow",
-    #     help=("Select this if you want to keep track of workflow on any "
-    #           "record of the model of this rule"))
+
     state = fields.Selection(
         [("draft", "Draft"), ("subscribed", "Subscribed")],
         required=True,
@@ -169,10 +162,9 @@ class AuditlogRule(models.Model):
         updated = False
         model_cache = self.pool._auditlog_model_cache
         for rule in self:
-            if rule.state != "subscribed":
-                continue
-            if not self.pool.get(rule.model_id.model or rule.model_model):
-                # ignore rules for models not loadable currently
+            if rule.state != "subscribed" or not self.pool.get(
+                rule.model_id.model or rule.model_model
+            ):
                 continue
             model_cache[rule.model_id.model] = rule.model_id.id
             model_model = self.env[rule.model_id.model or rule.model_model]
@@ -673,5 +665,4 @@ class AuditlogRule(models.Model):
             act_window = rule.action_id
             if act_window:
                 act_window.unlink()
-        self.write({"state": "draft"})
-        return True
+        return self.write({"state": "draft"})
