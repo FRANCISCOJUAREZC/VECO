@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="icon_btn_blue" model="ir.attachment">
+        <field name="name">xunel icon small</field>
+        <field name="datas" type="base64" file="account_xunnel/static/src/img/xunnel-blue.svg"/>
+        <field name="public" eval="True"/>
+        <field name="type">url</field>
+    </record>
+
+    <record id="icon_btn_white" model="ir.attachment">
+        <field name="name">xunel icon small</field>
+        <field name="datas" type="base64" file="account_xunnel/static/src/img/xunnel-white.svg"/>
+        <field name="public" eval="True"/>
+        <field name="type">url</field>
+    </record>
+
+    <record id="no_content_tree_view" model="ir.attachment">
+        <field name="name">xunel icon big</field>
+        <field name="datas" type="base64" file="account_xunnel/static/src/img/xunnel-icon.png"/>
+        <field name="public" eval="True"/>
+        <field name="type">url</field>
+    </record>
+
+</odoo>

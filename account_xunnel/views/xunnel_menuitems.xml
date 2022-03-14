@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_xunnel_configuration" name="Xunnel" parent="account.menu_finance_configuration" sequence='3'/>
+    <menuitem id="xunnel_add_account" name="Credential Creator" parent="account_xunnel.menu_xunnel_configuration" action="add_account_action" sequence='1'/>
+    <menuitem id="xunnel_download_accounts" name="Download Accounts" parent="account_xunnel.menu_xunnel_configuration" action="wizard_download_bank_accounts_action" sequence='2'/>
+    <menuitem id="xunnel_set_up_connection_token" name="Set Up Token" parent="account_xunnel.menu_xunnel_configuration" action="wizard_set_up_connection_token_action" sequence='3'/>
+</odoo>

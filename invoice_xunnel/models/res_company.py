@@ -3,8 +3,8 @@
 
 import base64
 from codecs import BOM_UTF8
-from time import mktime
 from datetime import date
+from time import mktime
 
 from lxml import objectify
 from lxml.etree import XMLSyntaxError
@@ -17,27 +17,36 @@ BOM_UTF8U = BOM_UTF8.decode('UTF-8')
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    xunnel_last_sync = fields.Date(
-        string='Last Sync with Xunnel',
-        default=lambda _: date.today())
+    xunnel_last_sync = fields.Date(string='Last Sync with Xunnel', default=lambda _: date.today())
 
-    @api.multi
-    def _sync_xunnel_attachments(self):
+    @api.model
+    def l10n_mx_edi_get_tfd_etree(self, cfdi):
+        """Get the TimbreFiscalDigital node from the cfdi.
+
+        :param cfdi: The cfdi as etree
+        :return: the TimbreFiscalDigital node
+        """
+        if not hasattr(cfdi, 'Complemento'):
+            return None
+        attribute = 'tfd:TimbreFiscalDigital[1]'
+        namespace = {'tfd': 'http://www.sat.gob.mx/TimbreFiscalDigital'}
+        node = cfdi.Complemento.xpath(attribute, namespaces=namespace)
+        return node[0] if node else None
+
+    def _sync_xunnel_documents(self):
         """Requests https://wwww.xunnel.com/ to retrive all invoices
         related to the current company and check them in the database
         to create them if they're not. After refresh xunnel_last_sync
         """
         self.ensure_one()
         if not self.vat and self.xunnel_token:
-            raise UserError(
-                _('You need to define the VAT of your company.'))
+            raise UserError(_('You need to define the VAT of your company.'))
         values = dict(
             last_sync=False,
-            vat=self.vat,
-            xunnel_testing=self.xunnel_testing)
+            xunnel_testing=False,
+            vat=self.vat)
         if self.xunnel_last_sync:
-            values.update(last_sync=mktime(
-                self.xunnel_last_sync.timetuple()))
+            values.update(last_sync=mktime(self.xunnel_last_sync.timetuple()))
         response = self._xunnel('get_invoices_sat', values)
         err = response.get('error')
         if err:
@@ -45,46 +54,40 @@ class ResCompany(models.Model):
         if response.get('response') is None:
             return True
         dates = []
-        created = failed = 0
+        failed = 0
+        created = []
         folder_id = self.env.ref('documents.documents_finance_folder')
-        tag_id = self.env.ref('invoice_xunnel.without_invoice')
         for item in response.get('response'):
             xml = item.lstrip(BOM_UTF8U).encode("UTF-8")
             try:
+                xml = xml.replace(b'xmlns:schemaLocation', b'xsi:schemaLocation')
                 xml_obj = objectify.fromstring(xml)
             except XMLSyntaxError:
                 failed += 1
                 continue
-            xml_type = xml_obj.get('TipoDeComprobante', False)
-            tags_type = self.get_tag_map(xml_type) | tag_id
             dates.append(xml_obj.get('Fecha', xml_obj.get('fecha', ' ')))
-            uuid = self.env['account.invoice'].l10n_mx_edi_get_tfd_etree(
-                xml_obj).get('UUID')
-            attachment = self.env['ir.attachment'].search([
-                ('name', '=', uuid)])
-            if not attachment:
-                created += 1
-                attachment.create({
-                    'name': uuid,
-                    'xunnel_attachment': True,
-                    'datas_fname': (
-                        uuid + '.xml'),
+            uuid = self.l10n_mx_edi_get_tfd_etree(xml_obj).get('UUID')
+            datas_fname = "%s.xml" % (uuid)
+            document = self.env['documents.document'].search([('name', '=', datas_fname), ('name', '!=', False)])
+            if not document:
+                document = document.with_context(xml_obj=xml_obj, no_document=True).create({
+                    'name': datas_fname,
+                    'xunnel_document': True,
                     'type': 'binary',
-                    'datas': base64.encodestring(bytes(xml)),
+                    'datas': base64.b64encode(bytes(xml)),
                     'index_content': xml,
                     'mimetype': 'application/xml',
                     'folder_id': folder_id.id,
-                    'tag_ids': [(6, 0, tags_type.ids)],
                 })
+                created.append(document.id)
         self.xunnel_last_sync = max(dates) if dates else self.xunnel_last_sync
         return {
             'created': created,
             'failed': failed,
         }
 
-    @api.multi
     def get_xml_sync_action(self):
-        result = self._sync_xunnel_attachments()
+        result = self._sync_xunnel_documents()
         message_class = 'success'
         message = _(
             "%s xml have been downloaded.") % result.get('created')
@@ -92,23 +95,13 @@ class ResCompany(models.Model):
         if failed:
             message_class = 'warning'
             message += _(
-                " Also %s files have failed at the conversion.") % failed
+                "\nAlso %s files have failed at the conversion."
+                "\nWe sent you an email with the details of the failed invoices.") % failed
+        action_params = {'message': message, 'message_class': message_class}
         return {
             'type': 'ir.actions.client',
-            'tag': 'account_xunnel.syncrhonized_accounts',
+            'tag': 'account_xunnel.synchronized_accounts',
             'name': _('Xunnel invoice response.'),
             'target': 'new',
-            'message': message,
-            'message_class': message_class
+            'params': action_params,
         }
-
-    def get_tag_map(self, key):
-        default = self.env['documents.tag']
-        values = {
-            'I': self.env.ref('invoice_xunnel.ingreso_tag'),
-            'E': self.env.ref('invoice_xunnel.egreso_tag'),
-            'T': self.env.ref('invoice_xunnel.translado_tag'),
-            'P': self.env.ref('invoice_xunnel.reception_tag'),
-            'N': self.env.ref('invoice_xunnel.nomina_tag'),
-        }
-        return values.get(key, default)

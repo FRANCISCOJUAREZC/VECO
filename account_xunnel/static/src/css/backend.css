@@ -1,0 +1,38 @@
+.__css_btn_xunnel__ {
+    border: none;
+    padding-left: 2em;
+    border-radius: 3px;
+    background-size: 23px, auto !important;
+    filter: drop-shadow(2px 2px 2px #777);
+}
+
+.__css_btn_xunnel__.btn-primary {
+    background: url(/web/content/account_xunnel.icon_btn_white) -2px 2px no-repeat, linear-gradient(to left, #00558c, #009bd2);
+}
+
+.__css_btn_xunnel__.btn-secondary {
+    background: url(/web/content/account_xunnel.icon_btn_blue) -2px 2px no-repeat, linear-gradient(#FFF, #FFF);
+    color: #266ca2;
+}
+
+.o_view_nocontent .o_nocontent_help .__css_xunnel_no_content__:before {
+    background: transparent url(/web/content/account_xunnel.no_content_tree_view) no-repeat center;
+}
+
+.__css_paybook_widget__ img.logo-xunnel {
+    filter: drop-shadow(2px 3px 3px #AAA);
+}
+
+.__css_paybook_widget__ .pb-w-sync_widget-header {
+    background-image: url('https://www.xunnel.com/web/image/theme_xunnel.modal_header');
+    color: white;
+}
+
+.__css_paybook_widget__ .pb-w-sync_widget-header h1 {
+    color: white;
+}
+
+.__css_paybook_widget__ .pb-w-sync_widget-header button svg,
+.__css_paybook_widget__ .pb-w-sync_widget-header .el-icon-close.pb-w-sync_icon-close {
+    filter: invert();
+}

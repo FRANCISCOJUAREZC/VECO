@@ -1,0 +1,4 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_xunnel_documents_wizard,access_xunnel_documents_wizard,model_xunnel_documents_wizard,base.group_user,1,1,1,0
+access_wizard_change_date_root,access_wizard_change_date_root,account_xunnel.model_wizard_change_date,base.group_user,1,1,1,0
+access_attach_xmls_wizard,access_attach_xmls_wizard,model_attach_xmls_wizard,base.group_user,1,0,0,0

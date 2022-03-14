@@ -21,9 +21,30 @@ msgid "<i class=\"fa fa-refresh fa-fw\"/> Synchronize banks &amp; accounts"
 msgstr "<i class=\"fa fa-refresh fa-fw\"/> Sincronizar bancos &amp; cuentas"
 
 #. module: account_xunnel
+#: model_terms:ir.ui.view,arch_db:account_xunnel.wizard_download_bank_accounts_form_view
+msgid ""
+".\n"
+"                        <br/>\n"
+"                        <br/>\n"
+"                        Are you sure you want to do this action? Press the cancel button to abort the process."
+msgstr ""
+".\n"
+"                        <br/>\n"
+"                        <br/>\n"
+"                        Esta seguro de que quiere hacer esta acción? Presione el botón cancelar para abortar el proceso."
+
+#. module: account_xunnel
 #: model_terms:ir.ui.view,arch_db:account_xunnel.account_journal_dashboard_inherit_online_sync_id
-msgid "<small class=\"text-danger\" attrs=\"{'invisible': ['|', ('has_synchronized_xunnel', '=', True), ('account_online_journal_id', '=', False)]}\">Online synchronization may duplicate the transactions added manually.</small>"
-msgstr "<small class=\"text-danger\" attrs=\"{'invisible': [('has_synchronized_xunnel', '=', True)]}\">La sincronización en línea puede duplicar las transacciones agregadas manualmente.</small>"
+msgid ""
+"<small class=\"text-danger\" attrs=\"{'invisible': ['|', "
+"('has_synchronized_xunnel', '=', True), ('account_online_link_id', '=', "
+"False)]}\">Online synchronization may duplicate the transactions added "
+"manually.</small>"
+msgstr ""
+"<small class=\"text-danger\" attrs=\"{'invisible': ['|', "
+"('has_synchronized_xunnel', '=', True), ('account_online_link_id', '=', "
+"False)]}\">La sincronización en línea puede duplicar transacciones agregadas "
+"manualmente.</small>"
 
 #. module: account_xunnel
 #: model_terms:ir.ui.view,arch_db:account_xunnel.view_account_journal_dashboard_kanban_xunnel
@@ -31,10 +52,48 @@ msgid "<span title=\"Latest synchronization\">Xunnel Last sync</span>"
 msgstr "<span title=\"Latest synchronization\">Última sincronización Xunnel</span>  "
 
 #. module: account_xunnel
-#: code:addons/account_xunnel/models/account_config_settings.py:59
+#: model_terms:ir.ui.view,arch_db:account_xunnel.wizard_download_bank_accounts_form_view
+msgid "Acept & download"
+msgstr "Aceptar y descargar"
+
+#. module: account_xunnel
+#: code:addons/account_xunnel/models/res_config_settings.py:0
 #, python-format
 msgid "An error has occurred while synchronizing your banks. %s"
 msgstr "Ha sucedido un error mientras se sincronizaban los bancos. %s   "
+
+#. module: account_xunnel
+#: model:ir.model,name:account_xunnel.model_account_bank_statement_line
+msgid "Bank Statement Line"
+msgstr "Línea de extracto bancario"
+
+#. module: account_xunnel
+#: model_terms:ir.ui.view,arch_db:account_xunnel.change_xunnel_last_sync_date_view
+#: model_terms:ir.ui.view,arch_db:account_xunnel.wizard_download_bank_accounts_form_view
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: account_xunnel
+#: model:ir.model.fields,field_description:account_xunnel.field_account_bank_statement_line__card_number
+msgid "Card Number"
+msgstr "Número de Tarjeta"
+
+#. module: account_xunnel
+#: model_terms:ir.ui.view,arch_db:account_xunnel.change_xunnel_last_sync_date_view
+msgid "Change date"
+msgstr "Cambiar fecha"
+
+#. module: account_xunnel
+#: model:ir.model,name:account_xunnel.model_wizard_change_date
+msgid "Change the sync date from an online account"
+msgstr "Cambie la fecha de sincronización de una cuenta en línea"
+
+#. module: account_xunnel
+#. openerp-web
+#: code:addons/account_xunnel/static/src/xml/add_account_manager.xml:0
+#, python-format
+msgid "Click to start"
+msgstr "Clic para iniciar"
 
 #. module: account_xunnel
 #: model:ir.model,name:account_xunnel.model_res_company
@@ -42,9 +101,68 @@ msgid "Companies"
 msgstr "Compañías"
 
 #. module: account_xunnel
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_set_up_connection_token__company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: account_xunnel
 #: model:ir.model,name:account_xunnel.model_res_config_settings
 msgid "Config Settings"
 msgstr "Opciones de Configuración"
+
+#. module: account_xunnel
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_change_date__create_uid
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_download_bank_accounts__create_uid
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_set_up_connection_token__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: account_xunnel
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_change_date__create_date
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_download_bank_accounts__create_date
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_set_up_connection_token__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: account_xunnel
+#: model:ir.ui.menu,name:account_xunnel.xunnel_add_account
+msgid "Credential Creator"
+msgstr "Creador de Credenciales"
+
+#. module: account_xunnel
+#: model:ir.actions.client,name:account_xunnel.add_account_action
+msgid "Credentials manager"
+msgstr "Administrador de Credenciales"
+
+#. module: account_xunnel
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_change_date__display_name
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_download_bank_accounts__display_name
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_set_up_connection_token__display_name
+msgid "Display Name"
+msgstr "Nombre para Mostrar"
+
+#. module: account_xunnel
+#: model:ir.ui.menu,name:account_xunnel.xunnel_download_accounts
+msgid "Download Accounts"
+msgstr "Descargar Cuentas"
+
+#. module: account_xunnel
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_change_date__id
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_download_bank_accounts__id
+#: model:ir.model.fields,field_description:account_xunnel.field_wizard_set_up_connection_token__id
+msgid "ID"
+msgstr ""
+
+#. module: account_xunnel
+#: model_terms:ir.ui.view,arch_db:account_xunnel.change_xunnel_last_sync_date_view
+#: model_terms:ir.ui.view,arch_db:account_xunnel.wizard_download_bank_accounts_form_view
+msgid "Import Bank Statements"
+msgstr "Importar Movimientos Bancarios"
+
+#. module: account_xunnel
+#: model:ir.model.fields,field_description:account_xunnel.field_account_online_link__is_xunnel
+msgid "Is Xunnel"
+msgstr "Es Xunnel"
 
 #. module: account_xunnel
 #: model:res.company,overdue_msg:account_xunnel.webhook_company
@@ -72,6 +190,7 @@ msgid "Enable/Disable Xunnel Test Environment."
 msgstr "Activa/Desactiva Ambiente de pruebas de Xunnel."
 
 #. module: account_xunnel
+#: model:ir.model.fields,field_description:account_xunnel.field_account_bank_statement_import_journal_creation__has_synchronized_xunnel
 #: model:ir.model.fields,field_description:account_xunnel.field_account_journal__has_synchronized_xunnel
 msgid "Has Synchronized Xunnel"
 msgstr "Sincronizada con Xunnel"
@@ -92,15 +211,40 @@ msgid "Key-like text for authentication in controllers."
 msgstr "Llave de autenticación para los controllers."
 
 #. module: account_xunnel
+#: code:addons/account_xunnel/models/account_journal.py:0
+#, python-format
+msgid ""
+"No item was found in the period of time that you choose, please change the"
+"                                     Xunnel Synchronization Date of the "
+"journal or check if its associated  account"
+"                                     has transactions at www.xunnel.com"
+msgstr "No se encontró ningún ítem en el periodo de tiempo elegido, por favor modifique el valor de Fecha de sincronización Xunnel de este diario o revise si su cuenta asociada tiene transacciones en www.xunnel.com"
+
+#. module: account_xunnel
 #: model:ir.model.fields,field_description:account_xunnel.field_account_journal__online_journal_last_sync
 msgid "Online account last synchronization"
 msgstr "Última sincronización de cuenta en linea"
 
 #. module: account_xunnel
+#: model_terms:ir.ui.view,arch_db:account_xunnel.change_xunnel_last_sync_date_view
+msgid ""
+"Only de statements after the date specified will be fetched at the "
+"synchronization"
+msgstr "Sólo los movimientos con fecha posterior a la especificada serán traidos durante la sincronización"
+
+#. module: account_xunnel
 #: code:addons/account_xunnel/models/xunnel_online_account.py:108
 #, python-format
 msgid "Opening statement: first synchronization"
-msgstr ""
+msgstr "Movimiento de Apertura: Primer sincronización"
+
+#. module: account_xunnel
+#. openerp-web
+#: code:addons/account_xunnel/static/src/xml/add_account_manager.xml:0
+#: code:addons/account_xunnel/static/src/xml/add_account_manager.xml:0
+#, python-format
+msgid "Press (esc) to close"
+msgstr "Presione (esc) para cerrar"
 
 #. module: account_xunnel
 #: selection:account.online.provider,provider_type:0
@@ -121,6 +265,16 @@ msgstr "Proveedor de sincronización de cuenta en línea"
 #: model:ir.model.fields,help:account_xunnel.field_account_journal__has_synchronized_xunnel
 msgid "Recognize if has synchronized with Xunnel"
 msgstr "Reconocer si se ha sincronizado con Xunnel"
+
+#. module: account_xunnel
+#: model_terms:ir.ui.view,arch_db:account_xunnel.change_xunnel_last_sync_date_view
+msgid "Select a date to start syncing"
+msgstr "Seleccione una fecha para comenzar a sincronizar"
+
+#. module: account_xunnel
+#: model:ir.ui.menu,name:account_xunnel.xunnel_set_up_connection_token
+msgid "Set Up Token"
+msgstr "Configurar Token"
 
 #. module: account_xunnel
 #: code:addons/account_xunnel/models/account_config_settings.py:62

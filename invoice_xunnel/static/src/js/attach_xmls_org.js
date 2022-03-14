@@ -1,13 +1,14 @@
-odoo.define('invoice_xunnel.l10n_mx_edi_vendor_bills', function (require) {
+odoo.define('xunnel_invoice.l10n_mx_edi_vendor_bills', function (require) {
 "use strict";
+
+var basicFields = require('web.basic_fields');
 var FieldRegistry = require('web.field_registry');
-var FieldChar = FieldRegistry.get('char');
+var FieldChar = basicFields.FieldChar;
 
 var _t = require('web.translation')._t;
 
-
 var attachXmlsWizard = FieldChar.extend({
-    template: 'invoice_xunnel.attach_xmls_template',
+    template: 'xunnel_invoice.attach_xmls_template',
 
     events: {
         // events drag and drop on the div handler
@@ -93,7 +94,7 @@ var attachXmlsWizard = FieldChar.extend({
                     name: _t('Supplier Invoices'),
                     view_type: 'list',
                     view_mode: 'list,form',
-                    res_model: 'account.invoice',
+                    res_model: 'account.move',
                     type: 'ir.actions.act_window',
                     views: [[false, 'list'], [false, 'form']],
                     targe: 'current',

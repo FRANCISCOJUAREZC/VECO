@@ -1,4 +1,3 @@
-
 from odoo import http
 from odoo.addons.web.controllers.main import Binary
 

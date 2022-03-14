@@ -5,10 +5,10 @@ odoo.define('account_xunnel.synchronized_accounts', (require) => {
     const core = require('web.core');
 
     const SyncrhonizedAccounts = Action.extend({
-        template: 'account_xunnel.synchronized_accounts',
+        template: 'account_xunnel.synchronized_accounts_template',
         init(parent, ctx){
-            this.message = ctx.message;
-            this.message_class = ctx.message_class;
+            this.message = ctx['params'].message;
+            this.message_class = ctx['params'].message_class;
             return this._super.apply(this, arguments);
         }, _close_action(){
             this.do_action({type: 'ir.actions.act_window_close'});
@@ -19,5 +19,5 @@ odoo.define('account_xunnel.synchronized_accounts', (require) => {
         }
     });
 
-    core.action_registry.add('account_xunnel.syncrhonized_accounts', SyncrhonizedAccounts)
+    core.action_registry.add('account_xunnel.synchronized_accounts', SyncrhonizedAccounts)
 })

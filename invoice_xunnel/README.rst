@@ -4,29 +4,32 @@
 Invoice Xunnel
 ==============
 
-This App allows you to sync your invoices/attachments with Odoo
+This app allows you to synchronize your invoices/documents from Xunnel with Odoo
 
-How To use it
--------------
+**How To Use It**
+-----------------
 
-- If you don't have a Xunnel Account, you must create it in xunnel.com.
+- If you don't have any Xunnel Account, you must create it at www.xunnel.com.
 - Login to your account.
 - Sync the accounts or banks that you need in the company.
 - Copy the token of the company.
-- Go to Accounting/Configuration/Settings then Xunnel Configuration and paste the token in Xunnel Token.
-- Set the start date to get your invoices/attachments.
-- Press the button "Sync Attachments".
+- Go to Accounting > Configuration > Settings > Xunnel Configuration and paste the token in Xunnel Token field, this can also be done in Accounting > Configuration > Xunnel > Set up token.
+- Set the start date to get your invoices/documents.
+- Press the button "Sync documents".
 
 .. figure:: invoice_xunnel/static/description/config-invoice.jpeg
 
 - Activate developer mode
-- Go to Settings/Technical/Attachments and you will see your attachments.
+- Go to Settings > Technical > Documents and you will see your documents.
 
-.. figure:: invoice_xunnel/static/description/attachment.jpeg
+.. figure:: invoice_xunnel/static/description/document.jpeg
 
 
-Maintainer
-----------
+To check some videos go to [Xunnel User Manual](https://xunnel.com/en_US/user-manual)
+
+
+**Maintainer**
+--------------
 
 .. image:: https://xunnel.com/logo.png
    :alt: Xunnel

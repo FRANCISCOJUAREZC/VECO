@@ -1,6 +1,5 @@
 import json
 
-
 GET_XUNNEL_PROVIDERS = {
     'response': [{
         'name': 'Acme Bank-Normal',

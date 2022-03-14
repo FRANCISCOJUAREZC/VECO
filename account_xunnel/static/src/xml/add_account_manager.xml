@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<template xml:space="preserve">
+
+    <t t-name="account_xunnel.no_token">
+        <section class="__css_paybook_widget__ py-5 my-4 text-center">
+            <h6 class="text-center text-muted mt-5">Press (esc) to close</h6>
+        </section>
+    </t>
+    <t t-name="account_xunnel.add_account_manager">
+        <section class="__css_paybook_widget__ py-5 my-4 text-center">
+            <img src="/web/content/account_xunnel.no_content_tree_view" alt="Logo" class="mx-auto logo-xunnel"/>
+            <div class="__js_dynamic_content__">
+                <h4 class="text-center text-muted mt-5"> <i class="fa fa-spin fa-spinner"></i> loading...</h4>
+            </div>
+            <h6 class="text-center text-muted mt-5">Press (esc) to close</h6>
+        </section>
+    </t>
+    <t t-name="account_xunnel.add_account_start_manager">
+        <a href="#" class="btn btn-link text-center text-muted mt-5 __css_btn_start_manager__">Click to start</a>
+    </t>
+    <t t-name="account_xunnel.synchronized_accounts_template">
+        <div t-attf-class="alert alert-#{widget.message_class}">
+            <h3 t-attf-class="mt8 mb8 ml8 text-#{widget.message_class}" t-esc="widget.message"/>
+        </div>
+    </t>
+    <t t-name="account_xunnel.synchronized_accounts_footer">
+        <div>
+            <button class="btn btn-primary js_cancel pull-right">Ok</button>
+        </div>
+    </t>
+
+</template>

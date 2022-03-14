@@ -5,7 +5,7 @@
         <field name="model">account.journal</field>
         <field name="inherit_id" ref="account.account_journal_dashboard_kanban_view" />
         <field name="arch" type="xml">
-            <xpath expr="//t[@t-name='JournalBodyBankCash']/div[hasclass('o_kanban_primary_right')]" position="inside">
+            <xpath expr="//div[@id='dashboard_bank_cash_right']" position="inside">
                 <div attrs="{'invisible': [('online_journal_last_sync', '=', False)]}" class="row" name="last_synchronization">
                     <div class="col-xs-6">
                         <span title="Latest synchronization">Xunnel Last sync</span>
@@ -22,13 +22,13 @@
     <record id="account_journal_dashboard_inherit_online_sync_id" model="ir.ui.view">
         <field name="name">Xunnel accountant dashboard</field>
         <field name="model">account.journal</field>
-        <field name="inherit_id" ref="account_online_sync.account_journal_dashboard_inherit_online_sync" />
+        <field name="inherit_id" ref="account_online_synchronization.account_journal_dashboard_inherit_online_sync" />
         <field name="arch" type="xml">
-            <xpath expr="//t[starts-with(@t-if, 'record.synchronization_status.value !=')]" position="inside">
+            <xpath expr="//a[@name='manual_sync']" position="before">
                 <div class="mb8">
                     <field name="has_synchronized_xunnel"  invisible="True"/>
-                    <field name="account_online_journal_id"  invisible="True"/>
-                    <small class="text-danger" attrs="{'invisible': ['|', ('has_synchronized_xunnel', '=', True), ('account_online_journal_id', '=', False)]}">Online synchronization may duplicate the transactions added manually.</small>
+                    <field name="account_online_link_id"  invisible="True"/>
+                    <small class="text-danger" attrs="{'invisible': ['|', ('has_synchronized_xunnel', '=', True), ('account_online_link_id', '=', False)]}">Online synchronization may duplicate the transactions added manually.</small>
                 </div>
             </xpath>
         </field>
@@ -43,4 +43,5 @@
             </xpath>
         </field>
     </record>
+
 </odoo>

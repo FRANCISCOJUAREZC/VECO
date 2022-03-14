@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<odoo>
+
+    <record id="wizard_set_up_connection_token_form_view" model="ir.ui.view">
+        <field name="name">Xunnel configuration</field>
+        <field name="model">wizard.set.up.connection.token</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <sheet>
+                    <group>
+                        <div class="col-6">
+                            <h4>Super secret token</h4>
+                            <small class="text-muted">
+                                Type here the code you were given when you first created you connection token in
+                                <a target="_blank" href="https://www.xunnel.com/">https://www.xunnel.com/</a>.
+                            </small>
+                            <field password="True" class="mt-4" name="xunnel_token" nolabel="1"/>
+                        </div>
+                    </group>
+                </sheet>
+                <footer class="text-right">
+                    <button name="confirm" string="Save" class="btn btn-primary __css_btn_xunnel__" type="object" ></button>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="wizard_set_up_connection_token_action" model="ir.actions.act_window">
+        <field name="name">Xunnel configuration</field>
+        <field name="res_model">wizard.set.up.connection.token</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="wizard_set_up_connection_token_form_view"/>
+    </record>
+
+</odoo>

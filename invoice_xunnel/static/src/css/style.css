@@ -110,7 +110,7 @@
     cursor: pointer;
 }
 .xml_img{
-    content: url(/invoice_xunnel/static/src/img/xml.png);
+    content: url(/l10n_mx_edi_vendor_bills/static/src/img/xml.png);
 }
 .remove_xml{
     position: relative;
@@ -138,4 +138,10 @@
     background-color: #ebf7f4;
     border: 1px solid #21b799;
     color: #1c9079;
+}
+.ellipsis {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 200px;
 }

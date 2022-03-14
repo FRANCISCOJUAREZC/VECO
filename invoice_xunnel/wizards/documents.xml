@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="xunnel_documents_wizard_view" model="ir.ui.view">
+        <field name="name">xunnel.documents.wizard.form</field>
+        <field name="model">xunnel.documents.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group attrs="{'invisible': [('message', '!=', False)]}">
+                        <field name="date_from"/>
+                        <div class="text-muted">
+                            SAT's invoices older than this date won't be fetched.
+                        </div>
+                    </group>
+                    <group attrs="{'invisible': [('message', '=', False)]}">
+                        <div role="alert" class="alert alert-warning">
+                            <field readonly="1" name="message"/>
+                        </div>
+                    </group>
+                </sheet>
+                <footer>
+                    <field name="no_attachment_action" invisible="1" />
+                    <button attrs="{'invisible': [('message', '!=', False)]}" name="synchronize_documents" type="object" string="Confirm" class="oe_highlight"/>
+                    <button attrs="{'invisible': ['|', ('message', '=', False),('no_attachment_action', '=', True)]}" name="open_documents" type="object" string="See XMLs" class="oe_highlight"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_product_confirm_wizard" model="ir.actions.act_window">
+        <field name="name">Xunnel XML synchronization</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">xunnel.documents.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="invoice_xunnel.xunnel_documents_wizard_view"/>
+        <field name="target">new</field>
+    </record>
+    
+</odoo>

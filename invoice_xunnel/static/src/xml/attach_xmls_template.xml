@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <template>
-    <t t-name="invoice_xunnel.attach_xmls_template">
+    <t t-name="xunnel_invoice.attach_xmls_template">
         <div style="margin:-24px -16px;padding:0px;">
             <div id="dragandrophandler" class="dnd_normal"><p>Drag and Drop your files here</p><p>or Click to upload the files</p></div>
             <input type="file" id="files" multiple="multiple" style="display:none;"/>

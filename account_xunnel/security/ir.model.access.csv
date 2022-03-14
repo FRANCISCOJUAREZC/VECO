@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_wizard_set_up_connection_token,access_wizard_set_up_connection_token,model_wizard_set_up_connection_token,base.group_user,1,1,1,0
+access_wizard_change_date,access_wizard_change_date,model_wizard_change_date,base.group_user,1,1,1,0
+access_wizard_download_bank_accounts,access_wizard_download_bank_accounts,model_wizard_download_bank_accounts,base.group_user,1,1,1,0

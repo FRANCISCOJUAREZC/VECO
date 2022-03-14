@@ -1,6 +1,6 @@
 odoo.define('invoice_xunnel.document_viewer', (require) => {
 
-    const DocumentsViewer = require('mail.DocumentViewer');
+    const DocumentsViewer = require('@mail/js/document_viewer')[Symbol.for("default")];
     const ajax = require('web.ajax');
     const { qweb } = require('web.core');
 
@@ -8,20 +8,17 @@ odoo.define('invoice_xunnel.document_viewer', (require) => {
         xmlDependencies: [
             '/invoice_xunnel/static/src/xml/templates.xml'
         ],
-         events: Object.assign({
-            'click pre.prettyprint .atn, pre.prettyprint .atv': 'copy_attribute'
-        }, DocumentsViewer.prototype.events)
-        , init(parent, attachments, activeAttachmentID){
+        init(parent, documents, activedocumentID){
             this._super.apply(this, arguments);
-            this.attachment = _.filter(attachments, function(attachment) {
-                var match = attachment.type == 'url' ? attachment.url.match("(youtu|.png|.jpg|.gif)") : attachment.mimetype.match("(image|video|application/pdf|text)");
+            this.document = _.filter(documents, function(document) {
+                var match = document.type == 'url' ? document.url.match("(youtu|.png|.jpg|.gif)") : document.mimetype.match("(image|video|application/pdf|text)");
                 if (match) {
-                    attachment.type = match[1];
+                    document.type = match[1];
                     if (match[1].match("(.png|.jpg|.gif)")) {
-                        attachment.type = 'image';
+                        document.type = 'image';
                     }
                     if (match[1] === 'youtu') {
-                        var youtube_array = attachment.url.split('/');
+                        var youtube_array = document.url.split('/');
                         var youtube_token = youtube_array[youtube_array.length-1];
                         if (youtube_token.indexOf('watch') !== -1) {
                             youtube_token = youtube_token.split('v=')[1];
@@ -30,17 +27,17 @@ odoo.define('invoice_xunnel.document_viewer', (require) => {
                                 youtube_token = youtube_token.substring(0, amp);
                             }
                         }
-                        attachment.youtube = youtube_token;
+                        document.youtube = youtube_token;
                     }
                     return true;
                 } else{
-                    const match = attachment.type == 'url' ? false : attachment.mimetype.match("application/xml");
+                    const match = document.type == 'url' ? false : document.mimetype.match("application/xml");
                     if (match) {
                         return true;
                     }
                 }
             });
-            this.activeAttachment = _.findWhere(attachments, {id: activeAttachmentID});
+            this.activedocument = _.findWhere(documents, {id: activedocumentID});
             this._reset();
         }, start(){
             this._super.apply(this, arguments);
@@ -53,6 +50,8 @@ odoo.define('invoice_xunnel.document_viewer', (require) => {
                 ajax.post(route, {}).then((view) => {
                     const html = qweb.render('invoice_xunnel.xml_preview', { view });
                     xmlViewer.html(PR.prettyPrintOne(html.trim()));
+                    xmlViewer.find('pre.prettyprint .atn, pre.prettyprint .atv').click(
+                        this.copy_attribute.bind(this))
                 });
             }
         }, _onClose(ev){

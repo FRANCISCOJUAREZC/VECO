@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="xunnel_download_invoices" name="Download SAT XML" parent="account_xunnel.menu_xunnel_configuration" action="action_product_confirm_wizard" sequence='3'/>
+</odoo>
