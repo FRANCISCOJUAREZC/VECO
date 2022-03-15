@@ -5,7 +5,7 @@
     "description": """
     Added mutlti company filter in Payroll models.
     """,
-    "version": "12.0.1.0",
+    "version": "15.01",
     "author": "IT Admin",
     "website": "",
     "category": "Hidden",

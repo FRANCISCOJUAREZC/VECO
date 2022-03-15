@@ -1,39 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
     	<record id="ir_rule_hr_contract_multi_company" model="ir.rule">
             <field name="name">HR Contract: Multi Company</field>
             <field name="model_id" ref="hr_contract.model_hr_contract"/>
             <field name="global" eval="True"/>
-            <field name="domain_force">['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
         </record>
-        
+
         <record id="ir_rule_hr_payslip_run_multi_company" model="ir.rule">
             <field name="name">HR Payslip Batch: Multi Company</field>
             <field name="model_id" ref="hr_payroll.model_hr_payslip_run"/>
             <field name="global" eval="True"/>
-            <field name="domain_force">['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
         </record>
-        
+
         <record id="ir_rule_hr_payslip_multi_company" model="ir.rule">
             <field name="name">HR Payslip: Multi Company</field>
             <field name="model_id" ref="hr_payroll.model_hr_payslip"/>
             <field name="global" eval="True"/>
-            <field name="domain_force">['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
         </record>
-        
+
         <record id="ir_rule_hr_salary_rule_multi_company" model="ir.rule">
             <field name="name">HR Salary Rule: Multi Company</field>
             <field name="model_id" ref="hr_payroll.model_hr_salary_rule"/>
             <field name="global" eval="True"/>
-            <field name="domain_force">['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
         </record>
-        
+
         <record id="ir_rule_hr_payroll_structure_multi_company" model="ir.rule">
             <field name="name">HR Salary Structure: Multi Company</field>
             <field name="model_id" ref="hr_payroll.model_hr_payroll_structure"/>
             <field name="global" eval="True"/>
-            <field name="domain_force">['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+       <record id="ir_rule_hr_categories_multi_company" model="ir.rule">
+            <field name="name">HR Rule Category: Multi Company</field>
+            <field name="model_id" ref="hr_payroll.model_hr_salary_rule_category"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
         </record>
     </data>
 </odoo>
