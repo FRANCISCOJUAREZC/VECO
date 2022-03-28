@@ -11,7 +11,7 @@ class CrossoveredBudgetLines(models.Model):
     partner_id = fields.Many2one(
         comodel_name='res.partner',
         help='''If set, this budget line will take in care
-         the partner on the analytic lines to achievement computation.'''
+         the partner on the analytic lines to achievement computation.''',
     )
 
     def _compute_practical_amount(self):
