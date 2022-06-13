@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from datetime import datetime
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.exceptions import Warning
@@ -113,9 +113,9 @@ class ImportarDiasWizard(models.TransientModel):
                 if payslip not in worked_days_lines_by_payslip:
                     worked_days_lines_by_payslip[payslip] = []
                 if other_inputs:
-                    worked_lines = payslip.input_line_ids.filtered(lambda x:x.code==code)
+                    worked_lines = payslip.input_line_ids.code.filtered(lambda x:x.input_type_id.code==code)
                 else:    
-                    worked_lines = payslip.worked_days_line_ids.filtered(lambda x:x.code==code)
+                    worked_lines = payslip.worked_days_line_ids.code.filtered(lambda x:x.work_entry_type_id.code==code)
                     
                 if worked_lines:
                     worked_days_lines_by_payslip[payslip] += [(1, l.id, vals) for l in worked_lines]
