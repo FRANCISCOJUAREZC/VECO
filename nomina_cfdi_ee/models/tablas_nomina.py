@@ -40,22 +40,22 @@ class TablasPeriodoISR(models.Model):
     c_fija = fields.Float('Cuota fija') 
     s_excedente = fields.Float('Sobre excedente (%)')
 
-#class TablasSubsidio2lLine(models.Model):
-#    _name = 'tablas.subsidio2.line'
-#    _description = 'TablasSubsidio2lLine'
+class TablasSubsidio2lLine(models.Model):
+    _name = 'tablas.subsidio2.line'
+    _description = 'TablasSubsidio2lLine'
 
-#    form_id = fields.Many2one('tablas.cfdi', string='Subsidio Mensual Art. 114 LISR', required=True)
-#    lim_inf = fields.Float('Límite inferior') 
-#    c_fija = fields.Float('Cuota fija') 
-#    s_imp_marginal = fields.Float('Sobre imp. marginal (%)')
+    form_id = fields.Many2one('tablas.cfdi', string='Subsidio Mensual Art. 114 LISR', required=True)
+    lim_inf = fields.Float('Límite inferior') 
+    c_fija = fields.Float('Cuota fija') 
+    s_imp_marginal = fields.Float('Sobre imp. marginal (%)')
 
-#class TablasSubsidioAcreditablelLine(models.Model):
-#    _name = 'tablas.subsidioacreditable.line'
-#    _description = 'TablasSubsidioAcreditablelLine'
+class TablasSubsidioAcreditablelLine(models.Model):
+    _name = 'tablas.subsidioacreditable.line'
+    _description = 'TablasSubsidioAcreditablelLine'
 
-#    form_id = fields.Many2one('tablas.cfdi', string='Subsidio acreditable', required=True)
-#    ano = fields.Float('Año') 
-#    s_mensual = fields.Float('Subsidio (%)')
+    form_id = fields.Many2one('tablas.cfdi', string='Subsidio acreditable', required=True)
+    ano = fields.Float('Año') 
+    s_mensual = fields.Float('Subsidio (%)')
 
 class TablasPeriodoBimestrallLine(models.Model):
     _name = 'tablas.periodo.bimestral'
@@ -96,6 +96,30 @@ class TablasPeriodoMensuallLine(models.Model):
         string=_('Mes / Periodo'),)
     no_dias = fields.Float('Número de dias', store=True) 
 
+class TablasPeriodoSemanalLine(models.Model):
+    _name = 'tablas.periodo.semanal'
+    _description = 'TablasPeriodoSemanalLine'
+
+    form_id = fields.Many2one('tablas.cfdi', string='Calendario semanal', required=True)
+    no_periodo = fields.Selection(
+        selection=[('1', 'Periodo 1'), 
+                   ('2', 'Periodo 2'), 
+                   ('3', 'Periodo 3'),
+                   ('4', 'Periodo 4'), 
+                   ('5', 'Periodo 5'),
+                   ('6', 'Periodo 6'),
+                   ('7', 'Periodo 7'),
+                   ('8', 'Periodo 8'),
+                   ('9', 'Periodo 9'),
+                   ('10', 'Periodo 10'),
+                   ('11', 'Periodo 11'),
+                   ('12', 'Periodo 12'),
+                   ],
+        string=_('No. Periodo'),)
+    dia_inicio = fields.Date('Primer día del peridoo') 
+    dia_fin = fields.Date('Ultímo día del peridoo') 
+    no_dias = fields.Float('Dias en el periodo', store=True)
+
     @api.onchange('dia_inicio', 'dia_fin')
     def compute_dias(self):
         if self.dia_fin and self.dia_inicio:
@@ -122,11 +146,11 @@ class TablasCFDI(models.Model):
     tabla_ISR_anual = fields.One2many('tablas.isr.anual', 'form_id', copy=True)
     tabla_subem = fields.One2many('tablas.subsidio.line', 'form_id', copy=True)
     tabla_ISR_periodo = fields.One2many('tablas.isr.periodo', 'form_id', copy=True)
-#    tabla_subsidio = fields.One2many('tablas.subsidio2.line', 'form_id', copy=True)
-#    tabla_subsidio_acreditable = fields.One2many('tablas.subsidioacreditable.line', 'form_id', copy=True)
+    tabla_subsidio = fields.One2many('tablas.subsidio2.line', 'form_id', copy=True)
+    tabla_subsidio_acreditable = fields.One2many('tablas.subsidioacreditable.line', 'form_id', copy=True)
     tabla_bimestral = fields.One2many('tablas.periodo.bimestral', 'form_id', copy=True)
     tabla_mensual = fields.One2many('tablas.periodo.mensual', 'form_id', copy=True)
-    #tabla_semanal = fields.One2many('tablas.periodo.semanal', 'form_id', copy=True)
+    tabla_semanal = fields.One2many('tablas.periodo.semanal', 'form_id', copy=True)
 
     uma = fields.Float(string=_('UMA'), default='84.49')
     salario_minimo = fields.Float(string=_('Salario mínimo'))
