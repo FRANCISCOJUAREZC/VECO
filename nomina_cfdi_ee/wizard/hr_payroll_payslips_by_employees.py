@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, models, fields, _
-import datetime
-from datetime import timedelta, date
+from collections import defaultdict
+from datetime import datetime, date, time
+from dateutil.relativedelta import relativedelta
+import pytz
+
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
+from odoo.osv import expression
+from odoo.tools import format_date
+
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -43,11 +50,20 @@ class HrPayslipEmployeesExt(models.TransientModel):
         if(self.structure_id.type_id.default_struct_id == self.structure_id):
             work_entries = work_entries.filtered(lambda work_entry: work_entry.state != 'validated')
             if work_entries._check_if_error():
+                work_entries_by_contract = defaultdict(lambda: self.env['hr.work.entry'])
+
+                for work_entry in work_entries.filtered(lambda w: w.state == 'conflict'):
+                    work_entries_by_contract[work_entry.contract_id] |= work_entry
+
+                for contract, work_entries in work_entries_by_contract.items():
+                    conflicts = work_entries._to_intervals()
+                    time_intervals_str = "\n - ".join(['', *["%s -> %s" % (s[0], s[1]) for s in conflicts._items]])
                 return {
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',
                     'params': {
                         'title': _('Some work entries could not be validated.'),
+                        'message': _('Time intervals to look for:%s', time_intervals_str),
                         'sticky': False,
                     }
                 }
@@ -80,7 +96,7 @@ class HrPayslipEmployeesExt(models.TransientModel):
 
         payslips = Payslip.with_context(tracking_disable=True).create(payslip_values)
         for payslip in payslips:
-            payslip._onchange_employee()
+          #  payslip._onchange_employee()
             
             ######################## agregar prima vacacional
             # compute Prima vacacional en fecha correcta
