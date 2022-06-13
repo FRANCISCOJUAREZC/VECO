@@ -4,7 +4,8 @@ from odoo import models,fields
 
 class EntregaFondoCaja(models.TransientModel):
     _name = 'entrega.fondo.caja'
-    
+    _description = 'Entrega fondo caja'
+
     fecha_solicitud = fields.Date('Fecha solicitud')
     fecha_aplicacion = fields.Date('Fecha aplicación')
     descripcion = fields.Char("Descripción")

@@ -4,7 +4,7 @@ from odoo import fields,models
 
 class EnviarNomina(models.TransientModel):
     _name='enviar.nomina'
-    
+    _description = 'Enviar nomina'
     
     todos = fields.Boolean(string='Rango')
     rango_de_empleados1 = fields.Integer(string='Rango de empleados')

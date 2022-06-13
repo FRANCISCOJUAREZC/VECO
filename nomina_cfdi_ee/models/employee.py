@@ -84,12 +84,14 @@ class Employee(models.Model):
     empleado_paterno = fields.Char("Apellido Paterno")
     empleado_materno = fields.Char("Apellido Materno")
     sindicalizado = fields.Boolean('Sindicalizado', default=False)
+    domicilio_receptor = fields.Char("Código postal (SAT)")
 
-    @api.onchange('registro_patronal')
-    def _check_registro_length(self):
-        if self.registro_patronal:
-            if len(self.registro_patronal) != 11:
-                raise UserError(_('La longitud del registro patronal es incorrecto'))
+#    @api.multi
+#    @api.onchange('registro_patronal')
+#    def _check_registro_length(self):
+#        if self.registro_patronal:
+#            if len(self.registro_patronal) != 11:
+#                raise UserError(_('La longitud del registro patronal es incorrecto'))
 
     @api.onchange('segurosocial')
     def _check_nss_length(self):

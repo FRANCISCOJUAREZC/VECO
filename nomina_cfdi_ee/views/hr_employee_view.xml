@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-   <record id="view_employee_form_inherit" model="ir.ui.view">
+   <record id="view_employee_form_inherit_ee" model="ir.ui.view">
         <field name="name">hr.employee.nomina</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
            <xpath expr="//notebook" position="inside">
-                <page name="info_cdfi" string="CFDI 3.3" groups="hr_payroll.group_hr_payroll_user">
+                <page name="info_cdfi" string="CFDI" groups="om_hr_payroll.group_hr_payroll_user">
                         <group cols="4">
                             <group string="Detalles de Pago">
                                 <field name="no_empleado"/>
@@ -28,9 +28,12 @@
                                 <field name="rfc"/>
                                 <field name="curp"/>
                                 <field name="segurosocial"/>
+                                <field name="registro_patronal_id"/>
+                            </group>
+                            <group string="Direcciones">
                                 <field name="correo_electronico"/>
                                 <field name="estado"/>
-                                <field name="registro_patronal_id"/>
+                                <field name="domicilio_receptor"/>
                             </group>
                         </group>
                 </page><!--

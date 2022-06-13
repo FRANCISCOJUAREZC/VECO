@@ -257,6 +257,7 @@ class HrPayslipRun(models.Model):
                 try:
                    if not payslip.nomina_cfdi:
                       payslip.action_cfdi_nomina_generate()
+                      correct += 1
                 except Exception as e:
                    err_msg += payslip.employee_id.name + ' ' + e.args[0] + '\n'
                    errors += 1
@@ -265,7 +266,7 @@ class HrPayslipRun(models.Model):
         if errors > 0:
            raise UserError(_('Nóminas timbradas correctamente %s \n Nóminas no timbradas %s \n Errores: \n %s') % (correct, errors, err_msg))
         else:
-           raise UserError(_('Nóminas timbradas correctamente %s \n Nóminas no timbradas %s \n') % (correct, errors, err_msg))
+           raise UserError(_('Nóminas timbradas correctamente %s \n Nóminas no timbradas %s \n') % (correct, errors))
         return
 
     def confirmar_nomina(self):

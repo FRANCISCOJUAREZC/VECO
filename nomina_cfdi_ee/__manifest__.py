@@ -7,7 +7,7 @@
     Nomina CFDI Module
     ''',
     'author': 'IT Admin',
-    'version': '15.01',
+    'version': '15.02',
     'category': 'Employees',
     'depends': [
         'hr_payroll',
@@ -15,6 +15,7 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'wizard/reason_cancelation_sat_view.xml',
         'data/sequence_data.xml',
         'data/cron.xml',
         'data/nomina.otropago.csv',

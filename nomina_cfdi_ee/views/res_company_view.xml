@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="base.view_company_form"/>
             <field name="arch" type="xml">
                <xpath expr="//notebook" position="inside">
-                    <page name="info_cdfi" string="Nomina 3.3">
+                    <page name="info_cdfi" string="Nomina">
                           <group cols="4"  string="Configuración">
                              <group>
                                 <field name="nombre_fiscal"/>
