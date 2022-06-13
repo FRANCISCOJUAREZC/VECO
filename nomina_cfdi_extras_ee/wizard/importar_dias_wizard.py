@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api, _
+from odoo import models, fields, api
 from datetime import datetime
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.exceptions import Warning

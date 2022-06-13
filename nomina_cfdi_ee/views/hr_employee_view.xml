@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
            <xpath expr="//notebook" position="inside">
-                <page name="info_cdfi" string="CFDI" groups="om_hr_payroll.group_hr_payroll_user">
+                <page name="info_cdfi" string="CFDI" groups="hr_payroll.group_hr_payroll_user">
                         <group cols="4">
                             <group string="Detalles de Pago">
                                 <field name="no_empleado"/>
@@ -42,7 +42,7 @@
                             <field name="fondo_ahorro"/>
                         </group>
                 </page>-->
-                <page name="nombre" string="Nombre" groups="om_hr_payroll.group_hr_payroll_user">
+                <page name="nombre" string="Nombre" groups="hr_payroll.group_hr_payroll_user">
                    <group cols="4">
                       <field name="empleado_nombre"/>
                       <field name="empleado_paterno"/>
