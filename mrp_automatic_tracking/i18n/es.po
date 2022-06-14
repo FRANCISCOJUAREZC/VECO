@@ -1,0 +1,51 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* mrp_automatic_tracking
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 12.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-06-17 17:20+0000\n"
+"PO-Revision-Date: 2022-06-17 17:20+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: mrp_automatic_tracking
+#: model:ir.model.fields,help:mrp_automatic_tracking.field_mrp_production__set_manual_tracking
+msgid "If True, all the tracked material recording will\n"
+"        be manual on workorders"
+msgstr "Si está seleccionado, todos los materiales deberán registrarse en la pantalla negra de las ordenesde trabajo."
+
+#. module: mrp_automatic_tracking
+#: model:ir.model,name:mrp_automatic_tracking.model_mrp_production
+msgid "Production"
+msgstr "Producción"
+
+#. module: mrp_automatic_tracking
+#: model:ir.model.fields,field_description:mrp_automatic_tracking.field_mrp_production__set_manual_tracking
+msgid "Set Manual Tracking"
+msgstr "Registrar Lotes en Pantalla Negra"
+
+#. module: mrp_automatic_tracking
+#: model:ir.model,name:mrp_automatic_tracking.model_mrp_workorder
+msgid "Work Order"
+msgstr "Orden de trabajo"
+
+#. module: mrp_automatic_tracking
+#: code:addons/mrp_automatic_tracking/models/mrp_workorder.py:49
+#, python-format
+msgid "You must only have a unique serial number for this product. \n"
+" This product actually is on the following orders: \n"
+"\n"
+" %s "
+msgstr ""
+"Solo puede existir un número de serie único para este producto. \n"
+" Ordenes de Producción con este número de serie: \n"
+"\n"
+" %s "
+
