@@ -230,7 +230,7 @@ class HrPayslip(models.Model):
                 'number_of_days': day_rounded,
                 'number_of_hours': hours,
             }
-            _logger.info('dias trabajados %s -- %s', work_entry_type_id.name, day_rounded)
+            _logger.info('dias trabajados %s -- %s', work_entry_type.name, day_rounded)
             res.append(attendance_line)
         return res
 
