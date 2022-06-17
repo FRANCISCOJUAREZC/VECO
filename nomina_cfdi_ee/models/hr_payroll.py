@@ -273,6 +273,7 @@ class HrPayslip(models.Model):
                     'number_of_hours': out_hours,
                 })
                 _logger.info('dias otros lados %s -- %s', work_entry_type.name, out_days)
+            _logger.info('entra en este otro')
         return res
 
     @api.model
