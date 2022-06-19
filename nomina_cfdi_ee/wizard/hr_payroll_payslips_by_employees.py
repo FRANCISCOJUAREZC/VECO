@@ -95,65 +95,6 @@ class HrPayslipEmployeesExt(models.TransientModel):
         }) for contract in contracts]
 
         payslips = Payslip.with_context(tracking_disable=True).create(payslip_values)
-        for payslip in payslips:
-          #  payslip._onchange_employee()
-            
-            ######################## agregar prima vacacional
-            # compute Prima vacacional en fecha correcta
-            if payslip.contract_id.tipo_prima_vacacional == '01':
-                date_start = payslip.contract_id.date_start
-                if date_start:
-                    d_from = fields.Date.from_string(payslip_run.date_start)
-                    d_to = fields.Date.from_string(payslip_run.date_end)
-
-                    date_start = fields.Date.from_string(date_start)
-                    if datetime.datetime.today().year > date_start.year:
-                        if str(date_start.day) == '29' and str(date_start.month) == '2':
-                            date_start -=  datetime.timedelta(days=1)
-                        date_start = date_start.replace(d_to.year)
-                        
-                        if d_from <= date_start <= d_to:
-                            diff_date = payslip_run.date_end - payslip.contract_id.date_start #datetime.datetime.combine(, datetime.time.max)
-                            years = diff_date.days /365.0
-                            antiguedad_anos = int(years)
-                            tabla_antiguedades =  payslip.contract_id.tablas_cfdi_id.tabla_antiguedades.filtered(lambda x: x.antiguedad <= antiguedad_anos)
-                            tabla_antiguedades = tabla_antiguedades.sorted(lambda x:x.antiguedad, reverse=True)
-                            vacaciones = tabla_antiguedades and tabla_antiguedades[0].vacaciones or 0
-                            prima_vac = tabla_antiguedades and tabla_antiguedades[0].prima_vac or 0
-
-                            work_entry_type = self.env['hr.work.entry.type'].sudo().search([('code','=','PVC')])
-                            attendances = {
-                                 'payslip_id': payslip.id,
-                                 'sequence': 2,
-                                 'work_entry_type_id': work_entry_type.id,
-                                 'number_of_days': vacaciones * prima_vac / 100.0, #work_data['days'],
-                                #'number_of_hours': 1['hours'],
-                                # 'contract_id': contract.id,
-                            }
-                            new_worked_days = self.env['hr.payslip.worked_days'].create(attendances)
-
-            ######################## Revisar dias nomina
-            for worklines in payslip.worked_days_line_ids:
-                if worklines.work_entry_type_id.code == 'WORK100':
-                    if payslip_run.tipo_nomina == 'O':
-                       if worklines.number_of_days != 15:
-                             worklines.number_of_days = 15
-                    else:
-                       if self.structure_id.name != 'Aguinaldo':
-                          days = 0
-                          if payslip.contract_id.date_start > payslip_run.date_start:
-                              days = payslip_run.date_end - payslip.contract_id.date_start
-                          else:
-                              days = payslip_run.date_end - payslip_run.date_start
-                          worklines.number_of_days = days.days + 1
-                       else:
-                          days = 0
-                          if payslip.contract_id.date_start > payslip_run.date_start:
-                              days_compute = payslip_run.date_end - payslip.contract_id.date_start
-                              days = days_compute.days + 1
-                          else:
-                              days = 365
-                          worklines.number_of_days = days
 
         payslips.compute_sheet()
         payslip_run.state = 'draft'
