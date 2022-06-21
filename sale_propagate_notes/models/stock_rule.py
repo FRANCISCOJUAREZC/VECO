@@ -20,11 +20,12 @@ class StockRule(models.Model):
         last_move = move.move_dest_ids
         return recursive_move(last_move)
 
-    def _prepare_mo_vals(self, product_id, product_qty,
-                         product_uom, location_id, name, origin, values, bom):
+    def _prepare_mo_vals(self, product_id, product_qty, product_uom,
+                         location_id, name, origin, company_id, values, bom):
         res = super(StockRule, self)._prepare_mo_vals(
-            product_id, product_qty, product_uom,
-            location_id, name, origin, values, bom)
+            product_id, product_qty, product_uom, location_id, name,
+            origin, company_id, values, bom
+        )
         last_move = self._get_last_move_id(values.get('move_dest_ids'))
         if last_move and last_move.sale_line_id:
             sale_line = last_move.sale_line_id
