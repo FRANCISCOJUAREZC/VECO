@@ -40,9 +40,9 @@ class MrpWorkorder(models.Model):
                 vals['date_planned_finished'] = start_date
             return self.write(vals)
 
-    def _compute_working_users(self):
-        for order in self:
-            order.is_user_working = True
+    # def _compute_working_users(self):
+    #     for order in self:
+    #         order.is_user_working = False
 
     def open_tablet_view(self):
         res = super(MrpWorkorder, self).open_tablet_view()

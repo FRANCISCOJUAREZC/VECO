@@ -14,6 +14,7 @@ class MrpWorkorder(models.Model):
            when start the workorder"""
 
         self.ensure_one()
+        res = super(MrpWorkorder, self).button_start()
         TimeLine = self.env['mrp.workcenter.productivity']
         if self.state in ('done', 'cancel'):
             return True
@@ -36,13 +37,14 @@ class MrpWorkorder(models.Model):
                 'date_start': start_date,
                 'date_planned_start': start_date,
             }
-            if self.date_planned_finished < start_date:
+            if self.date_planned_finished and self.date_planned_finished < start_date:
                 vals['date_planned_finished'] = start_date
-            return self.write(vals)
+            self.write(vals)
+        return res
 
-    def _compute_working_users(self):
-        for order in self:
-            order.is_user_working = True
+    # def _compute_working_users(self):
+    #     for order in self:
+    #         order.is_user_working = True
 
     def open_tablet_view(self):
         res = super(MrpWorkorder, self).open_tablet_view()
