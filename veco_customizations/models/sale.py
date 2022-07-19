@@ -21,5 +21,5 @@ class SaleOrder(models.Model):
         for invoice in invoices.values():
             for line in invoice.invoice_line_ids:
                 if line.sale_line_ids:
-                    line.name = line.sale_line_ids[0].name
+                    line.name = line.sale_line_ids[0].product_id.description_picking
         return super(SaleOrder, self)._finalize_invoices(invoices, references)
