@@ -15,6 +15,7 @@ _logger = logging.getLogger(__name__)
 
 class import_payslip_from_xml(models.TransientModel):
     _name ='import.payslip.from.xml'
+    _description = 'Importar XML nomina'
 
     import_file = fields.Binary("Importar Archivo",required=False)
     file_name = fields.Char("Nombre del archivo")

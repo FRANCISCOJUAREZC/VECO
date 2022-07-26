@@ -44,7 +44,7 @@
                 <group string="Datos nómina">
                    <field name="estructura"/>
                    <field name="payslip_run_id"/>
-                   <field name="journal_id"/>
+               <!--    <field name="journal_id"/>-->
                 </group>
             </group>
             <footer>

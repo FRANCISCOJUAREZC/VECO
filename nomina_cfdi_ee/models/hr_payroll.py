@@ -219,7 +219,7 @@ class HrPayslip(models.Model):
         add_days_rounding = 0
 
         # poner en ceros todo
-        nb_of_days = (self.date_to - self.date_from).days + 1
+        nb_of_days = (self.date_to - self.date_from).days #+ 1
         leave_days = 0
         inc_days = 0
         vac_days = 0
@@ -260,15 +260,20 @@ class HrPayslip(models.Model):
             if work_entry_type:
                     if work_entry_type.code == 'FJS' or work_entry_type.code == 'FI' or work_entry_type.code == 'FR':
                         falta_days += day_rounded * factor
+                        leave_days += day_rounded * factor
+                        attendance_line.update({'number_of_days': day_rounded * factor})
                         if self.contract_id.septimo_dia:
                             proporcional += (hours / work_hours) * factor
                     elif work_entry_type.code == 'INC_EG' or work_entry_type.code == 'INC_RT' or work_entry_type.code == 'INC_MAT':
+                        leave_days += day_rounded
                         if self.contract_id.incapa_sept_dia:
                             inc_days += day_rounded
                     elif work_entry_type.code == 'VAC' or work_entry_type.code == 'FJC':
                         vac_days += day_rounded * 7.0192/7.0
-                    if work_entry_type.code != 'DFES' and work_entry_type.code != 'DFES_3' and work_entry_type.code != 'WORK100':
-                        leave_days += day_rounded
+                        leave_days += day_rounded * 7.0192/7.0
+                        attendance_line.update({'number_of_days': day_rounded * 7.0192/7.0})
+#                    if work_entry_type.code != 'DFES' and work_entry_type.code != 'DFES_3' and work_entry_type.code != 'WORK100':
+#                       leave_days += day_rounded
                     if work_entry_type.code == 'WORK100':
                         work_data_days = day_rounded
                         _logger.info('work_data_days %s', work_data_days)
@@ -335,7 +340,7 @@ class HrPayslip(models.Model):
                          }
                          res.append(attendances)
                    else:
-                      dias_periodo = (date_to - date_from).days + 1
+                      dias_periodo = (self.date_to - self.date_from).days + 1
                       total_days = work_data_days + leave_days
                       if total_days != dias_periodo or leave_days != 0:
                          if leave_days == 0  and not nvo_ingreso:
@@ -437,9 +442,9 @@ class HrPayslip(models.Model):
         else:
                date_start = self.contract_id.date_start
                if date_start:
-                   d_from = fields.Date.from_string(date_from)
-                   d_to = fields.Date.from_string(date_to)
-               if date_start > date_from:
+                   d_from = fields.Date.from_string(self.date_from)
+                   d_to = fields.Date.from_string(self.date_to)
+               if date_start > self.date_from:
                    number_of_days =  (self.date_to - date_start).days + 1 - leave_days
                else:
                    number_of_days =  (self.date_to - self.date_from).days + 1 - leave_days
@@ -450,10 +455,10 @@ class HrPayslip(models.Model):
               work_entry_type = self.env['hr.work.entry.type'].browse(line['work_entry_type_id'])
               if work_entry_type.code == "WORK100":
                    line['number_of_days'] = number_of_days
-              if work_entry_type.code == "VAC" or work_entry_type.code == "FJC":
-                   line['number_of_days'] = day_rounded * 7.0192/7.0
-              if work_entry_type.code == 'FJS' or work_entry_type.code == 'FI' or work_entry_type.code == 'FR':
-                   line['number_of_days'] =  day_rounded * factor
+     #         if work_entry_type.code == "VAC" or work_entry_type.code == "FJC":
+     #              line['number_of_days'] = vac_days
+     #         if work_entry_type.code == 'FJS' or work_entry_type.code == 'FI' or work_entry_type.code == 'FR':
+     #              line['number_of_days'] =  day_rounded * factor
 
         return res
 
