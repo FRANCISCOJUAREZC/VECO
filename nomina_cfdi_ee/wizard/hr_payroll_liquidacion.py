@@ -137,15 +137,15 @@ class GeneraLiquidaciones(models.TransientModel):
                 raise UserError("No se encontró estructura de liquidación, debe llamarse Liquidación - indemnizacion/finiquito")
 
             other_inputs = []
-            other_inputs_type2 = self.env['hr.payslip.input.type'].sudo().search([('code','=','PDA')])
+            other_inputs_type2 = self.env['hr.payslip.input.type'].sudo().search([('code','=','PDA')], limit=1)
             if other_inputs_type2:
                 other_inputs.append((0,0,{'input_type_id': other_inputs_type2.id, 'amount': self.monto_prima_antiguedad}))
 
-            other_inputs_type3 = self.env['hr.payslip.input.type'].sudo().search([('code','=','IND')])
+            other_inputs_type3 = self.env['hr.payslip.input.type'].sudo().search([('code','=','IND')], limit=1)
             if other_inputs_type3:
                 other_inputs.append((0,0,{'input_type_id': other_inputs_type3.id, 'amount': self.monto_indemnizacion}))
 
-            other_inputs_type4 = self.env['hr.payslip.input.type'].sudo().search([('code','=','PPS')])
+            other_inputs_type4 = self.env['hr.payslip.input.type'].sudo().search([('code','=','PPS')], limit=1)
             if other_inputs_type4:
                 other_inputs.append((0,0,{'input_type_id': other_inputs_type4.id, 'amount': self.pago_separacion}))
 
@@ -307,7 +307,7 @@ class GeneraLiquidaciones(models.TransientModel):
                    domain=[('state','=', 'done')]
                    domain.append(('employee_id','=',record.employee_id.id))
                    if contract.tablas_cfdi_id.caja_ahorro_abono:
-                        rules = record.env['hr.salary.rule'].search([('code', '=', contract.tablas_cfdi_id.caja_ahorro_abono.code)])
+                        rules = record.env['hr.salary.rule'].search([('code', '=', contract.tablas_cfdi_id.caja_ahorro_abono.code)], limit=1)
                         payslips = record.env['hr.payslip'].search(domain)
                         payslip_lines = payslips.mapped('line_ids').filtered(lambda x: x.salary_rule_id.id in rules.ids)
                         employees = {}
@@ -322,7 +322,7 @@ class GeneraLiquidaciones(models.TransientModel):
                                for line in lines:
                                   abono += line.total
                    if contract.tablas_cfdi_id.caja_ahorro_retiro:
-                        rules = record.env['hr.salary.rule'].search([('code', '=', contract.tablas_cfdi_id.caja_ahorro_retiro.code)])
+                        rules = record.env['hr.salary.rule'].search([('code', '=', contract.tablas_cfdi_id.caja_ahorro_retiro.code)], limit=1)
                         payslips = record.env['hr.payslip'].search(domain)
                         payslip_lines = payslips.mapped('line_ids').filtered(lambda x: x.salary_rule_id.id in rules.ids)
                         employees = {}
