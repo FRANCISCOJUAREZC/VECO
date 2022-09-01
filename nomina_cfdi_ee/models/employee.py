@@ -27,7 +27,7 @@ class Employee(models.Model):
     )
     diario_pago = fields.Many2one('account.journal', string='Cuenta de pago', domain=[('type', 'in', ('bank', 'cash'))])
 
-    #registro_patronal = fields.Char(string=_('Registro patronal'))
+    registro_patronal = fields.Char(string=_('Registro patronal'))
     registro_patronal_id = fields.Many2one('registro.patronal', string='Registro patronal')
 
     regimen = fields.Selection(
