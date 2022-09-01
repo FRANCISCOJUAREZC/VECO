@@ -343,6 +343,7 @@ class MrpProductionPlanItem(models.Model):
                 production_items += self.create(values)
         return production_items + current_rows
 
+    @api.model
     def run_production_plan(self):
         production_items = self._create_items()
         action = self.env.ref(
