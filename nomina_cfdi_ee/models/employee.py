@@ -74,11 +74,11 @@ class Employee(models.Model):
         string=_('Jornada'),
     )
     estado = fields.Many2one('res.country.state','Lugar donde labora (estado)')
-    #fondo_ahorro  = fields.Float(string=_('Fondo de ahorro'), readonly=True)
-    #dias_utilidad =  fields.Float(string=_('Dias para cálculo de Utilidad'))
-    #sueldo_utilidad =  fields.Float(string=_('Sueldo para cálculo de Utilidad'))
-    #fecha_utilidad_inicio = fields.Date(readonly=True)
-    #fecha_utilidad_fin = fields.Date(readonly=True)
+    fondo_ahorro  = fields.Float(string=_('Fondo de ahorro'), readonly=True)
+    dias_utilidad =  fields.Float(string=_('Dias para cálculo de Utilidad'))
+    sueldo_utilidad =  fields.Float(string=_('Sueldo para cálculo de Utilidad'))
+    fecha_utilidad_inicio = fields.Date(readonly=True)
+    fecha_utilidad_fin = fields.Date(readonly=True)
 
     empleado_nombre = fields.Char("Nombre")
     empleado_paterno = fields.Char("Apellido Paterno")
