@@ -170,18 +170,20 @@ class MrpWorkcenterProductivity(models.Model):
                 'line_ids': lines,
                 'ref': self.workorder_id.display_name,
                 'mrp_timeline_id': self.id,
+                'move_type': 'entry',
             })
         except Exception as e:
             raise ValidationError(
-                msg + _('\n The MO with the problem is: %s \n'
-                        'Workorder: %s \n'
-                        'Time Record: Date Start: %s - Date End: %s \n'
-                        'User: %s') % (
+                _('\n The MO with the problem is: %s \n'
+                    'Workorder: %s \n'
+                    'Time Record: Date Start: %s - Date End: %s \n'
+                    'User: %s \n Error: %s') % (
                     self.workorder_id.production_id.name,
                     self.workorder_id.display_name,
                     self.date_start,
                     self.date_end,
-                    self.user_id.name)
+                    self.user_id.name,
+                    str(e))
                 )
 
         self.workforce_entry_id = move.id
