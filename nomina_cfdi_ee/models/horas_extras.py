@@ -45,7 +45,8 @@ class HorasNomina(models.Model):
         return
 
     def action_cancelar(self):
-        self.write({'state':'cancel'})
+        for record in self:
+           self.write({'state':'cancel'})
 
     def action_draft(self):
         self.write({'state':'draft'})

@@ -53,7 +53,7 @@
 										<tr t-foreach="slips[dept_id]" t-as="slip">
 											<t t-if="not slip.state =='cancel'">  
 												<td>
-													<span t-esc="slip.employee_id.no_employee"/>
+													<span t-esc="slip.employee_id.no_empleado"/>
 												</td>
 												<td>
 													<span t-esc="slip.employee_id.name"/>
@@ -146,7 +146,7 @@
 											<t t-if="not slip.state =='cancel'">  
 												<!--
 												<td>
-													<span t-esc="slip.employee_id.no_employee"/>
+													<span t-esc="slip.employee_id.no_empleado	"/>
 												</td>
 												<td>
 													<span t-esc="slip.employee_id.name"/>
@@ -247,7 +247,7 @@
 										<tr t-foreach="slips[dept_id]" t-as="slip">
 											<t t-if="not slip.state =='cancel'">  
 												<td>
-													<span t-esc="slip.employee_id.no_employee"/>
+													<span t-esc="slip.employee_id.no_empleado"/>
 												</td>
 												<td>
 													<span t-esc="slip.employee_id.name"/>

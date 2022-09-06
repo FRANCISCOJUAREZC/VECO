@@ -11,3 +11,4 @@ from . import horas_extras
 from . import ctalogo_nomina
 from . import registro_patronal
 from . import caja_ahorro
+from . import employee_public

@@ -248,3 +248,7 @@ class IncidenciasNomina(models.Model):
         for incidencias in self:
             if incidencias.state == 'draft':
                 incidencias.action_validar()
+
+    def action_change_cancel(self):
+        for incidencias in self:
+             incidencias.action_cancelar()

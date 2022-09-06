@@ -5,7 +5,6 @@ from dateutil.relativedelta import relativedelta
 from odoo.exceptions import Warning, UserError
 import pytz
 from odoo import tools
-from .tzlocal import get_localzone
 
 class VacacionesNomina(models.Model):
     _name = 'vacaciones.nomina'
@@ -29,7 +28,7 @@ class VacacionesNomina(models.Model):
     @api.onchange('dias')
     def _onchange_dias(self):
         if self.dias and self.dias > self.dias_de_vacaciones_disponibles:
-            raise Warning("No tiene suficientes dias de vacaciones")
+            raise UserError("No tiene suficientes dias de vacaciones")
             
     @api.model
     def init(self):
@@ -57,8 +56,12 @@ class VacacionesNomina(models.Model):
     
     def action_validar(self):
         if self.dias and self.dias > self.dias_de_vacaciones_disponibles:
-            raise Warning("No tiene suficientes dias de vacaciones para validar el registro")
-        leave_type = self.company_id.leave_type_vac or False
+            raise UserError("No tiene suficientes dias de vacaciones para validar el registro")
+
+        if self.company_id.leave_type_vac: 
+            leave_type = self.company_id.leave_type_vac
+        else:
+            raise UserError(_('Falta configurar el tipo de falta'))
         if self.fecha_inicial:
             date_from = self.fecha_inicial
             date_to = date_from + relativedelta(days=self.dias - 1)
@@ -128,25 +131,31 @@ class VacacionesNomina(models.Model):
                         vac.write({'dias':0})
         return True
 
-    
     def action_cancelar(self):
-        if self.state == 'draft':
-            self.write({'state':'cancel'})
-        else:
-            self.write({'state':'cancel'})
-            nombre = 'Vacaciones_'+self.name
-            registro_falta = self.env['hr.leave'].search([('name','=', nombre)], limit=1)
-            if registro_falta:
-               registro_falta.action_refuse()
+        for record in self:
+           if record.state == 'draft':
+               record.write({'state':'cancel'})
+           elif record.state == 'done':
+               record.write({'state':'cancel'})
+               nombre = 'Vacaciones_'+record.name
+               registro_falta = record.env['hr.leave'].search([('name','=', nombre)], limit=1)
+               if registro_falta:
+                  registro_falta.action_refuse()
 
-            contract = self.employee_id.contract_id
-            if contract:
-               vac = contract.tabla_vacaciones.sorted(key=lambda object1: object1.ano)
-               saldo_ant = vac[0].dias + self.dias
-               vac[0].write({'dias':saldo_ant})
+               contract = record.employee_id.contract_id
+               if contract:
+                  vac = contract.tabla_vacaciones.sorted(key=lambda object1: object1.ano)
+                  if vac:
+                     saldo_ant = vac[0].dias + record.dias
+                     vac[0].write({'dias':saldo_ant})
 
     def action_draft(self):
         self.write({'state':'draft'})
 
     def unlink(self):
         raise UserError("Los registros no se pueden borrar, solo cancelar.")
+
+    def action_change_state(self):
+        for record in self:
+            if record.state == 'draft':
+                record.action_validar()

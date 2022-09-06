@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, _, api
-from .tzlocal import get_localzone
 from datetime import datetime
 import pytz
 from odoo.exceptions import UserError
@@ -70,9 +69,15 @@ class DiasFeriados(models.Model):
 
         leave_type = None
         if self.tipo=='doble':
-           leave_type = self.company_id.leave_type_dfes or False
+           if self.company_id.leave_type_dfes: 
+              leave_type = self.company_id.leave_type_dfes
+           else:
+              raise UserError(_('Falta configurar el tipo de falta'))
         elif self.tipo=='triple':
-           leave_type = self.company_id.leave_type_dfes3 or False
+           if self.company_id.leave_type_dfes3: 
+              leave_type = self.company_id.leave_type_dfes3
+           else:
+              raise UserError(_('Falta configurar el tipo de falta'))
         if not leave_type:
            leave_type = self.env['hr.leave.type'].create({'name': 'DFES'})
 
@@ -110,16 +115,16 @@ class DiasFeriados(models.Model):
         self.write({'state':'done'})
         return
 
-   
     def action_cancelar(self):
-        if self.state == 'draft':
-            self.write({'state':'cancel'})
-        else:
-            self.write({'state':'cancel'})
-            nombre = 'Feriado_'+self.name
-            registro_falta = self.env['hr.leave'].search([('name','=', nombre)], limit=1)
-            if registro_falta:
-               registro_falta.action_refuse()
+        for record in self:
+           if record.state == 'draft':
+               record.write({'state':'cancel'})
+           else:
+               record.write({'state':'cancel'})
+               nombre = 'Feriado_' + record.name
+               registro_falta = record.env['hr.leave'].search([('name','=', nombre)], limit=1)
+               if registro_falta:
+                  registro_falta.action_refuse()
 
     def action_draft(self):
         self.write({'state':'draft'})

@@ -4,7 +4,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pytz
 from odoo.exceptions import UserError
-from .tzlocal import get_localzone
 from odoo import tools
 
 class IncapacidadesNomina(models.Model):
@@ -61,11 +60,20 @@ class IncapacidadesNomina(models.Model):
     def action_validar(self):
         leave_type = None
         if self.ramo_de_seguro=='Riesgo de trabajo':
-            leave_type = self.company_id.leave_type_rie_id or False
+            if self.company_id.leave_type_rie_id: 
+               leave_type = self.company_id.leave_type_rie_id
+            else:
+               raise UserError(_('Falta configurar el tipo de falta'))
         elif self.ramo_de_seguro=='Enfermedad general':
-            leave_type = self.company_id.leave_type_enf_id or False
+            if self.company_id.leave_type_enf_id: 
+               leave_type = self.company_id.leave_type_enf_id
+            else:
+               raise UserError(_('Falta configurar el tipo de falta'))
         elif self.ramo_de_seguro=='Maternidad':
-            leave_type = self.company_id.leave_type_mat_id or False
+            if self.company_id.leave_type_mat_id: 
+               leave_type = self.company_id.leave_type_mat_id
+            else:
+               raise UserError(_('Falta configurar el tipo de falta'))
 
         if self.fecha:
             date_from = self.fecha
@@ -126,19 +134,23 @@ class IncapacidadesNomina(models.Model):
 
    
     def action_cancelar(self):
-        if self.state == 'draft':
-            self.write({'state':'cancel'})
-        else:
-            self.write({'state':'cancel'})
-            nombre = 'Incapacidades_'+self.name
-            registro_falta = self.env['hr.leave'].search([('name','=', nombre)], limit=1)
-            if registro_falta:
-               registro_falta.action_refuse()
+        for record in self:
+           if record.state == 'draft':
+               record.write({'state':'cancel'})
+           else:
+               record.write({'state':'cancel'})
+               nombre = 'Incapacidades_' + record.name
+               registro_falta = record.env['hr.leave'].search([('name','=', nombre)], limit=1)
+               if registro_falta:
+                  registro_falta.action_refuse()
 
-   
     def action_draft(self):
         self.write({'state':'draft'})
 
-   
     def unlink(self):
         raise UserError("Los registros no se pueden borrar, solo cancelar.")
+
+    def action_change_state(self):
+        for record in self:
+            if record.state == 'draft':
+                record.action_validar()

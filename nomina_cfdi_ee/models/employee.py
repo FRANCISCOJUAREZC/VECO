@@ -27,7 +27,6 @@ class Employee(models.Model):
     )
     diario_pago = fields.Many2one('account.journal', string='Cuenta de pago', domain=[('type', 'in', ('bank', 'cash'))])
 
-    registro_patronal = fields.Char(string=_('Registro patronal'))
     registro_patronal_id = fields.Many2one('registro.patronal', string='Registro patronal')
 
     regimen = fields.Selection(
@@ -74,11 +73,11 @@ class Employee(models.Model):
         string=_('Jornada'),
     )
     estado = fields.Many2one('res.country.state','Lugar donde labora (estado)')
-    fondo_ahorro  = fields.Float(string=_('Fondo de ahorro'), readonly=True)
-    dias_utilidad =  fields.Float(string=_('Dias para cálculo de Utilidad'))
-    sueldo_utilidad =  fields.Float(string=_('Sueldo para cálculo de Utilidad'))
-    fecha_utilidad_inicio = fields.Date(readonly=True)
-    fecha_utilidad_fin = fields.Date(readonly=True)
+    #fondo_ahorro  = fields.Float(string=_('Fondo de ahorro'), readonly=True)
+    #dias_utilidad =  fields.Float(string=_('Dias para cálculo de Utilidad'))
+    #sueldo_utilidad =  fields.Float(string=_('Sueldo para cálculo de Utilidad'))
+    #fecha_utilidad_inicio = fields.Date(readonly=True)
+    #fecha_utilidad_fin = fields.Date(readonly=True)
 
     empleado_nombre = fields.Char("Nombre")
     empleado_paterno = fields.Char("Apellido Paterno")

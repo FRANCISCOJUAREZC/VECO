@@ -2,7 +2,7 @@
 from odoo import models, fields, _, api
 import pytz
 from odoo.exceptions import UserError
-from datetime import datetime
+from datetime import datetime, date
 from odoo import tools
 import logging
 _logger = logging.getLogger(__name__)
@@ -105,13 +105,14 @@ class CajaAhorro(models.Model):
         return
 
     def action_cancelar(self):
-        if self.state == 'draft':
-            self.write({'state':'cancel'})
-        else:
-            if datetime.today().date() > self.fecha_aplicacion:
-               raise UserError("Solo se puede cancelar si no ha pasado su fecha de aplicación.")
-            else:
+        for record in self:
+            if self.state == 'draft':
                self.write({'state':'cancel'})
+            elif self.state == 'done':
+               if date.today() > self.fecha_aplicacion:
+                   raise UserError("Solo se puede cancelar si no ha pasado su fecha de aplicación.")
+               else:
+                   self.write({'state':'cancel'})
 
     def unlink(self):
         for record in self:

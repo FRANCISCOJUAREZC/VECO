@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, _, api
 import pytz
-from .tzlocal import get_localzone
 from datetime import datetime, timedelta
 from odoo.exceptions import UserError
 
@@ -47,7 +46,7 @@ class RetardoNomina(models.Model):
            leave_type = self.company_id.leave_type_fr or False
 
            date_from = self.fecha.strftime('%Y-%m-%d') +' 15:00:00'
-           date_to = self.fecha.strftime('%Y-%m-%d') +' 15:00:00' + timedelta(minutes=self.tiempo)
+           date_to = self.fecha.strftime('%Y-%m-%d') +' 15:00:00' + datetime.timedelta(minutes=self.tiempo)
         
 #           timezone = self._context.get('tz')
 #           if not timezone:
@@ -96,15 +95,16 @@ class RetardoNomina(models.Model):
         return
 
     def action_cancelar(self):
-        if self.state == 'draft':
-            self.write({'state':'cancel'})
-        else:
-           self.write({'state':'cancel'})
-           if self.crear_ausencia:
-              nombre = 'Retardo_' + self.name
-              registro_falta = self.env['hr.leave'].search([('name','=', nombre)], limit=1)
-              if registro_falta:
-                 registro_falta.action_refuse()
+        for record in self:
+           if record.state == 'draft':
+               record.write({'state':'cancel'})
+           elif record.state == 'done':
+              record.write({'state':'cancel'})
+              if record.crear_ausencia:
+                 nombre = 'Retardo_' + record.name
+                 registro_falta = record.env['hr.leave'].search([('name','=', nombre)], limit=1)
+                 if registro_falta:
+                    registro_falta.action_refuse()
 
     def action_draft(self):
         self.write({'state':'draft'})

@@ -78,4 +78,24 @@
           groups="hr_payroll.group_hr_payroll_user"
       />
 
+    <record id="action_selected_vacaciones" model="ir.actions.server">
+        <field name="name">Validar</field>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="nomina_cfdi_extras_ee.model_vacaciones_nomina"/>
+        <field name="binding_model_id" ref="nomina_cfdi_extras_ee.model_vacaciones_nomina"/>
+        <field name="code">records.action_change_state()
+        </field>
+    </record>
+
+    <record id="action_cancel_vacaciones" model="ir.actions.server">
+        <field name="name">Cancelar</field>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="nomina_cfdi_extras_ee.model_vacaciones_nomina"/>
+        <field name="binding_model_id" ref="nomina_cfdi_extras_ee.model_vacaciones_nomina"/>
+        <field name="code">records.action_cancelar()
+        </field>
+    </record>
+
 </odoo>

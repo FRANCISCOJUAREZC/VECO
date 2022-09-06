@@ -2,7 +2,6 @@
 from odoo import models, fields, _, api
 import pytz
 from odoo.exceptions import UserError
-from .tzlocal import get_localzone
 from datetime import datetime
 from odoo import tools
 
@@ -58,13 +57,25 @@ class FaltasNomina(models.Model):
     def action_validar(self):
         leave_type = None
         if self.tipo_de_falta=='Justificada con goce de sueldo':
-            leave_type = self.company_id.leave_type_fjc or False
+            if self.company_id.leave_type_fjc: 
+               leave_type = self.company_id.leave_type_fjc
+            else:
+               raise UserError(_('Falta configurar el tipo de falta'))
         elif self.tipo_de_falta=='Justificada sin goce de sueldo':
-            leave_type = self.company_id.leave_type_fjs or False
+            if self.company_id.leave_type_fjs: 
+               leave_type = self.company_id.leave_type_fjs
+            else:
+               raise UserError(_('Falta configurar el tipo de falta'))
         elif self.tipo_de_falta=='Injustificada':
-            leave_type = self.company_id.leave_type_fi or False
+            if self.company_id.leave_type_fi: 
+               leave_type = self.company_id.leave_type_fi
+            else:
+               raise UserError(_('Falta configurar el tipo de falta'))
         elif self.tipo_de_falta=='retardo':
-            leave_type = self.company_id.leave_type_fr or False
+            if self.company_id.leave_type_fr: 
+               leave_type = self.company_id.leave_type_fr
+            else:
+               raise UserError(_('Falta configurar el tipo de falta'))
 
         date_from = self.fecha_inicio.strftime('%Y-%m-%d') # +' 00:00:00'
         date_to = self.fecha_fin.strftime('%Y-%m-%d') # +' 23:59:59'
@@ -115,14 +126,15 @@ class FaltasNomina(models.Model):
         return
 
     def action_cancelar(self):
-        if self.state == 'draft':
-            self.write({'state':'cancel'})
-        else:
-           self.write({'state':'cancel'})
-           nombre = 'Faltas_'+self.name
-           registro_falta = self.env['hr.leave'].search([('name','=', nombre)], limit=1)
-           if registro_falta:
-              registro_falta.action_refuse()
+        for record in self:
+           if record.state == 'draft':
+               record.write({'state':'cancel'})
+           else:
+              record.write({'state':'cancel'})
+              nombre = 'Faltas_'+ record.name
+              registro_falta = record.env['hr.leave'].search([('name','=', nombre)], limit=1)
+              if registro_falta:
+                 registro_falta.action_refuse()
 
     def action_draft(self):
         self.write({'state':'draft'})

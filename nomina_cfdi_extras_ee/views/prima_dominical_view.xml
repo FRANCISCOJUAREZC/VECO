@@ -81,4 +81,13 @@
         </field>
     </record>
 
+    <record id="action_cancel_prima_dominical" model="ir.actions.server">
+        <field name="name">Cancelar</field>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="nomina_cfdi_extras_ee.model_prima_dominical"/>
+        <field name="binding_model_id" ref="nomina_cfdi_extras_ee.model_prima_dominical"/>
+        <field name="code">records.action_cancelar()
+        </field>
+    </record>
 </odoo>

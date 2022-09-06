@@ -141,6 +141,8 @@ class CalculoISRAnual(models.TransientModel):
                   impuesto_marginal = excedente_limite_superior * porcentaje_sobre_excedente/100
                   isr_tarifa_113 = impuesto_marginal + cuota_fija
                   result2[val]['Impuesto'] = isr_tarifa_113
+               else:
+                  result2[val]['Impuesto'] = 0
             else:
                result2[val]['Impuesto'] = 0
 

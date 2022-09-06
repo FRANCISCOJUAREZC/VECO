@@ -77,7 +77,8 @@ class ViaticosNomina(models.Model):
                'name' : self.description,
                'struct_id' : structure_rec and structure_rec.id,
                'tipo_nomina' : 'E',
-               'contract_id': employee.contract_id.id
+               'contract_id': employee.contract_id.id,
+               'dias_pagar': 1,
                }
            if employee.contract_id:
                vals.update({
@@ -107,6 +108,7 @@ class ViaticosNomina(models.Model):
                     'struct_id' : structure_rec and structure_rec.id,
                     'tipo_nomina' : 'E',
                     'contract_id' : employee.contract_id.id,
+                    'dias_pagar': 1,
                     }
                 if employee.contract_id:
                     vals.update({

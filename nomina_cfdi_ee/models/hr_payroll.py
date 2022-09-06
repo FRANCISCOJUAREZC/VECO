@@ -455,10 +455,6 @@ class HrPayslip(models.Model):
               work_entry_type = self.env['hr.work.entry.type'].browse(line['work_entry_type_id'])
               if work_entry_type.code == "WORK100":
                    line['number_of_days'] = number_of_days
-     #         if work_entry_type.code == "VAC" or work_entry_type.code == "FJC":
-     #              line['number_of_days'] = vac_days
-     #         if work_entry_type.code == 'FJS' or work_entry_type.code == 'FI' or work_entry_type.code == 'FR':
-     #              line['number_of_days'] =  day_rounded * factor
 
         return res
 
@@ -1332,12 +1328,12 @@ class HrPayslip(models.Model):
             except Exception as e:
                 error = str(e)
                 if "Name or service not known" in error or "Failed to establish a new connection" in error:
-                    raise Warning("Servidor fuera de servicio, favor de intentar mas tarde")
+                    raise UserError("Servidor fuera de servicio, favor de intentar mas tarde")
                 else:
-                   raise Warning(error)
+                   raise UserError(error)
 
             if "Whoops, looks like something went wrong." in response.text:
-                raise Warning("Error en el proceso de timbrado, espere un minuto y vuelva a intentar timbrar nuevamente. \nSi el error aparece varias veces reportarlo con la persona de sistemas.")
+                raise UserError("Error en el proceso de timbrado, espere un minuto y vuelva a intentar timbrar nuevamente. \nSi el error aparece varias veces reportarlo con la persona de sistemas.")
 
 #            _logger.info('something ... %s', response.text)
             json_response = response.json()
@@ -1477,12 +1473,12 @@ class HrPayslip(models.Model):
                 except Exception as e:
                     error = str(e)
                     if "Name or service not known" in error or "Failed to establish a new connection" in error:
-                        raise Warning("Servidor fuera de servicio, favor de intentar mas tarde")
+                        raise UserError("Servidor fuera de servicio, favor de intentar mas tarde")
                     else:
-                       raise Warning(error)
+                       raise UserError(error)
 
                 if "Whoops, looks like something went wrong." in response.text:
-                    raise Warning("Error en el proceso de timbrado, espere un minuto y vuelva a intentar timbrar nuevamente. \nSi el error aparece varias veces reportarlo con la persona de sistemas.")
+                    raise UserError("Error en el proceso de timbrado, espere un minuto y vuelva a intentar timbrar nuevamente. \nSi el error aparece varias veces reportarlo con la persona de sistemas.")
 
                 json_response = response.json()
                 #_logger.info('log de la exception ... %s', response.text)

@@ -45,7 +45,7 @@ class CreditoInfonavit(models.Model):
 
     def action_validar(self):
         for rec in self:
-            if rec.contract_id:
+            if rec.contract_id and rec.state == 'draft':
                if rec.tipo_de_descuento == '1':
                   rec.valor_infonavit_ant = rec.contract_id.infonavit_porc
                   rec.contract_id.infonavit_porc = rec.valor_descuento
@@ -60,7 +60,7 @@ class CreditoInfonavit(models.Model):
 
     def action_cancelar(self):
         for rec in self:
-            if rec.contract_id:
+            if rec.contract_id and rec.state == 'done':
                if rec.tipo_de_descuento == '1':
                   rec.contract_id.infonavit_porc = rec.valor_infonavit_ant
                elif rec.tipo_de_descuento == '2':

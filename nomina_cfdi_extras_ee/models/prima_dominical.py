@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, _, api
-from .tzlocal import get_localzone
 from datetime import datetime
 import pytz
 from odoo.exceptions import UserError
@@ -45,7 +44,8 @@ class PrimaDominical(models.Model):
         return
 
     def action_cancelar(self):
-        self.write({'state':'cancel'})
+        for record in self:
+            self.write({'state':'cancel'})
 
     def action_draft(self):
         self.write({'state':'draft'})

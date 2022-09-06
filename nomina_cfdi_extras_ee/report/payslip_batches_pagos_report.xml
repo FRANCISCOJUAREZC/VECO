@@ -3,12 +3,13 @@
 	<data>
 		<report string="Relacion de pagos" id="action_report_payslip_batches_pagos"
 			model="hr.payslip.run" report_type="qweb-pdf"
-			name="nomina_cfdi_extras_ee.report_payslip_batches_pagos" file="nomina_cfdi_extras_ee.report_payslip_batches_pagos" />
+			name="nomina_cfdi_extras_ee.report_payslip_batches_pagos" file="nomina_cfdi_extras_ee.report_payslip_batches_pagos"
+                       paperformat="nomina_cfdi_extras_ee.nomina_reports"  />
 	</data>
 	<template id="report_payslip_batches_pagos">
 		<t t-call="web.html_container">
 		<t t-foreach="docs" t-as="o">
-			<t t-call="web.external_layout">
+			<t t-call="nomina_cfdi_extras_ee.cfdi_payroll_layout">
 				<div class="page">
 					<div class="oe_structure" />
 					<center>

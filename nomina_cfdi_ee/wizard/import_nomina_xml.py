@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models,fields,api, _
-from odoo.exceptions import Warning
+from odoo.exceptions import Warning, UserError
 import os
 from lxml import etree
 import base64
@@ -25,10 +25,10 @@ class import_payslip_from_xml(models.TransientModel):
         self.ensure_one()
         payslip_id = self.env['hr.payslip'].browse(self._context.get('active_id'))
         if not self.import_file:
-            raise Warning("Seleccione primero el archivo.")
+            raise UserError("Seleccione primero el archivo.")
         p, ext = os.path.splitext(self.file_name)
         if ext[1:].lower() !='xml':
-            raise Warning(_("Formato no soportado \"{}\", importa solo archivos XML").format(self.file_name))
+            raise UserError(_("Formato no soportado \"{}\", importa solo archivos XML").format(self.file_name))
 
         file_content = base64.b64decode(self.import_file)
         xml_data = etree.fromstring(file_content)
