@@ -88,19 +88,19 @@ class exportar_cfdi_sua(models.TransientModel):
                     data7 = employee.empleado_nombre.replace('ñ','#').replace('Ñ','#').ljust(27, ' ') #Nombre(s)
                     data8 = '{:06d}'.format(int(round(rec.sueldo_cotizacion_base,2)*100)) or '      ' #Salario base de cotización
                     data9 = '      ' #Filler
-                    if not employee.tipoDeTrabajador:
+                    if not employee.tipodetrabajador:
                        raise UserError(_('No tiene %s tipo de trabajador configurado') % (employee.name))
-                    data10 = employee.tipoDeTrabajador #Tipo de trabajador
-                    if not employee.tipoDeSalario:
+                    data10 = employee.tipodetrabajador #Tipo de trabajador
+                    if not employee.tipodesalario:
                        raise UserError(_('No tiene %s tipo de salario configurado') % (employee.name))
-                    data11 = employee.tipoDeSalario #Tipo de salario
-                    if not employee.tipoDeJornada:
+                    data11 = employee.tipodesalario #Tipo de salario
+                    if not employee.tipodejornada:
                        raise UserError(_('No tiene %s tipo de jornada configurado') % (employee.name))
-                    data12 = employee.tipoDeJornada #Semana o jornada reducida
+                    data12 = employee.tipodejornada #Semana o jornada reducida
                     data13 = rec.fecha.strftime("%d%m%Y") #Fecha de movimiento (inicio de labores)
-                    if not employee.unidadMedicina:
+                    if not employee.unidadmedicina:
                        raise UserError(_('No tiene %s unidad de medicina configurado') % (employee.name))
-                    data14 = employee.unidadMedicina and employee.unidadMedicina[0:3].ljust(3, ' ') or '' #Unidad de medicina familiar
+                    data14 = employee.unidadmedicina and employee.unidadmedicina[0:3].ljust(3, ' ') or '' #Unidad de medicina familiar
                     data15 = '  ' #Filler
                     data16 = '08' #Tipo de movimiento
                     if not employee.no_guia:
@@ -179,15 +179,15 @@ class exportar_cfdi_sua(models.TransientModel):
                     data6 = '{:06d}'.format(int(round(rec.sueldo_cotizacion_base,2)*100)) or '      ' #Salario base de cotización
                     data7 = '      ' #Filler
                     #data7a = ' ' #Filler dua con este espacio vacio o 1
-                    if not employee.tipoDeTrabajador:
+                    if not employee.tipodetrabajador:
                        raise UserError(_('No tiene %s tipo de trabajador configurado') % (employee.name))
-                    data7a = employee.tipoDeTrabajador #Tipo de trabajador 
-                    if not employee.tipoDeSalario:
+                    data7a = employee.tipodetrabajador #Tipo de trabajador 
+                    if not employee.tipodesalario:
                        raise UserError(_('No tiene %s tipo de salario configurado') % (employee.name))
-                    data8 = employee.tipoDeSalario #Tipo de salario
-                    if not employee.tipoDeJornada:
+                    data8 = employee.tipodesalario #Tipo de salario
+                    if not employee.tipodejornada:
                        raise UserError(_('No tiene %s tipo de jornada configurado') % (employee.name))
-                    data9 = employee.tipoDeJornada #Semana o jornada reducida
+                    data9 = employee.tipodejornada #Semana o jornada reducida
                     data10 = rec.fecha.strftime("%d%m%Y") #Fecha de movimiento (inicio de labores)
                     data11 = '     ' #Filler
                     data12 = '07' #Tipo de movimiento
@@ -229,8 +229,7 @@ class exportar_cfdi_sua(models.TransientModel):
                           data4 = rec.fecha_inicio.strftime("%d%m%Y")
                       data7 = ''
                       folioimss = '        '
-                      #if employee.contract_id:
-                      data7='0000000' #'{:07d}'.format(int(employee.contract_id.sueldo_diario_integrado*100))
+                      data7='0000000'
                       file_text.append((employee.registro_patronal_id.registro_patronal[0:11] or '           ')+(employee.segurosocial[0:11] or '           ')+(data3)+(data4)+ \
                                        (folioimss)+'{:02d}'.format(rec.dias)+data7 + '\r')
 
@@ -271,8 +270,7 @@ class exportar_cfdi_sua(models.TransientModel):
                    if rec.fecha:
                        data4 = rec.fecha.strftime("%d%m%Y")
                    data7 = ''
-                   #if employee.contract_id:
-                   data7='0000000' #'{:07d}'.format(int(employee.contract_id.sueldo_diario_integrado*100)) 
+                   data7='0000000'
                    file_text.append((employee.registro_patronal_id.registro_patronal[0:11] or '           ')+(employee.segurosocial[0:11] or '')+(data3)+(data4) + \
                                     (rec.folio_incapacidad[0:8]) + '{:02d}'.format(rec.dias) + data7 + '\r')
 
@@ -297,21 +295,6 @@ class exportar_cfdi_sua(models.TransientModel):
                       if employee.contract_id:
                           data7='{:07d}'.format(int(round(rec.sueldo_cotizacion_base,2)*100))
                       file_text.append((employee.registro_patronal_id.registro_patronal[0:11] or '           ')+(employee.segurosocial[0:11] or '           ')+(data3)+(data4)+(folioimss)+(diasincidencia)+data7 + '\r')
-
-#               for rec in i_nomina:
-#                   if rec.tipo_de_incidencia=='Alta':
-#                      employee = rec.employee_id
-#                      data3 = '08'
-#                      data4=''
-#                      if rec.fecha:
-#                          data4 = rec.fecha.strftime("%d%m%Y")
-#                      data7 = '0000000'
-#                      folioimss = '        '
-#                      diasincidencia = '00'
-#                      if employee.contract_id:
-#                          data7='{:07d}'.format(int(round(employee.contract_id.sueldo_diario_integrado,2)*100))
-#                      file_text.append((employee.registro_patronal[0:11] or '           ')+(employee.segurosocial[0:11] or '           ')+(data3)+(data4)+(folioimss)+(diasincidencia)+data7)
-
 
             if self.tipo_exp_sua == '1': ##Tipo Incapacidad
                for rec in in_nomina:
@@ -413,12 +396,12 @@ class exportar_cfdi_sua(models.TransientModel):
                            raise UserError(_("Faltan CURP del empleado %s") % (employee.name))
                       if len(employee.curp) != 18:
                          raise UserError(_('La longitud del CURP es incorrecto %s')  % (employee.name))
-                      if not employee.tipoDeTrabajador:
+                      if not employee.tipodetrabajador:
                            raise UserError(_("Faltan tipo de trabajador del empleado %s") % (employee.name))
-                      if not employee.tipoDeJornada:
+                      if not employee.tipodejornada:
                            raise UserError(_("Faltan tipo de jornada del empleado %s") % (employee.name))
                       file_text.append((employee.registro_patronal_id.registro_patronal[0:11] or '           ')+(employee.segurosocial[0:11] or '           ') + employee.rfc + employee.curp + \
-                                       nombre.ljust(50, ' ') + employee.tipoDeTrabajador + '0' + data4 + sdi + employee.no_empleado.ljust(27, ' ') + folioimss + ' ' + data7 + '\r')
+                                       nombre.ljust(50, ' ') + employee.tipodetrabajador + '0' + data4 + sdi + employee.no_empleado.ljust(27, ' ') + folioimss + ' ' + data7 + '\r')
 
             if self.tipo_exp_sua == '3':  ##Movimiento afiliatorio
                for rec in i_nomina:
@@ -439,7 +422,7 @@ class exportar_cfdi_sua(models.TransientModel):
                       if employee.empleado_nombre:
                            nombre = nombre + employee.empleado_nombre
                       if employee.contract_id:
-                          sdi='{:07d}'.format(int(round(rec.sueldo_base_cotizacion,2)*100))
+                          sdi='{:07d}'.format(int(round(rec.sueldo_cotizacion_base,2)*100))
                       if not employee.job_title:
                          raise UserError(_('No tiene %s puesto configurado') % (employee.name))
                       if employee.gender == 'male':
@@ -458,13 +441,13 @@ class exportar_cfdi_sua(models.TransientModel):
                            raise UserError(_("Faltan fecha de cumpleaños del empleado %s") % (employee.name))
                       if not employee.place_of_birth:
                            raise UserError(_("Faltan lugar de nacimiento del empleado %s") % (employee.name))
-                      if not employee.unidadMedicina:
+                      if not employee.unidadmedicina:
                            raise UserError(_("Faltan unidad de medicina del empleado %s") % (employee.name))
                       if not employee.codigo_postal:
                            raise UserError(_("Faltan código postal del domicilio del empleado %s") % (employee.name))
                       file_text.append((employee.registro_patronal_id.registro_patronal[0:11] or '           ')+(employee.segurosocial[0:11] or '           ') + employee.codigo_postal + \
                                         employee.birthday.strftime("%d%m%Y") + employee.place_of_birth.rjust(25, ' ') + '00' + \
-                                        employee.unidadMedicina[0:3].ljust(3, ' ') + employee.job_title.rjust(12, ' ') + genero + employee.tipoDeSalario + ' ' + '\r')
+                                        employee.unidadmedicina[0:3].ljust(3, ' ') + employee.job_title.rjust(12, ' ') + genero + employee.tipodesalario + ' ' + '\r')
 
             if self.tipo_exp_sua == '4':  ##Credito INFONAVIT
                for rec in infonavit:
@@ -498,6 +481,7 @@ class exportar_cfdi_sua(models.TransientModel):
             if self.tipo_exp_sua == '5':  ##Tipo reingreso
                for rec in i_nomina:
                    if rec.tipo_de_incidencia=='Reingreso':
+                      employee = rec.employee_id
                       if not employee.registro_patronal_id:
                          raise UserError(_('No tiene %s registro patronal configurado') % (employee.name))
                       if len(employee.registro_patronal_id.registro_patronal) != 11:
@@ -506,7 +490,6 @@ class exportar_cfdi_sua(models.TransientModel):
                          raise UserError(_('No tiene %s seguro social configurado') % (employee.name))
                       if len(employee.segurosocial) != 11:
                          raise UserError(_('La longitud del número de seguro social es incorrecto %s')  % (employee.name))
-                      employee = rec.employee_id
                       data3 = '08'
                       data4=''
                       if rec.fecha:
@@ -515,7 +498,7 @@ class exportar_cfdi_sua(models.TransientModel):
                       folioimss = '        '
                       diasincidencia = '00'
                       if employee.contract_id:
-                          data7='{:07d}'.format(int(round(rec.sueldo_base_cotizacion,2)*100))
+                          data7='{:07d}'.format(int(round(rec.sueldo_cotizacion_base,2)*100))
                       file_text.append((employee.registro_patronal_id.registro_patronal[0:11] or '           ')+(employee.segurosocial[0:11] or '           ')+(data3)+(data4)+(folioimss)+(diasincidencia)+data7 + '\r')
 
            ####agregar footer IDSE

@@ -9,10 +9,10 @@
             <page name="info_idse" string="SUA / IDSE">
                 <group cols="4">
                     <group string="Información IDSE">
-                        <field name="tipoDeTrabajador"/>
-                        <field name="tipoDeSalario"/>
-                        <field name="tipoDeJornada"/>
-                        <field name="unidadMedicina"/>
+                        <field name="tipodetrabajador"/>
+                        <field name="tipodesalario"/>
+                        <field name="tipodejornada"/>
+                        <field name="unidadmedicina"/>
                         <field name="no_guia"/>
                     </group>
                     <group string="Información SUA">
