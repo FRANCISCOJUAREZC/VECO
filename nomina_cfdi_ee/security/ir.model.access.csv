@@ -25,4 +25,4 @@ access_caja_nomina,access_caja_nomina,nomina_cfdi_ee.model_caja_nomina,hr_payrol
 access_entrega_fondo_caja,access_entrega_fondo_caja,nomina_cfdi_ee.model_entrega_fondo_caja,,1,1,1,1
 access_enviar_nomina,access_enviar_nomina,model_enviar_nomina,,1,1,1,1
 access_import_payslip_from_xml,access_import_payslip_from_xml,model_import_payslip_from_xml,,1,1,1,1
-access_reason_cancelation_wizard,reason_cancelation_wizard,nomina_cfdi_ee.model_reason_cancelation,om_hr_payroll.group_hr_payroll_user,1,1,1,1
+access_reason_cancelation_wizard,reason_cancelation_wizard,nomina_cfdi_ee.model_reason_cancelation,hr_payroll.group_hr_payroll_user,1,1,1,1
