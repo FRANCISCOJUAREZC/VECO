@@ -17,6 +17,9 @@
                     <field name="banorte_numero" attrs="{'invisible':[('banco_rfc','!=','BMN930209927')]}"/>
                     <field name="bbva_referencia" attrs="{'invisible':[('banco_rfc','!=','BBA830831LJ2')]}"/>
                     <field name="bbva_no_contrato" attrs="{'invisible':[('banco_rfc','!=','BBA830831LJ2')]}"/>
+                    <field name="scotia_numero" attrs="{'invisible':[('banco_rfc','!=','SIN9412025I4')]}"/>
+                    <field name="scotia_cuenta" attrs="{'invisible':[('banco_rfc','!=','SIN9412025I4')]}"/>
+                    <field name="scotia_referencia" attrs="{'invisible':[('banco_rfc','!=','SIN9412025I4')]}"/>
                     <field name="fecha_dispersion" />
                 </group>
                 <footer>

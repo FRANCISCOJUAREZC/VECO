@@ -298,7 +298,7 @@ class CalculoSBC(models.TransientModel):
                 
         if self.total_empleados:
            for empleado2 in new_employees:
-               _#logger.info('lista nva %s', empleado2.name)
+               #_logger.info('lista nva %s', empleado2.name)
                if not empleado2.contract_id:
                    continue
                contrato = empleado2.contract_id[0]
@@ -488,6 +488,8 @@ class CalculoSBC(models.TransientModel):
 
             #poner totales
             if dias_periodo == 0:
+               continue
+            if total_gravado == 0:
                continue
             resultado = round(nsbc + total_gravado/round(dias_periodo),2)
             if resultado > 25 * contrato.tablas_cfdi_id.uma:

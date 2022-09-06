@@ -20,7 +20,9 @@ class GenerarPagosBanco(models.TransientModel):
                    ('BSM970519DU8_2', 'Santander - Mixto'),
                    ('BNM840515VB1', 'Banamex - Dispersión "C"'),
                    ('BNM840515VB1_2', 'Banamex - Dispersión "D"'),
-                   ('BRM940216EQ6', 'Banregio'),],
+                   ('BRM940216EQ6', 'Banregio'),
+                   ('HMI950125KG8', 'HSBC'),
+                   ('SIN9412025I4', 'Scotiabank'),],
         string=_('Banco de dispersión'),
     )
     dato1 = fields.Char("Código de pago")
@@ -33,6 +35,9 @@ class GenerarPagosBanco(models.TransientModel):
     banorte_numero = fields.Char("No. emisor asignado")
     bbva_referencia = fields.Char("Referencia (7 digitos)")
     bbva_no_contrato = fields.Char("No. contrato (10 digitos)")
+    scotia_numero = fields.Char("Número de cliente")
+    scotia_cuenta = fields.Char("Cuenta de cargo")
+    scotia_referencia = fields.Char("Referencia")
 
     file_content = fields.Binary("Archivo")
     diario_pago = fields.Many2one('account.journal', string='Cuenta de pago', domain=[('type', '=', 'bank')])
@@ -94,6 +99,22 @@ class GenerarPagosBanco(models.TransientModel):
                   enc18 = 'D' # version de layout
                   enc19 = '01' #fijo              123456789012345678    12345678901234567890
                   str_encabezado.append((enc11)+(enc12)+(enc13)+(enc14)+(enc15)+(enc16)+(enc17)+(enc18)+(enc19))
+            elif self.banco_rfc == 'SIN9412025I4': # Scotia bank
+                  #primer encabezado
+                  enc11 = 'EEHA' #FIJO
+                  if not self.scotia_numero:
+                     raise UserError(_('Falta el número de cliente Scotiabank.'))
+                  enc12 = self.scotia_numero.rjust(5, '0')
+                  enc13 = "01000000000000000000000000000"
+                  enc14 = '                                                                                                                                                                                                                                                                                                                                            '
+                  enc16 = 'EEHB'
+                  if not self.scotia_cuenta:
+                     raise UserError(_('Falta el número de cuenta de cargo Scotiabank.'))
+                  enc17 = self.scotia_cuenta.rjust(17, '0')
+                  enc18 = "0000000001000"
+                  enc19 = '                                                                                                                                                                                                                                                                                                                                                '
+                  str_encabezado.append((enc11)+(enc12)+(enc13)+(enc14))
+                  str_encabezado.append((enc16)+(enc17)+(enc18)+(enc19))
 
               ##################################################################################
               ###################################################################################
@@ -350,7 +371,91 @@ class GenerarPagosBanco(models.TransientModel):
                            data8 = '               '
                            file_text.append((data1)+(data2)+(data3)+(data4)+(data5)+(data6)+(data7)+(data8))
                            num_registro += 1
+                        elif self.banco_rfc == 'HMI950125KG8': # HSBC
 
+                           if not employee.no_cuenta:
+                               raise UserError(_('Falta configurar número de cuenta %s.') % (employee.name))
+                           data1 = employee.no_cuenta.rjust(10, '0') + ','
+                           data2 =  str(round(net_total,2)).split('.')[0].rjust(12, '0')
+                           if net_total > 0:
+                              data3 =  str(round(net_total,2)).split('.')[1].ljust(2, '0') + ','
+                           else:
+                              data3 =  '00' + ','
+
+                           data4 = 'ABONO POR PAGO DE NOMINA          ' + ','
+
+                           if not employee.empleado_nombre or not employee.empleado_paterno:
+                               raise UserError(_('Falta nombre y/o apellido paterno para el empleado %s.') % (employee.name))
+                           if employee.empleado_materno:
+                              nombre_empleado = employee.empleado_nombre + ' ' + employee.empleado_paterno + ' ' + employee.empleado_materno
+                           else:
+                              nombre_empleado = employee.empleado_nombre + ' ' + employee.empleado_paterno
+                           nombre_empleado = nombre_empleado.replace('-','').replace('.','').replace(':','').replace('?','').replace('&','').replace('!','')
+                           nombre_empleado = nombre_empleado.replace('á','a').replace('é','e').replace('í','i').replace('ó','o').replace('ú','u')
+                           nombre_empleado = nombre_empleado.replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U')
+                           nombre_empleado = nombre_empleado.replace('ñ','@').replace('Ñ','@')
+                           data5 = nombre_empleado[0:35].ljust(35, ' ')
+
+                           file_text.append((data1)+(data2)+(data3)+(data4)+(data5))
+                           num_registro += 1
+                        elif self.banco_rfc == 'BRM940216EQ6': # Banregio
+                           data1 = str(num_empleados + 1).rjust(5, '0') + ',' #secuencia
+                           data2 = 'S' + ','
+                           if not employee.no_cuenta:
+                               raise UserError(_('Falta configurar número de cuenta %s.') % (employee.name))
+                           data3 = employee.no_cuenta.rjust(20, '0') + ','
+                           data4 =  str(round(net_total,2)).split('.')[0].rjust(13, '0') + ','
+                           if net_total > 0:
+                              data5 =  str(round(net_total,2)).split('.')[1].ljust(2, '0') + ','
+                           else:
+                              data5 =  '00' + ','
+                           data6 = '0000000000000,00' + ',' #espacios en blanco
+                           data7 = 'TRANSFERENCIA SPEI                      ' + ',' #espacios en blanco
+                           data8 = '               '
+                           file_text.append((data1)+(data2)+(data3)+(data4)+(data5)+(data6)+(data7)+(data8))
+                           num_registro += 1
+                        elif self.banco_rfc == 'SIN9412025I4': # Scotiabank
+
+                           if not employee.no_cuenta:
+                               raise UserError(_('Falta configurar número de cuenta %s.') % (employee.name))
+                           data1 = 'EEDA'
+                           data2 = '04' #01 - Efectivo en ventanilla,  02 - Cheque de caja en ventanilla, 03 - Cheque de caja central y 04 - Abono en cuenta.
+                           data3 =  str(round(net_total,2)).split('.')[0].rjust(15, '0')
+                           if net_total > 0:
+                              data4 =  str(round(net_total,2)).split('.')[1].ljust(2, '0')
+                           else:
+                              data4 =  '00'
+
+                           data5 = self.fecha_dispersion.strftime('%Y%m%d')
+                           data6 = '01'
+                           data7 = str(employee.no_empleado).ljust(2)
+
+                           if not employee.empleado_nombre or not employee.empleado_paterno:
+                               raise UserError(_('Falta nombre y/o apellido paterno para el empleado %s.') % (employee.name))
+                           if employee.empleado_materno:
+                              nombre_empleado = employee.empleado_nombre + ' ' + employee.empleado_paterno + ' ' + employee.empleado_materno
+                           else:
+                              nombre_empleado = employee.empleado_nombre + ' ' + employee.empleado_paterno
+                           nombre_empleado = nombre_empleado.replace('-','').replace('.','').replace(':','').replace('?','').replace('&','').replace('!','')
+                           nombre_empleado = nombre_empleado.replace('á','a').replace('é','e').replace('í','i').replace('ó','o').replace('ú','u')
+                           nombre_empleado = nombre_empleado.replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U')
+                           nombre_empleado = nombre_empleado.replace('ñ','@').replace('Ñ','@')
+                           data8 = nombre_empleado[0:35].rjust(59, ' ')
+
+                           data9 = '            '
+                           data10 = self.scotia_referencia.rjust(16, '0')
+                           data11 = employee.no_cuenta.rjust(30, '0')
+                           data12 = '00000'
+                           data13 = '                                        '
+                           data14 = '1 '
+                           data15 = '00000044044001' 
+                           data16 = '01'
+                           data17 = payslip.payslip_run_id.name.ljust(142, ' ')
+                           data18 = '0000000000000000000000000'
+                           data19 = '                      '
+
+                           file_text.append((data1)+(data2)+(data3)+(data4)+(data5) + data6 + data7 + data8 + data9 + data10 + data11 + data12 + data13 + data14 + data15 + data16 + data17 + data18 + data19)
+                           num_registro += 1
                         num_empleados += 1
                         monto_total += round(net_total,2)
 
@@ -481,7 +586,40 @@ class GenerarPagosBanco(models.TransientModel):
                   enc23 = '0' #accion
                   enc24 = '00000000000000000000000000000000000000000000000000000000000000000000000000000' #filler 
                   str_encabezado.append(enc11+enc12+enc13+enc14+enc15+enc16+enc17+sum17a +enc18 + enc19+ enc20+ enc21+ enc22+ enc23+ enc24)
+            elif self.banco_rfc == 'HMI950125KG8': # HSBC
+                  #primer encabezado
+                  enc11 = 'MXPRLF,' #FIJO
+                  enc12 = 'F,' #fijo
+                  if self.diario_pago.bank_account_id.acc_number:
+                     enc13 = self.diario_pago.bank_account_id.acc_number.rjust(10, '0') + ','
 
+                  enc14 = str(round(monto_total,2)).split('.')[0].rjust(12, '0')
+                  if monto_total > 0:
+                     enc15 =  str(round(monto_total,2)).split('.')[1].ljust(2, '0')  + ','
+                  else:
+                     enc15 =  '00' + ','
+
+                  enc16 = str(num_empleados).rjust(7, '0') + ','
+                  enc17 = self.fecha_dispersion.strftime('%d%m%Y') + ','
+
+                  enc18 = ',' # horario de programacion
+                  enc19 = record.name
+
+                  str_encabezado.append(enc11+enc12+enc13+enc14+enc15+enc16+enc17+enc18 + enc19)
+            elif self.banco_rfc == 'SIN9412025I4': # Scotiabank
+                  sum1 = 'EETB' #FIJO
+                  sum2 = 'EETA' #Moneda nacional
+                  sum3 = '0000006'
+                  sum4 = str(round(monto_total,2)).split('.')[0].rjust(15, '0')
+                  if monto_total > 0:
+                     sum5a =  str(round(monto_total,2)).split('.')[1].ljust(2, '0')
+                  else:
+                     sum5a =  '00'
+                  sum6 = '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+                  sum7 = '                                                                                                                           '
+
+                  str_sumario.append((sum1)+(sum3)+(sum4)+(sum5a)+(sum6)+(sum7))
+                  str_sumario.append((sum2)+(sum3)+(sum4)+(sum5a)+(sum6)+(sum7))
 #            else:
 #               raise Warning("Banco no compatible con la dispersión.")
         if not file_text:
