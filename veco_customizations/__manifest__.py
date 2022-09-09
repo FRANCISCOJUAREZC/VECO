@@ -13,5 +13,6 @@
         'l10n_mx_edi',
         'hr_expense',
         'sale',
+        'purchase',
     ],
 }
