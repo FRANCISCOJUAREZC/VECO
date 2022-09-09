@@ -90,7 +90,6 @@ class MRPProduction(models.Model):
                          GROUP BY sm.product_id, mo.id, currency_table.rate""".format(currency_table=currency_table,)
             self.env.cr.execute(query_str, (tuple(rec.ids), ))
             total_cost = 0
-            import ipdb; ipdb.set_trace()
             for product_id, mo_id, qty, cost, currency_rate in self.env.cr.fetchall():
                 cost *= currency_rate
                 to_write['components_amount'] += cost
