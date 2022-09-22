@@ -14,5 +14,6 @@
         'hr_expense',
         'sale',
         'purchase',
+        'mrp',
     ],
 }
