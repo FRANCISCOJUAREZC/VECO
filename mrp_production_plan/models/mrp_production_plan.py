@@ -263,7 +263,7 @@ class MrpProductionPlanItem(models.Model):
         # Create transient records based on sale orders and manufacture orders
         sale_domain = [('state', 'in', ['sale', 'done'])]
         StockMove = self.env['stock.move'].sudo()
-        AccountInvoice = self.env['account.invoice'].sudo()
+        AccountInvoice = self.env['account.move'].sudo()
         current_sol = current_rows.mapped('sale_line_id')
         if current_rows and current_sol:
             sale_domain.append(
@@ -297,7 +297,7 @@ class MrpProductionPlanItem(models.Model):
             if sale_picking:
                 sale_picking_date_done = sale_picking[-1].picking_id.date_done
 
-            invoice_ids = sale_line.invoice_lines.mapped('invoice_id').filtered(
+            invoice_ids = sale_line.invoice_lines.mapped('move_id').filtered(
                 lambda invoice: invoice.state not in ['draft', 'cancel'])
             dest_location = mrp.location_dest_id
             sfp_pick = (
