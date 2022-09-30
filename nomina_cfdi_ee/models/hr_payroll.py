@@ -234,10 +234,10 @@ class HrPayslip(models.Model):
 
         if self.contract_id.periodicidad_pago == '04':
             dias_pagar = 15.2083
-            factor = 1.16
+            factor = 1.1667
         elif self.contract_id.periodicidad_pago == '02':
             dias_pagar = 7.0192
-            factor = 7.0192/6.0
+            factor = 1.1667
         else:
             dias_pagar = (self.date_to - self.date_from).days + 1
 
@@ -269,9 +269,9 @@ class HrPayslip(models.Model):
                         if self.contract_id.incapa_sept_dia:
                             inc_days += day_rounded
                     elif work_entry_type.code == 'VAC' or work_entry_type.code == 'FJC':
-                        vac_days += day_rounded * 7.0192/7.0
-                        leave_days += day_rounded * 7.0192/7.0
-                        attendance_line.update({'number_of_days': day_rounded * 7.0192/7.0})
+                        vac_days += day_rounded * 1.0027
+                        leave_days += day_rounded * 1.0027
+                        attendance_line.update({'number_of_days': day_rounded * 1.0027})
 #                    if work_entry_type.code != 'DFES' and work_entry_type.code != 'DFES_3' and work_entry_type.code != 'WORK100':
 #                       leave_days += day_rounded
                     if work_entry_type.code == 'WORK100':
@@ -360,11 +360,11 @@ class HrPayslip(models.Model):
                       if leave_days == 0 and not nvo_ingreso:
                          number_of_days = 7.0192
                       elif nvo_ingreso:
-                         number_of_days = work_data_days - leave_days
+                         number_of_days = work_data_days * 7.0192 / 7 - leave_days
                       else:
                          number_of_days = 7.0192 - leave_days
                    else:
-                      number_of_days = work_data_days
+                      number_of_days = work_data_days * 7.0192 / 7
                    if self.contract_id.sept_dia: # septimo día
                       if number_of_days == 0:
                          if leave_days != 7:
