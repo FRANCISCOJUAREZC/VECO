@@ -258,7 +258,7 @@ class HrPayslip(models.Model):
 
             #sacar calculos
             if work_entry_type:
-                    if work_entry_type.code == 'FJS' or work_entry_type.code == 'FI' or work_entry_type.code == 'FR':
+                    if work_entry_type.code == 'FJS' or work_entry_type.code == 'FI' or work_entry_type.code == 'FR'  or work_entry_type.code == 'FJC':
                         falta_days += day_rounded * factor
                         leave_days += day_rounded * factor
                         attendance_line.update({'number_of_days': day_rounded * factor})
@@ -268,12 +268,14 @@ class HrPayslip(models.Model):
                         leave_days += day_rounded
                         if self.contract_id.incapa_sept_dia:
                             inc_days += day_rounded
-                    elif work_entry_type.code == 'VAC' or work_entry_type.code == 'FJC':
-                        vac_days += day_rounded * 1.0027
-                        leave_days += day_rounded * 1.0027
-                        attendance_line.update({'number_of_days': day_rounded * 1.0027})
-#                    if work_entry_type.code != 'DFES' and work_entry_type.code != 'DFES_3' and work_entry_type.code != 'WORK100':
-#                       leave_days += day_rounded
+                    elif work_entry_type.code == 'VAC':
+                        if self.contract_id.periodicidad_pago == '04':
+                           factor2 = 1
+                        else:
+                           factor2 = 1.0027
+                        vac_days += day_rounded * factor2
+                        leave_days += day_rounded * factor2
+                        attendance_line.update({'number_of_days': day_rounded * factor2})
                     if work_entry_type.code == 'WORK100':
                         work_data_days = day_rounded
                         _logger.info('work_data_days %s', work_data_days)
