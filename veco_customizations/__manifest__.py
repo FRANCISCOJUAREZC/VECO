@@ -14,6 +14,9 @@
         'hr_expense',
         'sale',
         'purchase',
-        'mrp',
+        'mrp_workorder',
     ],
+    'data': [
+        'views/mrp_production_views.xml',
+    ]
 }

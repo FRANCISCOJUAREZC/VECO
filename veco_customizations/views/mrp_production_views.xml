@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record model="ir.ui.view" id="view_mrp_production_veco_customizations_form">
+        <field name="name">view.mrp.production.veco.customizations.form</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_assign']" position="before">
+                <field name="sync_button_visible" invisible="1"/>
+                <button name="action_prorate_data" type="object" class="oe_highlight" attrs="{'invisible': [('sync_button_visible', '=', False)]}" confirm="This action will update all the backorders (materials and times). Are you sure?" string="Update Orders" icon="fa-refresh"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
