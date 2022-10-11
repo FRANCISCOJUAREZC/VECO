@@ -1,0 +1,99 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* veco_customizations
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 15.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-11 19:40+0000\n"
+"PO-Revision-Date: 2022-10-11 19:40+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: veco_customizations
+#: model:ir.model,name:veco_customizations.model_account_analytic_line
+msgid "Analytic Line"
+msgstr "Línea analítica"
+
+#. module: veco_customizations
+#: model:ir.model,name:veco_customizations.model_account_edi_format
+msgid "EDI format"
+msgstr "Formato EDI"
+
+#. module: veco_customizations
+#: model:ir.model,name:veco_customizations.model_report_mrp_account_enterprise_mrp_cost_structure
+msgid "MRP Cost Structure Report"
+msgstr "Informe de estructura de costos de MRP"
+
+#. module: veco_customizations
+#: model:ir.model,name:veco_customizations.model_mrp_production
+msgid "Production Order"
+msgstr "Orden de producción"
+
+#. module: veco_customizations
+#: model:ir.model,name:veco_customizations.model_purchase_order
+msgid "Purchase Order"
+msgstr "Orden de compra"
+
+#. module: veco_customizations
+#: model:ir.model,name:veco_customizations.model_sale_order
+msgid "Sales Order"
+msgstr "Orden de venta"
+
+#. module: veco_customizations
+#: model:ir.model.fields,field_description:veco_customizations.field_mrp_production__sync_button_visible
+msgid "Sync Button Visible"
+msgstr "Botón de Sincronización Visible"
+
+#. module: veco_customizations
+#: model:ir.model.fields,field_description:veco_customizations.field_mrp_production__synchronized
+msgid "Synchronized"
+msgstr "Sincronizado"
+
+#. module: veco_customizations
+#: code:addons/veco_customizations/models/analytic.py:0
+#, python-format
+msgid ""
+"The Sales Order %s linked to the Analytic Account %s is cancelled. You "
+"cannot register an expense on a cancelled Sales Order."
+msgstr ""
+"El pedido de venta % ligado a la cuenta analítica %s está cancelado. No "
+"es posible registrar un gasto relacionado a un pedido cancelado."
+
+#. module: veco_customizations
+#: code:addons/veco_customizations/models/analytic.py:0
+#, python-format
+msgid ""
+"The Sales Order %s linked to the Analytic Account %s must be validated "
+"before registering expenses."
+msgstr ""
+"El pedido de venta %s ligado a la cuenta analítica %s debe ser confirmado "
+"antes de registrar un gasto"
+
+#. module: veco_customizations
+#: code:addons/veco_customizations/models/mrp_production.py:0
+#, python-format
+msgid ""
+"This action only can be executed from the first manufacture order (ending "
+"with 001."
+msgstr ""
+"Esta acción solo puede ser ejecutada desde la primer orden de producción "
+"(terminación 001)."
+
+#. module: veco_customizations
+#: model_terms:ir.ui.view,arch_db:veco_customizations.view_mrp_production_veco_customizations_form
+msgid ""
+"This action will update all the backorders (materials and times). Are you "
+"sure?"
+msgstr ""
+"Está acción actualizará todas las ordenes de producción relacionadas (materiales y tiempo). ¿Está seguro?"
+
+#. module: veco_customizations
+#: model_terms:ir.ui.view,arch_db:veco_customizations.view_mrp_production_veco_customizations_form
+msgid "Update Orders"
+msgstr "Sincronizar Ordenes"

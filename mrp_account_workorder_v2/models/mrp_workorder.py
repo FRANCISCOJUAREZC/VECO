@@ -159,7 +159,7 @@ class MrpWorkcenterProductivity(models.Model):
                 raise ValidationError(
                     e.name + _('\n The MO with the problem is: %s') % (
                         self.workorder_id.production_id.name))
-            self.workforce_entry_id.post()
+            self.workforce_entry_id.action_post()
             return self.workforce_entry_id
         # Create the new move
         try:
@@ -187,7 +187,7 @@ class MrpWorkcenterProductivity(models.Model):
                 )
 
         self.workforce_entry_id = move.id
-        move.post()
+        move.action_post()
 
     @api.model
     def create(self, vals):
@@ -205,3 +205,9 @@ class MrpWorkcenterProductivity(models.Model):
             # Update the data
             rec.with_context(is_edition=True).create_workforce_entry()
         return res
+
+    def unlink(self):
+        for rec in self:
+            rec.workforce_entry_id.button_draft()
+            rec.workforce_entry_id.button_cancel()
+            rec.workforce_entry_id.with_context(force_delete=True).unlink()
