@@ -8,6 +8,7 @@ from odoo import api, SUPERUSER_ID
 
 
 def migrate(cr, version):
+    return True
     env = api.Environment(cr, SUPERUSER_ID, {})
     env['res.partner'].search(
         [('parent_id', '!=', False)])._compute_display_name()
