@@ -47,8 +47,8 @@ class exportar_cfdi_sua(models.TransientModel):
             domain2.append(('employee_id','=', self.employee_id.id))
         
         if self.registro_patronal_id:
-            domain.append(('employee_id.registro_patronal_id','=', self.registro_patronal_id))
-            domain2.append(('employee_id.registro_patronal_id','=', self.registro_patronal_id))
+            domain.append(('employee_id.registro_patronal_id','=', self.registro_patronal_id.id))
+            domain2.append(('employee_id.registro_patronal_id','=', self.registro_patronal_id.id))
             
         ################ EXPORTACIÓN A IDSE #############################
         if is_idse:
