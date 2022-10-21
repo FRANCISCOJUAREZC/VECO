@@ -23,7 +23,7 @@ class WizardReglasSalariales(models.TransientModel):
     
    
     def print_reglas_salariales_report(self):
-        domain=[('state','=', 'done')]
+        domain=[('state','in', ('done','paid'))]
         if self.date_from:
             domain.append(('date_from','>=',self.date_from))
             

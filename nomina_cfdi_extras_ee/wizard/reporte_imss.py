@@ -22,7 +22,7 @@ class WizardReporteImss(models.TransientModel):
 
     def print_reporte_imss_report(self):
         #domain=[('state','=', 'done')]
-        domain=[]
+        domain=[('state','in', ('done','paid'))]
         if self.date_from:
             domain.append(('date_from','>=',self.date_from))
             
