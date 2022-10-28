@@ -4,6 +4,7 @@
 
 from . import account_edi_format
 from . import analytic
+from . import hr_employee
 from . import mrp_production
 from . import purchase_order
 from . import sale
