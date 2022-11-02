@@ -17,6 +17,7 @@
     ],
     'data': [
         'security/ir.model.access.csv',
+        'data/ir_cron_data.xml',
         'report/manufacture_cost_report.xml',
     ]
 }
