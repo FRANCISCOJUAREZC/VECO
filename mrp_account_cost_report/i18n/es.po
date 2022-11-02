@@ -122,6 +122,13 @@ msgid "Last Modified on"
 msgstr "Última modificación en"
 
 #. module: mrp_account_cost_report
+#: model:ir.actions.server,name:mrp_account_cost_report.ir_cron_update_mrp_production_orders_costs_ir_actions_server
+#: model:ir.cron,cron_name:mrp_account_cost_report.ir_cron_update_mrp_production_orders_costs
+#: model:ir.cron,name:mrp_account_cost_report.ir_cron_update_mrp_production_orders_costs
+msgid "MRP: Uptade Production Order Costs"
+msgstr "MRP: Actualizar Costos de Ordenes de Producción"
+
+#. module: mrp_account_cost_report
 #: model:ir.actions.act_window,name:mrp_account_cost_report.action_manufacture_cost_report
 #: model_terms:ir.ui.view,arch_db:mrp_account_cost_report.view_manufacture_cost_report_search
 msgid "Manufacture Cost"
