@@ -176,3 +176,14 @@ class MRPProduction(models.Model):
     def _compute_qty_done(self):
         for rec in self:
             rec.qty_done = sum(rec.finished_move_line_ids.mapped('qty_done'))
+
+    def refresh_costs(self):
+        init_date = fields.Datetime.now().replace(
+            hour=0, minute=0, second=0, microsecond=0)
+        end_date = fields.Datetime.now().replace(
+            hour=23, minute=59, second=59)
+        orders = self.search([
+            ('date_finished', '>=', init_date),
+            ('date_planned_finished', '<=', end_date),
+            ('state', '=', 'done')])
+        orders._compute_costs()
