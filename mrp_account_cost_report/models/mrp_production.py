@@ -2,7 +2,15 @@
 # © 2021 Morwi Encoders Consulting SA DE CV
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
+import logging
+
+from collections import Counter
+
+
 from odoo import api, fields, models
+from odoo.tools.float_utils import float_is_zero
+
+_logger = logging.getLogger(__name__)
 
 
 class MRPProduction(models.Model):
@@ -62,7 +70,10 @@ class MRPProduction(models.Model):
 
     @api.depends('state')
     def _compute_costs(self):
+        counter = 0
         for rec in self:
+            counter += 1
+            _logger.info("MRP Manufacture computed method _compute_costs executing %s record of %s ", counter, len(self))
             to_write = {
                 'components_amount': 0.0,
                 'workforce_amount': 0.0,
@@ -91,6 +102,8 @@ class MRPProduction(models.Model):
             self.env.cr.execute(query_str, (tuple(rec.ids), ))
             total_cost = 0
             for product_id, mo_id, qty, cost, currency_rate in self.env.cr.fetchall():
+                if cost is None:
+                    cost = 0
                 cost *= currency_rate
                 to_write['components_amount'] += cost
 
@@ -104,15 +117,38 @@ class MRPProduction(models.Model):
                     to_write['indirects_amount'] += abs(
                         work_line.workforce_entry_id.line_ids[1].balance)
                 to_write['hours'] += (work_line.duration / 60)
+
+            # Ensure field value to values with 0
+            for field, field_value in to_write.items():
+                if float_is_zero(field_value, precision_digits=2):
+                    to_write[field] = rec._get_most_repeated_field_value(
+                        field)
+
             to_write['total_cost'] = (
                 to_write['components_amount'] + to_write['workforce_amount'] +
                 to_write['indirects_amount'])
             to_write['unit_cost'] = to_write['total_cost'] / (sum(rec.finished_move_line_ids.mapped('qty_done')) or 1)
+
             rec.update(to_write)
+
+    def _get_most_repeated_field_value(self, field):
+        self.ensure_one()
+        try:
+            values = self.search_read(
+                [('product_id', '=', self.product_id.id),
+                 ('state', '=', 'done'),
+                 (field, '>', 0)], [field])
+            occurence_count = Counter([val[field] for val in values])
+            return occurence_count.most_common(1)[0][0]
+        except Exception as e:
+            return 0
 
     @api.depends('state')
     def _compute_sale_amount(self):
+        counter = 0
         for rec in self:
+            counter += 1
+            _logger.info("MRP Manufacture computed method _compute_sale_amount executing %s record of %s: ", counter, len(self))
             lines = self.env['sale.order.line'].search(
                 [('product_id', '=', rec.product_id.id),
                  ('order_id', '=', rec.x_studio_sale_id.id)])
@@ -120,7 +156,7 @@ class MRPProduction(models.Model):
                 'sale_price_unit': sum(lines.mapped('price_subtotal')) / (sum(
                     lines.mapped('product_uom_qty')) or 1),
                 'sale_amount': sum(lines.mapped('price_subtotal')),
-                'factor': sum(lines.mapped('price_subtotal')) / (rec.total_cost or 1),
+                'factor': sum(lines.mapped('price_subtotal')) / (rec.unit_cost or 1),
             })
 
     @api.depends('components_amount', 'workforce_amount', 'indirects_amount')
