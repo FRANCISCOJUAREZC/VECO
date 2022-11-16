@@ -124,6 +124,7 @@ class MRPProduction(models.Model):
                     to_write[field] = rec._get_most_repeated_field_value(
                         field)
 
+            # Write Values
             to_write['total_cost'] = (
                 to_write['components_amount'] + to_write['workforce_amount'] +
                 to_write['indirects_amount'])
