@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="group_mrp_quality_user" model="res.groups">
+        <field name="name">Mrp and Quality User</field>
+        <field name="menu_access" eval="[(4, ref('mrp.menu_mrp_root'))]"/>
+<!--         <field name="view_access" eval="[(4, ref('survey.res_partner_view_form'))]"/>
+        <field name="category_id" ref="base.module_category_human_resources_planning"/> -->
+       <!--  <field name="view_access" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin')), (4, ref('base.default_user'))]"/> -->
+    </record>
+</odoo>
