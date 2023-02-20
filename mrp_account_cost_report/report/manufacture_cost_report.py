@@ -12,7 +12,7 @@ class ManufactureCostReport(models.Model):
     _description = "Manufacture Cost Report"
     _auto = False
     _rec_name = 'date'
-    _order = 'date desc'
+    _order = 'date desc, description'
 
     date = fields.Datetime(readonly=True)
     product_id = fields.Many2one('product.product', 'Product', readonly=True)
@@ -44,15 +44,15 @@ class ManufactureCostReport(models.Model):
     def _query(self, with_clause='', fields={}, groupby='', from_clause=''):
         with_ = ("WITH %s" % with_clause) if with_clause else ""
         select_ = """
-            min(sm.id) as id,
-            sm.date as date,
-            sm.product_id as product_id,
-            sm.name as description,
-            sm.production_id as production_id,
-            sm.product_uom as product_uom_id,
+            min(mp.id) as id,
+            mp.date_finished as date,
+            mp.product_id as product_id,
+            mp.name as description,
+            mp.id as production_id,
+            mp.product_uom_id as product_uom_id,
             sum(mp.qty_done) as product_uom_qty,
             mp.x_studio_cliente_p_1 as customer,
-            sm.company_id as company_id,
+            mp.company_id as company_id,
             SUM(mp.components_amount) as components_amount,
             SUM(mp.workforce_amount) as workforce_amount,
             SUM(mp.indirects_amount) as indirects_amount,
@@ -73,20 +73,17 @@ class ManufactureCostReport(models.Model):
             select_ += field
 
         from_ = """
-                stock_move sm
-                join mrp_production mp on (sm.production_id=mp.id)
-                left join stock_picking_type spt on (sm.picking_type_id=spt.id)
+                mrp_production mp
                 %s
         """ % from_clause
 
         groupby_ = """
-            sm.product_id,
-            sm.name,
-            sm.product_uom,
-            sm.date,
-            sm.partner_id,
-            sm.company_id,
-            sm.production_id,
+            mp.product_id,
+            mp.name,
+            mp.product_uom_id,
+            mp.date_finished,
+            mp.company_id,
+            mp.id,
             mp.components_amount,
             mp.workforce_amount,
             mp.indirects_amount,
@@ -96,7 +93,7 @@ class ManufactureCostReport(models.Model):
         """ % (groupby)
 
         return (
-            "%s (SELECT %s FROM %s WHERE sm.state = 'done' AND spt.code = 'mrp_operation' AND sm.production_id IS NOT NULL GROUP BY %s)"
+            "%s (SELECT %s FROM %s WHERE mp.state = 'done' GROUP BY %s)"
             % (with_, select_, from_, groupby_)
         )
 
