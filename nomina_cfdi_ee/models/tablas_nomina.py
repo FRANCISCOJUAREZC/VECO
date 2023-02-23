@@ -135,6 +135,14 @@ class TablasAnualISR(models.Model):
     c_fija = fields.Float('Cuota fija') 
     s_excedente = fields.Float('Sobre excedente (%)')
 
+class TablasCesantia(models.Model):
+    _name = 'tablas.cesantia.line'
+    _description = 'TablasCesantiaLine'
+
+    form_id = fields.Many2one('tablas.cfdi', string='Cesantía', required=True)
+    lim_inf = fields.Float('Límite inferior')
+   # lim_sup = fields.Float('Límite superior')
+    cuota = fields.Float('Cuota patronal (%)', digits = (12,3))
 
 class TablasCFDI(models.Model):
     _name = 'tablas.cfdi'
@@ -151,6 +159,7 @@ class TablasCFDI(models.Model):
     tabla_bimestral = fields.One2many('tablas.periodo.bimestral', 'form_id', copy=True)
     tabla_mensual = fields.One2many('tablas.periodo.mensual', 'form_id', copy=True)
     tabla_semanal = fields.One2many('tablas.periodo.semanal', 'form_id', copy=True)
+    tabla_cesantia = fields.One2many('tablas.cesantia.line', 'form_id', copy=True)
 
     uma = fields.Float(string=_('UMA'), default='84.49')
     salario_minimo = fields.Float(string=_('Salario mínimo'))
