@@ -112,22 +112,22 @@ class HrPayslip(models.Model):
     aplicar_descuentos = fields.Boolean('Aplicar descuentos', default = True)
 
     #imss empleado
-    emp_exedente_smg = fields.Float(string='Exedente 3 SMGDF.')
+    emp_exedente_smg = fields.Float(string='Exedente 3 SMGDF')
     emp_prest_dinero = fields.Float(string='Prest en dinero')
     emp_esp_pens = fields.Float(string='Gastos médicos')
     emp_invalidez_vida = fields.Float( string='Invalidez y Vida.')
-    emp_cesantia_vejez = fields.Float(string='Cesantia y vejez.')
+    emp_cesantia_vejez = fields.Float(string='Cesantia y vejez')
     emp_total = fields.Float(string='IMSS trabajador')
     #imss patronal
     pat_cuota_fija_pat = fields.Float(string='Cuota fija patronal')
-    pat_exedente_smg = fields.Float(string='Exedente 3 SMGDF')
-    pat_prest_dinero = fields.Float(string='Prest. en dinero')
-    pat_esp_pens = fields.Float(string='Gastos médicos')
+    pat_exedente_smg = fields.Float(string='Exedente 3 SMGDF.')
+    pat_prest_dinero = fields.Float(string='Prest en dinero.')
+    pat_esp_pens = fields.Float(string='Gastos médicos.')
     pat_riesgo_trabajo = fields.Float( string='Riegso de trabajo')
     pat_invalidez_vida = fields.Float( string='Invalidez y Vida')
     pat_guarderias = fields.Float(string='Guarderias y PS')
     pat_retiro = fields.Float( string='Retiro')
-    pat_cesantia_vejez = fields.Float(string='Cesantia y vejez')
+    pat_cesantia_vejez = fields.Float(string='Cesantia y vejez.')
     pat_infonavit = fields.Float(string='INFONAVIT')
     pat_total = fields.Float(string='IMSS patron')
 
@@ -690,7 +690,7 @@ class HrPayslip(models.Model):
             mes_actual = self.contract_id.tablas_cfdi_id.tabla_mensual.search([('mes', '=', self.mes), ('form_id', '=', self.contract_id.tablas_cfdi_id.id)],limit =1)
             date_start = mes_actual.dia_inicio # self.date_from
             date_end = mes_actual.dia_fin #self.date_to
-            domain=[('state','=', 'done')]
+            domain=[('state','in', ['paid', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -721,7 +721,7 @@ class HrPayslip(models.Model):
             mes_actual = contract_id.tablas_cfdi_id.tabla_mensual.search([('mes', '=', mes), ('form_id', '=', contract_id.tablas_cfdi_id.id)],limit =1)
             date_start = mes_actual.dia_inicio # self.date_from
             date_end = mes_actual.dia_fin #self.date_to
-            domain=[('state','=', 'done')]
+            domain=[('state','in', ['paid', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -751,7 +751,7 @@ class HrPayslip(models.Model):
         if employee_id and contract_id.tablas_cfdi_id:
             date_start = date(fields.Date.from_string(date_from).year, 1, 1)
             date_end = date(fields.Date.from_string(date_from).year, 12, 31)
-            domain=[('state','=', 'done')]
+            domain=[('state','in', ['paid', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -794,7 +794,7 @@ class HrPayslip(models.Model):
         if self.employee_id and self.contract_id.tablas_cfdi_id:
             date_start = date(fields.Date.from_string(self.date_from).year, 1, 1)
             date_end = date(fields.Date.from_string(self.date_from).year, 12, 31)
-            domain=[('state','=', 'done')]
+            domain=[('state','in', ['paid', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -923,7 +923,7 @@ class HrPayslip(models.Model):
                                         tipo_hr = '02'
                                     lineas_de_percepcion_exentas.append({'TipoPercepcion': line.salary_rule_id.tipo_cpercepcion.clave,
                                        'Clave': line.code,
-                                       'Concepto': line.salary_rule_id.name,
+                                       'Concepto': line.salary_rule_id.name[:100],
                                        'ImporteGravado': parte_gravada,
                                        'ImporteExento': parte_exenta,
                                        'Dias': ext_line.number_of_days,
@@ -935,7 +935,7 @@ class HrPayslip(models.Model):
                     elif line.salary_rule_id.tipo_cpercepcion.clave == '045':
                         lineas_de_percepcion_exentas.append({'TipoPercepcion': line.salary_rule_id.tipo_cpercepcion.clave,
                            'Clave': line.code,
-                           'Concepto': line.salary_rule_id.name,
+                           'Concepto': line.salary_rule_id.name[:100],
                            'ValorMercado': 56,
                            'PrecioAlOtorgarse': 48,
                            'ImporteGravado': parte_gravada,
@@ -943,14 +943,14 @@ class HrPayslip(models.Model):
                     else:
                         lineas_de_percepcion_exentas.append({'TipoPercepcion': line.salary_rule_id.tipo_cpercepcion.clave,
                            'Clave': line.code,
-                           'Concepto': line.salary_rule_id.name,
+                           'Concepto': line.salary_rule_id.name[:100],
                            'ImporteGravado': parte_gravada,
                            'ImporteExento': parte_exenta})
                 else:
                     parte_gravada = line.total
                     lineas_de_percepcion.append({'TipoPercepcion': line.salary_rule_id.tipo_cpercepcion.clave,
                     'Clave': line.code,
-                    'Concepto': line.salary_rule_id.name,
+                    'Concepto': line.salary_rule_id.name[:100],
                     'ImporteGravado': line.total,
                     'ImporteExento': '0'})
 
@@ -1025,7 +1025,7 @@ class HrPayslip(models.Model):
                     #_logger.info('subsidio aplicado %s importe excento %s', self.subsidio_periodo, line.total)
                     lineas_de_otros.append({'TipoOtrosPagos': line.salary_rule_id.tipo_cotro_pago.clave,
                     'Clave': line.code,
-                    'Concepto': line.salary_rule_id.name,
+                    'Concepto': line.salary_rule_id.name[:100],
                     'ImporteGravado': '0',
                     'ImporteExento': line.total,
                     'SubsidioCausado': self.subsidio_periodo})
@@ -1034,7 +1034,7 @@ class HrPayslip(models.Model):
                     #_logger.info('entro al otro ..')
                     lineas_de_otros.append({'TipoOtrosPagos': line.salary_rule_id.tipo_cotro_pago.clave,
                         'Clave': line.code,
-                        'Concepto': line.salary_rule_id.name,
+                        'Concepto': line.salary_rule_id.name[:100],
                         'ImporteGravado': '0',
                         'ImporteExento': line.total})
         otrospagos = {
@@ -1064,7 +1064,7 @@ class HrPayslip(models.Model):
                     no_deuducciones += 1
                     lineas_deduccion.append({'TipoDeduccion': line.salary_rule_id.tipo_cdeduccion.clave,
                    'Clave': line.code,
-                   'Concepto': line.salary_rule_id.name,
+                   'Concepto': line.salary_rule_id.name[:100],
                    'Importe': round(line.total,2)})
                     payslip_total_TDED += round(line.total,2)
 
@@ -1123,13 +1123,25 @@ class HrPayslip(models.Model):
                         tipo_inc = '02'
                     elif ext_line.code == 'INC_MAT':
                         tipo_inc = '03'
+
+                    importe_monetario = 0
+                    sub_incapacidad = self.env['hr.payslip.line'].search([('category_id.code','=','ALW'),('slip_id','=',self.id)])
+                    if sub_incapacidad:
+                       for sub_line in sub_incapacidad:
+                          if sub_line.salary_rule_id.tipo_cpercepcion.clave == '014':
+                              importe_monetario += sub_line.total
+                    desc_incapacidad = self.env['hr.payslip.line'].search([('category_id.code','=','DED'),('slip_id','=',self.id)])
+                    if desc_incapacidad:
+                       for desc_line in desc_incapacidad:
+                          if desc_line.salary_rule_id.tipo_cdeduccion.clave == '006':
+                              importe_monetario += desc_line.total
                     incapacidad = {
-                  'Incapacidad': {
-                        'DiasIncapacidad': ext_line.number_of_days,
-                        'TipoIncapacidad': tipo_inc,
-                        'ImporteMonetario': 0,
-                        },
-                        }
+                         'Incapacidad': {
+                             'DiasIncapacidad': ext_line.number_of_days,
+                             'TipoIncapacidad': tipo_inc,
+                             'ImporteMonetario': importe_monetario,
+                         },
+                    }
                     request_params.update({'incapacidades': incapacidad})
 
         self.retencion_subsidio_pagado = self.isr_periodo - self.subsidio_periodo
@@ -1709,17 +1721,12 @@ class MailTemplate(models.Model):
         return  filename, file_extension.replace('.', '')
 
     def generate_email(self, res_ids, fields=None):
-        results = super(MailTemplate, self).generate_email(res_ids, fields=fields)
-        
+        multi_mode = True
         if isinstance(res_ids, (int)):
             res_ids = [res_ids]
-        #res_ids_to_templates = super(MailTemplate, self).get_email_template(res_ids)
+            multi_mode = False
+        results = super(MailTemplate, self).generate_email(res_ids, fields=fields)
 
-        # templates: res_id -> template; template -> res_ids
-        #templates_to_res_ids = {}
-        #for res_id, template in res_ids_to_templates.items():
-        #    templates_to_res_ids.setdefault(template, []).append(res_id)
-        
         template_id = self.env.ref('nomina_cfdi_ee.email_template_payroll')
         for lang, (template, template_res_ids) in self._classify_per_lang(res_ids).items():
             if template.id  == template_id.id:
@@ -1734,4 +1741,4 @@ class MailTemplate(models.Model):
                         xml_file = self.env['ir.attachment'].search(domain)[0]
                         attachments.append((payment.number.replace('/','_') + '.xml', xml_file.datas))
                         results[res_id]['attachments'] = attachments
-        return results
+        return multi_mode and results or results[res_ids[0]]

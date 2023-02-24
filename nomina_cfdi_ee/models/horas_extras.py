@@ -12,7 +12,8 @@ class HorasNomina(models.Model):
     fecha = fields.Date('Fecha')
     tipo_de_hora = fields.Selection([('1','Simple'),
                                       ('2','Doble'),
-                                      ('3', 'Triple')], string='Tipo de hora extra')
+                                      ('3', 'Triple'),
+                                      ('4', 'Automático'),], string='Tipo de hora extra')
     state = fields.Selection([('draft', 'Borrador'), ('done', 'Hecho'), ('cancel', 'Cancelado')], string='Estado', default='draft')
     horas = fields.Char("Horas", required=True)
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)

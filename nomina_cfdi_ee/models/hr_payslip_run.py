@@ -7,6 +7,8 @@ from calendar import monthrange
 import logging
 _logger = logging.getLogger(__name__)
 from odoo.exceptions import UserError
+import io
+import base64
 
 class HrPayslipRun(models.Model):
     _inherit = 'hr.payslip.run'
@@ -21,8 +23,8 @@ class HrPayslipRun(models.Model):
         for rec in self:
             slip_ids = rec.slip_ids.filtered(lambda r: r.state == 'done')
             for slip_id in slip_ids:
-                slip_id.write({'state': 'cancel'})
-    
+                slip_id.action_payslip_cancel()
+
     tipo_configuracion = fields.Many2one('configuracion.nomina', string='Configuración')
     all_payslip_generated = fields.Boolean("Payslip Generated",compute='_compute_payslip_cgdi_generated')
     all_payslip_generated_draft = fields.Boolean("Payslip Generated draft",compute='_compute_payslip_cgdi_generated_draft')
@@ -191,7 +193,7 @@ class HrPayslipRun(models.Model):
                 break
         self.all_payslip_generated_draft = cfdi_generated_draft 
        
-        
+
     def enviar_nomina(self):
         self.ensure_one()
         ctx = self._context.copy()
@@ -230,7 +232,7 @@ class HrPayslipRun(models.Model):
     def timbrar_nomina_wizard(self):
         self.ensure_one()
         #cr = self._cr
-        err_msg = ''
+        err_msg = 'Sin errores'
         correct = 0
         errors = 0
         payslip_obj = self.env['hr.payslip']
