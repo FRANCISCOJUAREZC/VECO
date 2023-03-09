@@ -53,9 +53,9 @@
                     <li t-if="company.website" class="list-inline-item">&amp;bull;</li>
                     <li t-if="company.website" class="list-inline-item">Página web: <span t-field="company.website"/></li>
                 </ul>
-                <div name="financial_infos">
+               <!-- <div name="financial_infos">
                     <span t-field="company.report_footer"/>
-                </div>
+                </div>-->
                 <div class="text-muted">
                     Hoja: <span class="page"/> / <span class="topage"/>
                 </div>
@@ -485,13 +485,15 @@
            </t>
         </template>
 
-        <report id="report_payslips"
-                model="hr.payslip"
-                string="Imprimir Nomina"
-                report_type="qweb-pdf"
-                name="nomina_cfdi_ee.report_payslip"
-                file="nomina_cfdi_ee.report_payslip"
-                paperformat="nomina_cfdi_ee.paperformat_a4_landscape"/>
+    <record id="report_payslips" model="ir.actions.report">
+        <field name="name">Imprimir Nomina</field>
+        <field name="model">hr.payslip</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">nomina_cfdi_ee.report_payslip</field>
+        <field name="report_file">nomina_cfdi_ee.report_payslip</field>
+        <field name="paperformat_id" ref="nomina_cfdi_ee.paperformat_a4_landscape"/>
+        <field name="binding_type">report</field>
+    </record>
 
      </data>
 </odoo>
