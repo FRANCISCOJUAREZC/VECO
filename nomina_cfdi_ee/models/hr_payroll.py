@@ -149,8 +149,8 @@ class HrPayslip(models.Model):
         string=_('Método de pago'), default='PUE',
     )	
     uso_cfdi = fields.Selection(
-        selection=[('P01', _('Por definir')),],
-        string=_('Uso CFDI (cliente)'),default='P01',
+        selection=[('P01', _('Por definir')),('CN01', _('Nomina')),],
+        string=_('Uso CFDI (cliente)'),default='CN01',
     )
     fecha_pago = fields.Date(string=_('Fecha de pago'))
     dias_pagar = fields.Float('Pagar en la nomina')
@@ -692,7 +692,7 @@ class HrPayslip(models.Model):
             mes_actual = self.contract_id.tablas_cfdi_id.tabla_mensual.search([('mes', '=', self.mes), ('form_id', '=', self.contract_id.tablas_cfdi_id.id)],limit =1)
             date_start = mes_actual.dia_inicio # self.date_from
             date_end = mes_actual.dia_fin #self.date_to
-            domain=[('state','=', 'done')]
+            domain=[('state','in', ['paid', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -723,7 +723,7 @@ class HrPayslip(models.Model):
             mes_actual = contract_id.tablas_cfdi_id.tabla_mensual.search([('mes', '=', mes), ('form_id', '=', contract_id.tablas_cfdi_id.id)],limit =1)
             date_start = mes_actual.dia_inicio # self.date_from
             date_end = mes_actual.dia_fin #self.date_to
-            domain=[('state','=', 'done')]
+            domain=[('state','in', ['paid', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -753,7 +753,7 @@ class HrPayslip(models.Model):
         if employee_id and contract_id.tablas_cfdi_id:
             date_start = date(fields.Date.from_string(date_from).year, 1, 1)
             date_end = date(fields.Date.from_string(date_from).year, 12, 31)
-            domain=[('state','=', 'done')]
+            domain=[('state','in', ['paid', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -796,7 +796,7 @@ class HrPayslip(models.Model):
         if self.employee_id and self.contract_id.tablas_cfdi_id:
             date_start = date(fields.Date.from_string(self.date_from).year, 1, 1)
             date_end = date(fields.Date.from_string(self.date_from).year, 12, 31)
-            domain=[('state','=', 'done')]
+            domain=[('state','in', ['paid', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -925,7 +925,7 @@ class HrPayslip(models.Model):
                                         tipo_hr = '02'
                                     lineas_de_percepcion_exentas.append({'TipoPercepcion': line.salary_rule_id.tipo_cpercepcion.clave,
                                        'Clave': line.code,
-                                       'Concepto': line.salary_rule_id.name,
+                                       'Concepto': line.salary_rule_id.name[:100],
                                        'ImporteGravado': parte_gravada,
                                        'ImporteExento': parte_exenta,
                                        'Dias': ext_line.number_of_days,
@@ -937,7 +937,7 @@ class HrPayslip(models.Model):
                     elif line.salary_rule_id.tipo_cpercepcion.clave == '045':
                         lineas_de_percepcion_exentas.append({'TipoPercepcion': line.salary_rule_id.tipo_cpercepcion.clave,
                            'Clave': line.code,
-                           'Concepto': line.salary_rule_id.name,
+                           'Concepto': line.salary_rule_id.name[:100],
                            'ValorMercado': 56,
                            'PrecioAlOtorgarse': 48,
                            'ImporteGravado': parte_gravada,
@@ -945,14 +945,14 @@ class HrPayslip(models.Model):
                     else:
                         lineas_de_percepcion_exentas.append({'TipoPercepcion': line.salary_rule_id.tipo_cpercepcion.clave,
                            'Clave': line.code,
-                           'Concepto': line.salary_rule_id.name,
+                           'Concepto': line.salary_rule_id.name[:100],
                            'ImporteGravado': parte_gravada,
                            'ImporteExento': parte_exenta})
                 else:
                     parte_gravada = line.total
                     lineas_de_percepcion.append({'TipoPercepcion': line.salary_rule_id.tipo_cpercepcion.clave,
                     'Clave': line.code,
-                    'Concepto': line.salary_rule_id.name,
+                    'Concepto': line.salary_rule_id.name[:100],
                     'ImporteGravado': line.total,
                     'ImporteExento': '0'})
 
@@ -1027,7 +1027,7 @@ class HrPayslip(models.Model):
                     #_logger.info('subsidio aplicado %s importe excento %s', self.subsidio_periodo, line.total)
                     lineas_de_otros.append({'TipoOtrosPagos': line.salary_rule_id.tipo_cotro_pago.clave,
                     'Clave': line.code,
-                    'Concepto': line.salary_rule_id.name,
+                    'Concepto': line.salary_rule_id.name[:100],
                     'ImporteGravado': '0',
                     'ImporteExento': line.total,
                     'SubsidioCausado': self.subsidio_periodo})
@@ -1036,7 +1036,7 @@ class HrPayslip(models.Model):
                     #_logger.info('entro al otro ..')
                     lineas_de_otros.append({'TipoOtrosPagos': line.salary_rule_id.tipo_cotro_pago.clave,
                         'Clave': line.code,
-                        'Concepto': line.salary_rule_id.name,
+                        'Concepto': line.salary_rule_id.name[:100],
                         'ImporteGravado': '0',
                         'ImporteExento': line.total})
         otrospagos = {
@@ -1066,7 +1066,7 @@ class HrPayslip(models.Model):
                     no_deuducciones += 1
                     lineas_deduccion.append({'TipoDeduccion': line.salary_rule_id.tipo_cdeduccion.clave,
                    'Clave': line.code,
-                   'Concepto': line.salary_rule_id.name,
+                   'Concepto': line.salary_rule_id.name[:100],
                    'Importe': round(line.total,2)})
                     payslip_total_TDED += round(line.total,2)
 
@@ -1125,13 +1125,25 @@ class HrPayslip(models.Model):
                         tipo_inc = '02'
                     elif ext_line.code == 'INC_MAT':
                         tipo_inc = '03'
+
+                    importe_monetario = 0
+                    sub_incapacidad = self.env['hr.payslip.line'].search([('category_id.code','=','ALW'),('slip_id','=',self.id)])
+                    if sub_incapacidad:
+                       for sub_line in sub_incapacidad:
+                          if sub_line.salary_rule_id.tipo_cpercepcion.clave == '014':
+                              importe_monetario += sub_line.total
+                    desc_incapacidad = self.env['hr.payslip.line'].search([('category_id.code','=','DED'),('slip_id','=',self.id)])
+                    if desc_incapacidad:
+                       for desc_line in desc_incapacidad:
+                          if desc_line.salary_rule_id.tipo_cdeduccion.clave == '006':
+                              importe_monetario += desc_line.total
                     incapacidad = {
-                  'Incapacidad': {
-                        'DiasIncapacidad': ext_line.number_of_days,
-                        'TipoIncapacidad': tipo_inc,
-                        'ImporteMonetario': 0,
-                        },
-                        }
+                         'Incapacidad': {
+                             'DiasIncapacidad': ext_line.number_of_days,
+                             'TipoIncapacidad': tipo_inc,
+                             'ImporteMonetario': importe_monetario,
+                         },
+                    }
                     request_params.update({'incapacidades': incapacidad})
 
         self.retencion_subsidio_pagado = self.isr_periodo - self.subsidio_periodo
@@ -1214,18 +1226,21 @@ class HrPayslip(models.Model):
                       'subtotal': self.subtotal,
                       'descuento': self.descuento,
                       'total': self.total_nomina,
+                      'Exportacion': '01',
                 },
                 'emisor': {
                       'rfc': self.company_id.vat,
                       'curp': self.company_id.curp,
                       'api_key': self.company_id.proveedor_timbrado,
                       'modo_prueba': self.company_id.modo_prueba,
-                      'nombre_fiscal': self.company_id.nombre_fiscal,
+                      'nombre_fiscal': self.company_id.nombre_fiscal.upper(),
                 },
                 'receptor': {
                       'rfc': self.employee_id.rfc,
-                      'nombre': self.employee_id.name,
+                      'nombre': self.contract_id.name.upper(),
                       'uso_cfdi': self.uso_cfdi,
+                      'RegimenFiscalReceptor': '605',
+                      'DomicilioFiscalReceptor': self.employee_id.domicilio_receptor,
                 },
                 'conceptos': {
                       'cantidad': '1.0',
@@ -1235,6 +1250,7 @@ class HrPayslip(models.Model):
                       'valorunitario': self.subtotal,
                       'importe':  self.subtotal,
                       'descuento': self.descuento,
+                      'ObjetoImp': '01',
                 },
                 'nomina12': {
                       'TipoNomina': self.tipo_nomina,
@@ -1265,7 +1281,7 @@ class HrPayslip(models.Model):
                       'NumSeguridadSocial': self.employee_id.segurosocial,
                       'Puesto': self.employee_id.job_id.name,
                       'Departamento': self.employee_id.department_id.name,
-                      'Sindicalizado': 'Sí' if self.employee_id.sindicalizado else '',
+                      'Sindicalizado': 'Sí' if self.employee_id.sindicalizado else 'No',
                       'RiesgoPuesto': self.contract_id.riesgo_puesto,
                       'SalarioBaseCotApor': self.contract_id.sueldo_base_cotizacion,
                       'SalarioDiarioIntegrado': self.contract_id.sueldo_diario_integrado,
@@ -1274,10 +1290,12 @@ class HrPayslip(models.Model):
                       'tipo_relacion': self.tipo_relacion,
                       'uuid_relacionado': self.uuid_relacionado,
                 },
-                'version': {
-                      'cfdi': '3.3',
-                      'sistema': 'odoo14',
-                      'version': '6',
+                'informacion': {
+                      'cfdi': '4.0',
+                      'sistema': 'odoo15 EE',
+                      'version': '1',
+                      'api_key': self.company_id.proveedor_timbrado,
+                      'modo_prueba': self.company_id.modo_prueba,
                 },
 		})
 
@@ -1332,12 +1350,12 @@ class HrPayslip(models.Model):
             except Exception as e:
                 error = str(e)
                 if "Name or service not known" in error or "Failed to establish a new connection" in error:
-                    raise Warning("Servidor fuera de servicio, favor de intentar mas tarde")
+                    raise UserError("Servidor fuera de servicio, favor de intentar mas tarde")
                 else:
-                   raise Warning(error)
+                   raise UserError(error)
 
             if "Whoops, looks like something went wrong." in response.text:
-                raise Warning("Error en el proceso de timbrado, espere un minuto y vuelva a intentar timbrar nuevamente. \nSi el error aparece varias veces reportarlo con la persona de sistemas.")
+                raise UserError("Error en el proceso de timbrado, espere un minuto y vuelva a intentar timbrar nuevamente. \nSi el error aparece varias veces reportarlo con la persona de sistemas.")
 
 #            _logger.info('something ... %s', response.text)
             json_response = response.json()
@@ -1379,20 +1397,16 @@ class HrPayslip(models.Model):
         if not xml_invoice:
             return None
         NSMAP = {
-                 'xsi':'http://www.w3.org/2001/XMLSchema-instance',
-                 'cfdi':'http://www.sat.gob.mx/cfd/3', 
-                 'tfd': 'http://www.sat.gob.mx/TimbreFiscalDigital',
-                 }
+            'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+            'cfdi': 'http://www.sat.gob.mx/cfd/4',
+            'tfd': 'http://www.sat.gob.mx/TimbreFiscalDigital',
+        }
 
         xml_data = etree.fromstring(xml_invoice)
-        Emisor = xml_data.find('cfdi:Emisor', NSMAP)
-        RegimenFiscal = Emisor.find('cfdi:RegimenFiscal', NSMAP)
         Complemento = xml_data.find('cfdi:Complemento', NSMAP)
         TimbreFiscalDigital = Complemento.find('tfd:TimbreFiscalDigital', NSMAP)
-        
-        self.rfc_emisor = Emisor.attrib['Rfc']
-     #   self.name_emisor = Emisor.attrib['Nombre']
-        self.tipocambio = xml_data.attrib['TipoCambio']
+
+        self.tipocambio = xml_data.find('TipoCambio') and xml_data.attrib['TipoCambio'] or '1'
         self.moneda = xml_data.attrib['Moneda']
         self.numero_cetificado = xml_data.attrib['NoCertificado']
         self.cetificaso_sat = TimbreFiscalDigital.attrib['NoCertificadoSAT']
@@ -1400,25 +1414,25 @@ class HrPayslip(models.Model):
         self.selo_digital_cdfi = TimbreFiscalDigital.attrib['SelloCFD']
         self.selo_sat = TimbreFiscalDigital.attrib['SelloSAT']
         self.folio_fiscal = TimbreFiscalDigital.attrib['UUID']
-        if self.number:
-            self.folio = xml_data.attrib['Folio']
-        if self.company_id.serie_nomina:
-            self.serie_emisor = xml_data.attrib['Serie']
+     #   if self.number:
+     #       self.folio = xml_data.attrib['Folio']
+     #   if self.company_id.serie_nomina:
+     #       self.serie_emisor = xml_data.attrib['Serie']
         self.invoice_datetime = xml_data.attrib['Fecha']
-        self.version = TimbreFiscalDigital.attrib['Version']
-        self.cadena_origenal = '||%s|%s|%s|%s|%s||' % (self.version, self.folio_fiscal, self.fecha_certificacion, 
-                                                         self.selo_digital_cdfi, self.cetificaso_sat)
-        
+        version = TimbreFiscalDigital.attrib['Version']
+        self.cadena_origenal = '||%s|%s|%s|%s|%s||' % (version, self.folio_fiscal, self.fecha_certificacion,
+                                                       self.selo_digital_cdfi, self.cetificaso_sat)
+
         options = {'width': 275 * mm, 'height': 275 * mm}
         amount_str = str(self.total_nomina).split('.')
-        #print 'amount_str, ', amount_str
-        qr_value = 'https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?&id=%s&re=%s&rr=%s&tt=%s.%s&fe=%s' % (self.folio_fiscal,
-                                                 self.company_id.vat, 
-                                                 self.employee_id.rfc,
-                                                 amount_str[0].zfill(10),
-                                                 amount_str[1].ljust(6, '0'),
-                                                 self.selo_digital_cdfi[-8:],
-                                                 )
+        qr_value = 'https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?&id=%s&re=%s&rr=%s&tt=%s.%s&fe=%s' % (
+            self.folio_fiscal,
+            self.company_id.vat,
+            self.employee_id.rfc,
+            amount_str[0].zfill(10),
+            amount_str[1].ljust(6, '0'),
+            self.selo_digital_cdfi[-8:],
+        )
         self.qr_value = qr_value
         ret_val = createBarcodeDrawing('QR', value=qr_value, **options)
         self.qrcode_image = base64.encodebytes(ret_val.asString('jpg'))
@@ -1477,12 +1491,12 @@ class HrPayslip(models.Model):
                 except Exception as e:
                     error = str(e)
                     if "Name or service not known" in error or "Failed to establish a new connection" in error:
-                        raise Warning("Servidor fuera de servicio, favor de intentar mas tarde")
+                        raise UserError("Servidor fuera de servicio, favor de intentar mas tarde")
                     else:
-                       raise Warning(error)
+                       raise UserError(error)
 
                 if "Whoops, looks like something went wrong." in response.text:
-                    raise Warning("Error en el proceso de timbrado, espere un minuto y vuelva a intentar timbrar nuevamente. \nSi el error aparece varias veces reportarlo con la persona de sistemas.")
+                    raise UserError("Error en el proceso de timbrado, espere un minuto y vuelva a intentar timbrar nuevamente. \nSi el error aparece varias veces reportarlo con la persona de sistemas.")
 
                 json_response = response.json()
                 #_logger.info('log de la exception ... %s', response.text)
@@ -1711,17 +1725,12 @@ class MailTemplate(models.Model):
         return  filename, file_extension.replace('.', '')
 
     def generate_email(self, res_ids, fields=None):
-        results = super(MailTemplate, self).generate_email(res_ids, fields=fields)
-        
+        multi_mode = True
         if isinstance(res_ids, (int)):
             res_ids = [res_ids]
-        #res_ids_to_templates = super(MailTemplate, self).get_email_template(res_ids)
+            multi_mode = False
+        results = super(MailTemplate, self).generate_email(res_ids, fields=fields)
 
-        # templates: res_id -> template; template -> res_ids
-        #templates_to_res_ids = {}
-        #for res_id, template in res_ids_to_templates.items():
-        #    templates_to_res_ids.setdefault(template, []).append(res_id)
-        
         template_id = self.env.ref('nomina_cfdi_ee.email_template_payroll')
         for lang, (template, template_res_ids) in self._classify_per_lang(res_ids).items():
             if template.id  == template_id.id:
@@ -1736,4 +1745,4 @@ class MailTemplate(models.Model):
                         xml_file = self.env['ir.attachment'].search(domain)[0]
                         attachments.append((payment.number.replace('/','_') + '.xml', xml_file.datas))
                         results[res_id]['attachments'] = attachments
-        return results
+        return multi_mode and results or results[res_ids[0]]
