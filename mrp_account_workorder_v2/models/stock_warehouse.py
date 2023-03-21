@@ -24,6 +24,8 @@ class StockWarehouse(models.Model):
     @api.constrains('workforce_account_ids')
     def check_workforce_line_ids(self):
         for rec in self:
+            if not rec.workforce_account_ids:
+                continue
             total_percentage = sum(
                 rec.mapped('workforce_account_ids.percentage'))
             if total_percentage != 100:
