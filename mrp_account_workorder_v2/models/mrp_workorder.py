@@ -201,9 +201,13 @@ class MrpWorkcenterProductivity(models.Model):
         if vals.get('workforce_entry_id'):
             return res
 
-        for rec in self.filtered('workforce_entry_id'):
+        for rec in self:
             # Update the data
-            rec.with_context(is_edition=True).create_workforce_entry()
+            if rec.workforce_entry_id:
+                is_edition = True
+            else:
+                is_edition = False
+                rec.with_context(is_edition=is_edition).create_workforce_entry()
         return res
 
     def unlink(self):
