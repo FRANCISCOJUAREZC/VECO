@@ -21,7 +21,12 @@
 <p>Anexo encontrará su recibo de nómina.</p>
 <p>Saludos,</p>
 
-
+<p>
+        <t t-if="user.signature" data-oe-t-group="0" data-oe-t-group-active="true" data-oe-t-inline="true">
+            <br>
+            <t t-out="user.signature or ''" data-oe-t-inline="true" contenteditable="false">--<br>Mitchell Admin</t>
+        </t>
+</p>
 ]]></field>
         </record>
         

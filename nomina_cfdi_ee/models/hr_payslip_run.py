@@ -199,17 +199,15 @@ class HrPayslipRun(models.Model):
         ctx = self._context.copy()
         template = self.env.ref('nomina_cfdi_ee.email_template_payroll', False)
         for payslip in self.slip_ids: 
-            ctx.update({
-                'default_model': 'hr.payslip',
-                'default_res_id': payslip.id,
-                'default_use_template': bool(template),
-                'default_template_id': template.id,
-                'default_composition_mode': 'comment',
-            })
-            
-            vals = self.env['mail.compose.message']._onchange_template_id(template.id, 'comment', 'hr.payslip', payslip.id)
-            mail_message  = self.env['mail.compose.message'].with_context(ctx).create(vals.get('value',{}))
-            mail_message._action_send_mail()
+               if not template:return
+               mail = None
+               if payslip.employee_id.correo_electronico:
+                   mail = payslip.employee_id.correo_electronico
+               if not mail:
+                   if payslip.employee_id.work_email:
+                      mail = payslip.employee_id.work_email
+               if not mail:return
+               template.send_mail(payslip.id, force_send=True,email_values={'email_to': mail})
         return True
 
     def timbrar_nomina(self):
@@ -265,11 +263,18 @@ class HrPayslipRun(models.Model):
                    errors += 1
                    pass
             self.env.cr.commit()
-        if errors > 0:
-           raise UserError(_('Nóminas timbradas correctamente %s \n Nóminas no timbradas %s \n Errores: \n %s') % (correct, errors, err_msg))
-        else:
-           raise UserError(_('Nóminas timbradas correctamente %s \n Nóminas no timbradas %s \n') % (correct, errors))
-        return
+
+        respuesta = ('Nóminas timbradas correctamente %s \n Nóminas no timbradas %s') % (correct, errors)
+
+        message_id = self.env['nomina.message.wizard'].create({'message': respuesta, 'log_txt': err_msg, 'nombre': self.name})
+        return {
+                'name': 'Respuesta timbrado',
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'nomina.message.wizard',
+                'res_id': message_id.id,
+                'target': 'new'
+        }
 
     def confirmar_nomina(self):
         self.ensure_one()
@@ -390,3 +395,25 @@ class ConfiguracionNomina(models.Model):
                    ('99', 'Otra periodicidad'),],
         string=_('Periodicidad de pago CFDI'), required=True
     )
+
+class NominaMessageWizard(models.TransientModel):
+    _name = 'nomina.message.wizard'
+    _description = "Respuesta timbrado"
+
+    message = fields.Text('Respuesta', required=True)
+    log_txt = fields.Text(string='log', default='Sin errores')
+    file_data = fields.Binary("File Data")
+    nombre = fields.Text(string='log', default='Sin errores')
+
+    def action_close(self):
+        return {'type': 'ir.actions.act_window_close'}
+
+    def descargar_txt(self):
+        self.write({'file_data':base64.b64encode(self.log_txt.encode())})
+        action = {
+            'name': 'Payslips',
+            'type': 'ir.actions.act_url',
+            'url': "/web/content/?model="+self._name+"&id=" + str(self.id) + "&field=file_data&download=true&filename=Timbrado_" + self.nombre + ".txt",
+            'target': 'self',
+            }
+        return action

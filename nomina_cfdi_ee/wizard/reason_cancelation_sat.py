@@ -19,7 +19,6 @@ class ReasonCancelation(models.TransientModel):
     def Confirmar(self):
         if self.env.context.get('active_id') and self.env.context.get('active_model') == "hr.payslip":
             move_obj = self.env['hr.payslip'].browse(self.env.context['active_id'])
-            print(move_obj)
             ctx = {'motivo_cancelacion':self.motivo_cancelacion,'foliosustitucion':self.foliosustitucion or False}
             return move_obj.with_context(ctx).action_cfdi_cancel()
 
