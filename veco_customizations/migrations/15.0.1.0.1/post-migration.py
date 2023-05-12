@@ -2,6 +2,8 @@
 # Copyright 2022 Morwi Encoders Consulting SA de CV
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
+import datetime
+
 from odoo import api, SUPERUSER_ID
 
 
