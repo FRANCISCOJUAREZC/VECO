@@ -2,8 +2,11 @@
 # Copyright 2022 Morwi Encoders Consulting SA de CV
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
+<<<<<<< HEAD
 import datetime
 
+=======
+>>>>>>> f010888 ([ADD] new journal entries for stock valuation)
 from odoo import api, SUPERUSER_ID
 
 
