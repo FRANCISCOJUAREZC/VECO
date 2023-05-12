@@ -5,7 +5,7 @@
 {
     'name': 'Security Veco',
     'category': 'Hidden',
-    'version': '15.0.1.0.1',
+    'version': '15.0.1.0.2',
     'description': """
         Module to add security to Veco
         """,
