@@ -23,7 +23,7 @@ class AccountEdiFormat(models.Model):
             for reconciled_aml in reconciled_amls:
                 if reconciled_aml.payment_id and reconciled_aml.payment_id in payments:
                     continue
-                if reconciled_aml.journal_id.type not in ['bank', 'cash']:
+                if reconciled_aml.journal_id.type not in ['bank', 'cash']
                     continue
                 payments_count += 1
             invoice_vals['number_of_payments'] = payments_count
