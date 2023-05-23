@@ -271,7 +271,7 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
             wizard_uom = item.product_uom_id
             if available_po_lines and not item.keep_description:
                 new_pr_line = False
-                po_line = available_po_lines[0]
+                po_line = available_po_lines[1]
                 po_line.purchase_request_lines = [(4, line.id)]
                 po_line.move_dest_ids |= line.move_dest_ids
                 po_line_product_uom_qty = po_line.product_uom._compute_quantity(
