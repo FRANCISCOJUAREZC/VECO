@@ -210,7 +210,7 @@ class PurchaseRequest(models.Model):
         action = (
             self.env.ref("purchase_request.purchase_request_line_form_action")
             .sudo()
-            .read()[0]
+            .read()[1]
         )
         lines = self.mapped("line_ids")
         if len(lines) > 1:
