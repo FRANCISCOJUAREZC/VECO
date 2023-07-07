@@ -403,10 +403,10 @@ class CfdiTraslado(models.Model):
 
     @api.model
     def to_json(self):
-        #if self.partner_id.vat == 'XAXX010101000':
-        #    nombre = 'PUBLICO EN GENERAL'
-        #else:
-        nombre = self.company_id.nombre_fiscal.upper()
+        if self.partner_id.vat == 'XAXX010101000':
+            nombre = 'PUBLICO EN GENERAL'
+        else:
+            nombre = self.partner_id.name.upper()
 
         no_decimales = self.currency_id.no_decimales
         no_decimales_prod = self.currency_id.decimal_places
@@ -653,7 +653,7 @@ class CfdiTraslado(models.Model):
             pedimentos = []
             if line.pedimento_no:
                   pedimentos.append({
-                         'Pedimento': line.pedimento_no[:2] + '  ' + line.pedimento_no[2:4] + '  ' + line.pedimento_no[4:8] + '  ' + line.pedimento_no[8:],
+                                 'Pedimento': no_pedimento.name[:2] + '  ' + no_pedimento.name[2:4] + '  ' + no_pedimento.name[4:8] + '  ' + no_pedimento.name[8:],
                   })
             guias = [] # soo si tiene un dato
             if line.guiaid_numero:
