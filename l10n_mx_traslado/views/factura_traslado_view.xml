@@ -50,21 +50,18 @@
                     <notebook>
                         <page name="invoice_line_factura" string="Mercancía a trasladar">
                             <field name="factura_line_ids" attrs="{'readonly':[('state','=','valid')]}">
-                            <control>
-                                <create string="Agregar línea"/>
-                            </control>
                             <tree editable="bottom">
+                                <control>
+                                   <create string="Agregar línea"/>
+                                </control>
                                 <field name="currency_id" invisible="1"/>  
                                 <field name="product_id" string="Producto"/>
                                 <field name="name" string="Nombre"/>
-                                <field name="pedimento" widget="many2many_tags" />
+                                <field name="pedimento_no" string="Pedimento"/>
                                 <field name="quantity" string="Cantidad"/>
                                 <field name="price_unit" string="Precio Unitario"/>
                                 <field name="pesoenkg"/>
                                 <field name="invoice_line_tax_ids" widget="many2many_tags" invisible="1"/>
-                                <!--<field name="guiaid_numero"/>
-                                <field name="guiaid_descrip"/>
-                                <field name="guiaid_peso"/>-->
                                 <field name="price_subtotal" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                             </tree>
                             </field> 
@@ -97,7 +94,7 @@
                                     <field name="tipo_comprobante" readonly="True" default="T" attrs="{'readonly':[('state','=','valid')]}"/>
                                     <field name="folio_fiscal" readonly="True"/>
                                     <field name="confirmacion" attrs="{'readonly':[('state','=','valid')]}"/>
-                                    <field name="estado_factura" attrs="{'readonly':[('state','=','valid')]}"/>
+                                    <field name="estado_factura"/>
                                     <field name="fecha_factura" attrs="{'readonly':[('state','=','valid')]}"/>
                                     <field name="proceso_timbrado"/>
                                 </group>
@@ -128,10 +125,10 @@
                         </page>
                         <page name="ccp_ubicaciones" string="Ubicaciones" attrs="{'invisible': [('carta_porte','=',False)]}">
                           <field name="ubicaciones_line_ids" attrs="{'readonly':[('state','=','valid')]}" context="{'default_tipo_transporte' : tipo_transporte}">
-                           <control>
-                                <create string="Agregar línea"/>
-                           </control>
                             <tree editable="bottom">
+                                <control>
+                                    <create string="Agregar línea"/>
+                                </control>
                                 <field name="tipo_transporte" invisible="1"/>
                                 <field name="tipoubicacion" />
                                 <field name="contacto" />
@@ -155,10 +152,10 @@
                                 </group>
                                 <group attrs="{'invisible':[('tipo_transporte','!=','01')]}">
                                     <field name="remolque_line_ids" attrs="{'readonly':[('state','=','valid')]}">
-                                        <control>
-                                           <create string="Agregar línea"/>
-                                        </control>
                                         <tree editable="bottom">
+                                            <control>
+                                               <create string="Agregar línea"/>
+                                            </control>
                                            <field name="subtipo_id" />
                                            <field name="placa" />
                                         </tree>
@@ -186,10 +183,10 @@
                         <page name="ccp_figuratrans" string="Figura transporte" attrs="{'invisible': [('carta_porte','=',False)]}">
                                 <group string="Figura transporte">
                                     <field name="figuratransporte_ids" attrs="{'readonly':[('state','=','valid')]}">
-                                        <control>
-                                           <create string="Agregar línea"/>
-                                        </control>
                                         <tree editable="bottom">
+                                            <control>
+                                               <create string="Agregar línea"/>
+                                            </control>
                                            <field name="tipofigura" />
                                            <field name="figura_id" />
                                            <field name="partetransporte" widget="many2many_tags"/>
