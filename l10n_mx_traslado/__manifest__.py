@@ -6,7 +6,7 @@
 
 {
     'name': 'CFDI Traslado',
-    'version': '15.01',
+    'version': '15.02',
     'description': ''' Agrega campos para generar CFDI de tipo traslado con el complemento de carta porte.
     ''',
     'category': 'Accounting',
@@ -18,6 +18,7 @@
     'data': [
         'security/ir.model.access.csv',
         'reports/invoice_report.xml',
+        'wizard/reason_cancelation_sat_view.xml',
         'views/factura_traslado_view.xml',
         'views/product_view.xml',
         'views/res_company_view.xml',
@@ -29,4 +30,5 @@
 	],
     'application': False,
     'installable': True,
+    'license': 'AGPL-3',
 }

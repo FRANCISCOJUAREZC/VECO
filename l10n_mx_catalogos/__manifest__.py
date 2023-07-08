@@ -5,9 +5,9 @@
 ##############################################################################
 
 {
-    'name': 'Catalogos para timbrado CFDI 3.3',
-    'version': '15.01',
-    'description': ''' Agrega catalogos para realizar el timbrado de facturas CFDI 3.3
+    'name': 'Catalogos para timbrado CFDI',
+    'version': '15.02',
+    'description': ''' Agrega catalogos para realizar el timbrado de facturas CFDI
     ''',
     'category': 'Accounting',
     'author': 'IT Admin',
@@ -67,4 +67,5 @@
 	],
     'application': False,
     'installable': True,
+    'license': 'AGPL-3',
 }

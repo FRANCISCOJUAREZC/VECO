@@ -5,6 +5,7 @@ from odoo import models, fields, api
 class CveEstacion(models.Model):
     _name = 'cve.estacion'
     _rec_name = "descripcion"
+    _description = 'cveestacion'
 
     c_estacion = fields.Char(string='Clave estacion')
     descripcion = fields.Char(string='Descripción')

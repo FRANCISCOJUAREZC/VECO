@@ -51,11 +51,12 @@ class StockPicking(models.Model):
 
         if line_vals:
                val = {
-                   'partner_id': self.env.user.company_id.id, #data.company_id.id,
+                   'partner_id': self.company_id.partner_id.id, #data.company_id.id,
                    'source_document': origin,
                    'invoice_date': datetime.today(),
-                   'currency_id': self.env.user.company_id.currency_id.id, # data.company_id.currency_id.id,
+                   'currency_id': self.company_id.currency_id.id, # data.company_id.currency_id.id,
                    'factura_line_ids':line_vals and [(0,0,i) for i in line_vals] or [(0,0,{})],
+                   'company_id': self.company_id.id
                    }
                cfdi_id = cfdi_traslado_obj.create(val)
         else:

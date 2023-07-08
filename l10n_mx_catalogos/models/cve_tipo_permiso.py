@@ -5,6 +5,7 @@ from odoo import models, fields, api
 class CveTipoPermiso(models.Model):
     _name = 'cve.tipo.permiso'
     _rec_name = "descripcion"
+    _description = 'cvetipopermiso'
 
     clave = fields.Char(string='Clave')
     descripcion = fields.Char(string='Descripción')

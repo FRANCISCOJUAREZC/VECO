@@ -4,8 +4,8 @@ from odoo import fields, models, api,_
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    clavestcc = fields.Many2one('cve.clave.prod.stcc', string='Clave STCC')
-    dimensiones = fields.Char(string='Dimensiones XX/XX/XXcm)')
+    clave_stcc = fields.Char(string='Clave STCC')
+    dimensiones = fields.Char(string='Dimensiones XX/XX/XXcm')
     materialpeligroso = fields.Selection(
         selection=[('Sí', 'Si'),
                    ('No', 'No'),],

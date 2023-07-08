@@ -8,9 +8,9 @@
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='sales']" position="after">
                    <page string="Carta Porte" name="datos_sat_cp">
-                        <group col="4">
+                        <group cols="4">
                              <group>
-                                <field name="clavestcc" />
+                                <field name="clave_stcc" />
                                 <field name="materialpeligroso" />
                                 <field name="clavematpeligroso" attrs="{'invisible':[('materialpeligroso','!=','Sí')]}"/>
                              </group>

@@ -116,7 +116,7 @@
 							</div>
 								<t t-if="o.factura_cfdi">
 								<div>
-									<span t-field="o.rfc_emisor" />
+									<span t-field="o.company_id.vat" />
 								</div>
 								<div>
 									<strong>Regimen fiscal</strong>: <span t-field="o.company_id.regimen_fiscal" />
@@ -343,10 +343,10 @@
 									<span t-field="o.methodo_pago" />
 								</td>
 								<td>
-									<strong>Régimen fiscal</strong>
+									<strong>Fecha y hora de certificación</strong>
 								</td>
 								<td >
-									<span t-field="o.regimen_fiscal" />
+									<span t-field="o.fecha_certificacion" />
 								</td>
 							</tr>
 							<tr>
@@ -389,15 +389,6 @@
 								</td>
 								<td >
 									<span t-field="o.folio_fiscal" />
-								</td>
-							</tr>
-							<tr>
-								<td></td><td></td>
-								<td>
-									<strong>Fecha y hora de certificación</strong>
-								</td>
-								<td >
-									<span t-field="o.fecha_certificacion" />
 								</td>
 							</tr>
 						</table>

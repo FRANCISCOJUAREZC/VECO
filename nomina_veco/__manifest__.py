@@ -7,13 +7,13 @@
     Nomina CFDI Module
     ''',
     'author': 'IT Admin',
-    'version': '15.01',
+    'version': '15.02',
     'category': 'Employees',
     'depends': [
         'hr_payroll','hr_payroll_account','nomina_cfdi_ee'
     ],
     'data': [
-        
+        'views/hr_contract_view.xml',
     ],
     'installable': True,
     'application': False,
