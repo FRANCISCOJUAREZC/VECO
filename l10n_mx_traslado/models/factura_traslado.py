@@ -13,7 +13,6 @@ from reportlab.graphics.barcode import createBarcodeDrawing
 from reportlab.lib.units import mm
 from . import amount_to_text_es_MX
 import pytz
-from .tzlocal import get_localzone
 from odoo import tools
 
 import logging
@@ -21,7 +20,8 @@ _logger = logging.getLogger(__name__)
 
 class CfdiTrasladoLine(models.Model):
     _name = "cfdi.traslado.line"
-    
+    _description = "CfdiTrasladoLine"
+
     cfdi_traslado_id= fields.Many2one('cfdi.traslado',string="CFDI Traslado")
     product_id = fields.Many2one('product.product',string='Producto',required=True)
     name = fields.Text(string='Descripción',required=True,)
@@ -34,7 +34,7 @@ class CfdiTrasladoLine(models.Model):
     price_total = fields.Monetary(string='Cantidad (con Impuestos)',
         store=True, readonly=True, compute='_compute_price', help="Cantidad total con impuestos")
     pesoenkg = fields.Float(string='Peso Kg', digits=dp.get_precision('Product Price'))
-    pedimento = fields.Many2many('stock.production.lot', string='Pedimentos', copy=False)
+    pedimento_no = fields.Char(string=_('Pedimentos'))
     guiaid_numero = fields.Char(string=_('No. Guia'))
     guiaid_descrip = fields.Char(string=_('Descr. guia'))
     guiaid_peso = fields.Float(string='Peso guia')
@@ -69,6 +69,7 @@ class CfdiTrasladoLine(models.Model):
 
 class CCPUbicacionesLine(models.Model):
     _name = "ccp.ubicaciones.line"
+    _description = "CCPUbicacionesLine"
     
     cfdi_traslado_id= fields.Many2one('cfdi.traslado',string="CFDI Traslado")
     tipoubicacion = fields.Selection(
@@ -93,6 +94,7 @@ class CCPUbicacionesLine(models.Model):
 
 class CCPRemolqueLine(models.Model):
     _name = "ccp.remolques.line"
+    _description = "CCPRemolqueLine"
 
     cfdi_traslado_id= fields.Many2one('cfdi.traslado',string="CFDI Traslado")
     subtipo_id = fields.Many2one('cve.remolque.semiremolque',string="Subtipo")
@@ -100,6 +102,7 @@ class CCPRemolqueLine(models.Model):
 
 class CCPPropietariosLine(models.Model):
     _name = "ccp.figura.line"
+    _description = "CCPPropietariosLine"
 
     cfdi_traslado_id= fields.Many2one('cfdi.traslado',string="CFDI Traslado")
     figura_id = fields.Many2one('res.partner',string="Contacto")
@@ -110,6 +113,7 @@ class CfdiTraslado(models.Model):
     _name = "cfdi.traslado"
     _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin']
     _rec_name = "number"
+    _description = "CfdiTraslado"
 
     factura_cfdi = fields.Boolean('Factura CFDI')
     number = fields.Char(string="Numero", store=True, readonly=True, copy=False,
@@ -231,7 +235,6 @@ class CfdiTraslado(models.Model):
         string=_('Régimen Fiscal'), 
     )
     uuid_relacionado = fields.Char(string=_('CFDI Relacionado'))
-    xml_invoice_link = fields.Char(string=_('XML Invoice Link'))
     qr_value = fields.Char(string=_('QR Code Value'))
     qrcode_image = fields.Binary("QRCode")
     comment = fields.Text("Comentario")
@@ -400,10 +403,10 @@ class CfdiTraslado(models.Model):
 
     @api.model
     def to_json(self):
-        if self.partner_id.vat == 'XAXX010101000':
-            nombre = 'PUBLICO EN GENERAL'
-        else:
-            nombre = self.partner_id.name.upper()
+        #if self.partner_id.vat == 'XAXX010101000':
+        #    nombre = 'PUBLICO EN GENERAL'
+        #else:
+        nombre = self.company_id.nombre_fiscal.upper()
 
         no_decimales = self.currency_id.no_decimales
         no_decimales_prod = self.currency_id.decimal_places
@@ -537,7 +540,7 @@ class CfdiTraslado(models.Model):
         qr_value = 'https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?&id=%s&re=%s&rr=%s&tt=%s.%s&fe=%s' % (
             self.folio_fiscal,
             self.company_id.vat,
-            self.partner_id.vat,
+            self.company_id.vat,
             amount_str[0].zfill(10),
             amount_str[1].ljust(6, '0'),
             self.selo_digital_cdfi[-8:],
@@ -648,10 +651,9 @@ class CfdiTraslado(models.Model):
                             'UUIDComercioExt': self.uuidcomercioext,
             }
             pedimentos = []
-            if line.pedimento:
-               for no_pedimento in line.pedimento:
+            if line.pedimento_no:
                   pedimentos.append({
-                                 'Pedimento': no_pedimento.name[:2] + '  ' + no_pedimento.name[2:4] + '  ' + no_pedimento.name[4:8] + '  ' + no_pedimento.name[8:],
+                         'Pedimento': line.pedimento_no[:2] + '  ' + line.pedimento_no[2:4] + '  ' + line.pedimento_no[4:8] + '  ' + line.pedimento_no[8:],
                   })
             guias = [] # soo si tiene un dato
             if line.guiaid_numero:
