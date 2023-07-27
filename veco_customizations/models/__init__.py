@@ -6,5 +6,6 @@ from . import account_edi_format
 from . import analytic
 from . import mrp_production
 from . import purchase_order
+from . import purchase_request
 from . import sale
 from . import stock_valuation_layer

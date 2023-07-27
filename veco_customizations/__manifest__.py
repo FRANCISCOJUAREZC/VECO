@@ -15,8 +15,10 @@
         'sale',
         'purchase',
         'mrp_workorder',
+        'purchase_request',
     ],
     'data': [
         'views/mrp_production_views.xml',
+        'views/purchase_request_views.xml',
     ]
 }
