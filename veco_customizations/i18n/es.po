@@ -21,6 +21,11 @@ msgid "Analytic Line"
 msgstr "Línea analítica"
 
 #. module: veco_customizations
+#: model:ir.model.fields,field_description:veco_customizations.field_purchase_request__approval_date
+msgid "Approval Date"
+msgstr "Fecha de Aprobación"
+
+#. module: veco_customizations
 #: model:ir.model,name:veco_customizations.model_account_edi_format
 msgid "EDI format"
 msgstr "Formato EDI"
