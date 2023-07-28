@@ -178,7 +178,7 @@ class HrPayslipRun(models.Model):
     def _compute_payslip_cgdi_generated(self):
         cfdi_generated = True
         for payslip in self.slip_ids:
-            if payslip.state in ['draft','verify'] or not payslip.nomina_cfdi:
+            if payslip.state in ['draft'] or not payslip.nomina_cfdi:
                 cfdi_generated=False
                 break
         self.all_payslip_generated = cfdi_generated 

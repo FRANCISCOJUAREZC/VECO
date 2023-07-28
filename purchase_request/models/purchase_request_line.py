@@ -109,7 +109,7 @@ class PurchaseRequestLine(models.Model):
         column2="purchase_order_line_id",
         string="Purchase Order Lines",
         readonly=True,
-        copy=False,
+        copy=True,
     )
     purchase_state = fields.Selection(
         compute="_compute_purchase_state",

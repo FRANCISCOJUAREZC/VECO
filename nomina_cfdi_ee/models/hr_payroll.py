@@ -630,10 +630,9 @@ class HrPayslip(models.Model):
     @api.depends('number')
     def _get_number_folio(self):
         if self.number:
-            self.number_folio = self.number.replace('SLIP','').replace('/','')
+            self.number_folio = self.number.replace('SLIP','').replace('NOM','').replace('/','')
         else:
-            self.write({'number': self.env['ir.sequence'].next_by_code('numero.nomina')})
-            self.number_folio = self.number.replace('NOM','').replace('/','')
+            raise UserError(_('La nómina no tiene un número asignado.'))
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
@@ -690,7 +689,7 @@ class HrPayslip(models.Model):
             mes_actual = self.contract_id.tablas_cfdi_id.tabla_mensual.search([('mes', '=', self.mes), ('form_id', '=', self.contract_id.tablas_cfdi_id.id)],limit =1)
             date_start = mes_actual.dia_inicio # self.date_from
             date_end = mes_actual.dia_fin #self.date_to
-            domain=[('state','in', ['paid', 'verify'])]
+            domain=[('state','in', ['draft', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -721,7 +720,7 @@ class HrPayslip(models.Model):
             mes_actual = contract_id.tablas_cfdi_id.tabla_mensual.search([('mes', '=', mes), ('form_id', '=', contract_id.tablas_cfdi_id.id)],limit =1)
             date_start = mes_actual.dia_inicio # self.date_from
             date_end = mes_actual.dia_fin #self.date_to
-            domain=[('state','in', ['paid', 'verify'])]
+            domain=[('state','in', ['draft', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -751,7 +750,7 @@ class HrPayslip(models.Model):
         if employee_id and contract_id.tablas_cfdi_id:
             date_start = date(fields.Date.from_string(date_from).year, 1, 1)
             date_end = date(fields.Date.from_string(date_from).year, 12, 31)
-            domain=[('state','in', ['paid', 'verify'])]
+            domain=[('state','in', ['draf', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -794,7 +793,7 @@ class HrPayslip(models.Model):
         if self.employee_id and self.contract_id.tablas_cfdi_id:
             date_start = date(fields.Date.from_string(self.date_from).year, 1, 1)
             date_end = date(fields.Date.from_string(self.date_from).year, 12, 31)
-            domain=[('state','in', ['paid', 'verify'])]
+            domain=[('state','in', ['draft', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
