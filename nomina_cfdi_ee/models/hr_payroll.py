@@ -692,7 +692,7 @@ class HrPayslip(models.Model):
             mes_actual = self.contract_id.tablas_cfdi_id.tabla_mensual.search([('mes', '=', self.mes), ('form_id', '=', self.contract_id.tablas_cfdi_id.id)],limit =1)
             date_start = mes_actual.dia_inicio # self.date_from
             date_end = mes_actual.dia_fin #self.date_to
-            domain=[('state','in', ['paid', 'verify'])]
+            domain=[('state','in', ['paid', 'done'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -723,7 +723,7 @@ class HrPayslip(models.Model):
             mes_actual = contract_id.tablas_cfdi_id.tabla_mensual.search([('mes', '=', mes), ('form_id', '=', contract_id.tablas_cfdi_id.id)],limit =1)
             date_start = mes_actual.dia_inicio # self.date_from
             date_end = mes_actual.dia_fin #self.date_to
-            domain=[('state','in', ['paid', 'verify'])]
+            domain=[('state','in', ['paid', 'done'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -753,7 +753,7 @@ class HrPayslip(models.Model):
         if employee_id and contract_id.tablas_cfdi_id:
             date_start = date(fields.Date.from_string(date_from).year, 1, 1)
             date_end = date(fields.Date.from_string(date_from).year, 12, 31)
-            domain=[('state','in', ['paid', 'verify'])]
+            domain=[('state','in', ['paid', 'done'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -796,7 +796,7 @@ class HrPayslip(models.Model):
         if self.employee_id and self.contract_id.tablas_cfdi_id:
             date_start = date(fields.Date.from_string(self.date_from).year, 1, 1)
             date_end = date(fields.Date.from_string(self.date_from).year, 12, 31)
-            domain=[('state','in', ['paid', 'verify'])]
+            domain=[('state','in', ['paid', 'done'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
