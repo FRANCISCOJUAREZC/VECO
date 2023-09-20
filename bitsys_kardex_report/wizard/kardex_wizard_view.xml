@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Wizard -->
+        <record id="kardex_report_view" model="ir.ui.view">
+            <field name="name">Reporte de Kardex</field>
+            <field name="model">bitsys_kardex_report.kardex.report</field>
+            <field name="arch" type="xml">
+                <form string="Opciones">
+
+                    <group>
+                        <field name="product_id" widget="many2many_tags" options="{'no_create': True}"/>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="fecha_inicio" />
+                        </group>
+                        <group>
+                            <field name="fecha_fin"  />
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="export_xls" type="object" default_focus="1" string="Excel" class="oe_highlight" context="{'xls_export':1}" icon="fa-download" />
+                        <button string="Cancel" class="btn btn-secondary" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!--Accion  -->
+        <record id="action_kardex_menu" model="ir.actions.act_window">
+            <field name="name">Kardex</field>
+            <field name="res_model">bitsys_kardex_report.kardex.report</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="kardex_report_view" />
+            <field name="target">new</field>
+        </record>
+
+        <!-- Opción en menú -->
+        <menuitem id="menu_kardex_menu_list" name="Kardex" action="action_kardex_menu" parent="stock.menu_warehouse_report" />
+    </data>
+</odoo>

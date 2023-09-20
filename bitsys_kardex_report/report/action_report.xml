@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Kardex -->
+        <record id="kardex_xlsx" model="ir.actions.report">
+            <field name="name">Kardex</field>
+            <field name="model">report.bitsys_kardex_report.kardex_report_xlsx</field>
+            <field name="report_type">xlsx</field>
+            <field name="report_name">bitsys_kardex_report.kardex_report_xlsx</field>
+            <field name="report_file">bitsys_kardex_report.kardex_report_xlsx</field>
+        </record>
+    </data>
+</odoo>

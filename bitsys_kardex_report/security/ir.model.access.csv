@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+bitsys_kardex_report.access_bitsys_kardex_report_kardex_report,access_bitsys_kardex_report_kardex_report,bitsys_kardex_report.model_bitsys_kardex_report_kardex_report,base.group_user,1,1,1,1
