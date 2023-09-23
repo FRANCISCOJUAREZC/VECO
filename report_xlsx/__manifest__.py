@@ -17,5 +17,5 @@
         "web.assets_backend": [
             "report_xlsx/static/src/js/report/action_manager_report.esm.js",
         ],
-    },
+    }, 
 }
