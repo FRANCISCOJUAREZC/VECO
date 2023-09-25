@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stock_kardex_report" model="ir.ui.view">
+        <field name="name">Kárdex de inventario</field>
+        <field name="model">stock.kardex.report.wiz</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="company_id" invisible="1"/>
+                    <field name="product_category" options="{'no_create': True}" widget="many2many_tags"/>
+                    <field name="product_ids" options="{'no_create': True}" widget="many2many_tags" force_save="1"/>
+                    <field name="location_ids" domain="[('company_id','=',company_id)]" options="{'no_create': True}" widget="many2many_tags"/>
+                    <label for="date_from" string="Fechas"/>
+                    <div class="o_row">
+                        <field name="date_from" widget="daterange" options="{'related_end_date': 'date_to'}"/>
+                        <span>a</span>
+                        <field name="date_to" widget="daterange" options="{'related_start_date': 'date_from'}"/>
+                    </div>
+                    <field name="hide_header"/>
+                </group>
+                <footer>
+                    <button name="print_report" string="Imprimir" type="object" class="btn-primary"/>
+                    <button name="create_report_xlsx" string="Excel" type="object" class="btn-primary"/>
+                    <button name="open_view" string="Abrir Kárdex" type="object" class="btn-secondary"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stock_kardex_report" model="ir.actions.act_window">
+        <field name="name">Kárdex de inventario</field>
+        <field name="res_model">stock.kardex.report.wiz</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_stock_kardex_report"/>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_kardex_report" name="Kárdex de inventario" parent="stock.menu_warehouse_report" action="action_stock_kardex_report"/>
+</odoo>

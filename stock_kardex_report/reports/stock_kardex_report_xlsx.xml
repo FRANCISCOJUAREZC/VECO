@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_kardex_report_xlsx" model="ir.actions.report">
+        <field name="name">Kárdex de inventario xlsx</field>
+        <field name="model">stock.kardex.report.wiz</field>
+        <field name="report_type">xlsx</field>
+        <field name="report_name">stock_kardex_report.stock_kardex_report_xlsx</field>
+        <field name="report_file">Kárdex de inventario</field>
+    </record>
+</odoo>
