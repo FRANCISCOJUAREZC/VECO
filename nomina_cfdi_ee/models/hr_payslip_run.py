@@ -167,18 +167,45 @@ class HrPayslipRun(models.Model):
                 if self.periodicidad_pago == '04':
                     batch.nominas_mes = 2
 
-    def recalcular_nomina_payslip_batch(self):
-        for batch in self:
-            for slip in batch.slip_ids:
-                if slip.state == 'draft':
-                    slip.compute_sheet()
+    def recalcular_nomina(self):
+        self.ensure_one()
+        view = self.env.ref('nomina_cfdi_ee.recalcular_nomina_wizard')
+        ctx = self.env.context.copy()
+        ctx.update({'default_payslip_batch_id': self.id})
+        return {
+            'name': 'Recalcular De Nomina',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'recalcular.de.nomina',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'context': ctx,
+        }
+
+    def recalcular_nomina_wizard(self):
+        self.ensure_one()
+        payslip_obj = self.env['hr.payslip']
+        start_range = self._context.get('start_range')
+        end_range = self._context.get('end_range')
+        for payslip_id in self.slip_ids.ids:
+            payslip = payslip_obj.browse(payslip_id)
+            if start_range and end_range:
+                emp_no = int(payslip.employee_id.no_empleado)
+                if emp_no >= start_range and emp_no <= end_range:
+                    if payslip.state == 'draft':
+                        payslip.compute_sheet()
+            else:
+                if payslip.state == 'draft':
+                    payslip.compute_sheet()
         return True
      
     @api.depends('slip_ids.state','slip_ids.nomina_cfdi')
     def _compute_payslip_cgdi_generated(self):
         cfdi_generated = True
         for payslip in self.slip_ids:
-            if payslip.state in ['draft'] or not payslip.nomina_cfdi:
+            if payslip.state in ['draft','verify'] or not payslip.nomina_cfdi:
                 cfdi_generated=False
                 break
         self.all_payslip_generated = cfdi_generated 
@@ -197,18 +224,20 @@ class HrPayslipRun(models.Model):
     def enviar_nomina(self):
         self.ensure_one()
         ctx = self._context.copy()
-        template = self.env.ref('nomina_cfdi_ee.email_template_payroll', False)
-        for payslip in self.slip_ids: 
-               if not template:return
-               mail = None
-               if payslip.employee_id.correo_electronico:
-                   mail = payslip.employee_id.correo_electronico
-               if not mail:
-                   if payslip.employee_id.work_email:
-                      mail = payslip.employee_id.work_email
-               if not mail:return
-               template.send_mail(payslip.id, force_send=True,email_values={'email_to': mail})
-        return True
+        view = self.env.ref('nomina_cfdi_ee.enviar_nomina_wizard')
+        ctx.update({'payslips':self.slip_ids.ids})
+  
+        return {
+            'name': 'Enviar nomina',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'enviar.nomina',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'context': ctx,
+        }
 
     def timbrar_nomina(self):
         self.ensure_one()
@@ -227,6 +256,13 @@ class HrPayslipRun(models.Model):
             'context': ctx,
         }
 
+    def download_zip(self):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/payroll/download_document?id={self.id}',
+            'target': 'new',
+        }
+
     def timbrar_nomina_wizard(self):
         self.ensure_one()
         #cr = self._cr
@@ -241,6 +277,8 @@ class HrPayslipRun(models.Model):
             if start_range and end_range:
                 emp_no = int(payslip.employee_id.no_empleado)
                 if emp_no >= start_range and emp_no <= end_range:
+                    if payslip.state == 'cancel':
+                        continue
                     if payslip.state in ['draft','verify']:
                         payslip.action_payslip_done()
                     try:
@@ -252,6 +290,8 @@ class HrPayslipRun(models.Model):
                        errors += 1
                        pass
             else:
+                if payslip.state == 'cancel':
+                    continue
                 if payslip.state in ['draft','verify']:
                    payslip.action_payslip_done()
                 try:

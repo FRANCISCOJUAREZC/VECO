@@ -51,8 +51,8 @@ class TotalPorEmpleado(models.TransientModel):
                 row+=1
                 if slip.state == "cancel":
                     continue
-                if slip.employee_id.no_empleado:
-                    print(slip.employee_id.no_empleado)
+#                if slip.employee_id.no_empleado:
+#                    print(slip.employee_id.no_empleado)
                 work_day = slip.get_total_work_days()
                 rule = {}
                 for code in all_col_list_seq:

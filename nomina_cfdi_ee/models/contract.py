@@ -212,7 +212,7 @@ class TablasVacacioneslLine(models.Model):
                    ('2023', '2023'),
                    ('2024', '2024'),
                    ],
-        string=_('Año'),)
+        string=_('Año'), required=True)
     estado = fields.Selection(
         selection=[('activo', 'Activo'),
                    ('inactivo', 'Inactivo'),

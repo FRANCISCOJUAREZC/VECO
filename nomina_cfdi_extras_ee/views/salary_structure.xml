@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <odoo>
+
+    <data noupdate="1">
+
   	<record id="dev_emp_loan_installment" model="hr.salary.rule">
         <field name="name">Préstamo</field>
         <field name="sequence" eval="390"/>
@@ -28,4 +31,6 @@
         <field eval="[(6, 0, [ref('hr_payroll.hr_rule_basic'), ref('hr_payroll.hr_rule_taxable'),ref('dev_emp_loan_installment'),ref('dev_emp_loan_interest_installment'),ref('hr_payroll.hr_rule_net')])]" name="rule_ids"/>
         <field name="company_id" ref="base.main_company"/>
     </record> -->
+    </data>
+
 </odoo>

@@ -68,8 +68,8 @@ class WizardISN(models.TransientModel):
                 for line in payslip_lines:
                    worksheet.write(row, 3, line.slip_id.name)
                    worksheet.write(row, 4, line.slip_id.date_from)
-                   worksheet.write(row, 5, line.total * empleado.contract_ids.tablas_cfdi_id.isn/100)
-                   total += line.total * empleado.contract_ids.tablas_cfdi_id.isn/100
+                   worksheet.write(row, 5, line.total * empleado.contract_id.tablas_cfdi_id.isn/100)
+                   total += line.total * empleado.contract_id.tablas_cfdi_id.isn/100
                    row +=1
              worksheet.write(row, 4, 'Total')
              worksheet.write(row, 5, total)

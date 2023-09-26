@@ -77,7 +77,7 @@ class employee_loan(models.Model):
                loan.end_date = datetime.today().strftime("%Y-%m-%d")
 
     name = fields.Char('Name',default='/',copy=False)
-    state = fields.Selection(loan_state,string='Estado',default='draft', track_visibility='onchange')
+    state = fields.Selection(loan_state,string='Estado',default='draft', tracking=True)
     employee_id = fields.Many2one('hr.employee',string='Empleado',default=_get_employee, required="1")
     department_id = fields.Many2one('hr.department',string='Departamento')
 #    hr_manager_id = fields.Many2one('hr.employee',string='Gerente RH')

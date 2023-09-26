@@ -17,19 +17,19 @@
                 <page name="info_cdfi" string="CFDI">
                         <group cols="4">
                             <group string="Datos CFDI">
-                                <field name="forma_pago"/>
-                                <field name="tipo_comprobante"/>
-                                <field name="methodo_pago"/>
-                                <field name="uso_cfdi"/>
+                                <field name="forma_pago" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>
+                                <field name="tipo_comprobante" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>
+                                <field name="methodo_pago" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>
+                                <field name="uso_cfdi" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>
                             </group>
                             <group  string="Detalles de Factura">
                                 <field name="folio_fiscal"/>
                                 <field name="estado_factura"/>
-                                <field name="fecha_factura"/>
+                                <field name="fecha_factura" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>
                             </group>
                             <group string="CFDI Relacionados">
-                                <field name="tipo_relacion"/>
-                                <field name="uuid_relacionado"/>
+                                <field name="tipo_relacion" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>
+                                <field name="uuid_relacionado" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>
                             </group>
                         </group>
                 </page>
@@ -97,16 +97,26 @@
               </xpath>
 
               <button name="action_payslip_cancel" position="before">
-                   <button name="action_cfdi_nomina_generate" type="object" string="Generar CFDI" 
-                            attrs="{'invisible':['|',('estado_factura', 'in', ('factura_correcta','factura_cancelada')),('state','!=','done')]}"
+                   <button name="action_cfdi_nomina_generate" type="object" string="Generar CFDI"
+                            attrs="{'invisible':['|', ('estado_factura', 'in', ('factura_correcta','factura_cancelada')), ('state','!=','done')]}"
                             class="oe_highlight" groups="base.group_user"/>
-                   <button name="%(nomina_cfdi_ee.reason_cancelation_sat_wizard)d" type="action" string="Cancelar CFDI" 
-                            attrs="{'invisible':['|',('nomina_cfdi','=',False), ('estado_factura','=','factura_cancelada')]}" 
+                   <button name="%(nomina_cfdi_ee.reason_cancelation_sat_wizard)d" type="action" string="Cancelar CFDI"
+                            attrs="{'invisible':['|',('nomina_cfdi','=',False), ('estado_factura','=','factura_cancelada')]}"
                             class="oe_highlight" groups="base.group_user" />
                    <button name="send_nomina" class="oe_highlight" attrs="{'invisible':[('estado_factura','!=','factura_correcta')]}" string="Enviar por correo" type="object"/>
                 </button>
             </field>
         </record>
+    
+      <record id="wizard_dar_baja_view" model="ir.actions.act_window">
+        <field name="name">Dar de baja</field>
+        <field name="res_model">wizard.dar.baja</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_hr_payslip_run"/>
+        <field name="binding_view_types">form</field>
+    </record>
+
 
        <record id="hr_payslip_run_form_nomina_cfdi" model="ir.ui.view">
             <field name="name">hr.payslip.run.form.nomina</field>
@@ -140,9 +150,6 @@
                                      <!--  <field name="journal_id" string="Diario de Nómina"/>-->
                                     </group>
                                  </group>
-                                <!--<group>
-                                    <field name="credit_note"/>
-                                </group>-->
                                 <group cols="4">
                                    <group  string="Configuración">
                                        <field name="ultima_nomina" /> <!--attrs="{'required':[('tipo_nomina','=','O')], 'invisible':[('tipo_nomina','!=','O')]}" /> -->
@@ -177,12 +184,15 @@
 		                </notebook>
             		</sheet>
             	</xpath>
+                <xpath expr="//header/button[@name='draft_payslip_run']" position="after">
+                    <button string="Descarga PDF y XML" name="download_zip" type="object" class="oe_highlight"/>
+                </xpath>
                 <button name="action_draft" position="after">
                     <field name="all_payslip_generated" invisible="1" />
                     <field name="all_payslip_generated_draft" invisible="1" />
                     <button string="Timbrar Nomina" name="timbrar_nomina" type="object" attrs="{'invisible':['|', ('all_payslip_generated','=',True), ('state','=','close')]}" class="oe_highlight"/>
                     <button string="Enviar Nomina" name="enviar_nomina" type="object" attrs="{'invisible':[('state','=','close')]}" class="oe_highlight"/>
-                    <button string="Recalcular nómina" name="recalcular_nomina_payslip_batch" type="object" attrs="{'invisible':['|', ('all_payslip_generated_draft','!=',True), ('state','=','close')]}" class="oe_highlight"/>
+                    <button string="Recalcular nómina" name="recalcular_nomina" type="object" attrs="{'invisible':['|', ('all_payslip_generated_draft','!=',True), ('state','=','close')]}" class="oe_highlight"/>
                 </button>
             </field>
        </record> 

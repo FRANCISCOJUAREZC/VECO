@@ -133,11 +133,10 @@ class ImportarDiasWizard(models.TransientModel):
                 vls = {'input_line_ids':worked_day_lines}
             else:
                 vls = {'worked_days_line_ids':worked_day_lines}
-            payslip.write(vls)    
-        
+            payslip.write(vls)
+
         return True
-    
-    
+
     def _read_xls(self, options,import_file):
         """ Read file content, using xlrd lib """
         book = xlrd.open_workbook(file_contents=import_file)

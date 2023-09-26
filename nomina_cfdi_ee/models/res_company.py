@@ -69,7 +69,7 @@ class ResCompany(models.Model):
         dt = datetime.now()
         start_week_day = (dt - timedelta(days=dt.weekday())).date()
         end_week_day = start_week_day + timedelta(days=6)
-        
+
         where_clause = []
         while start_week_day<=end_week_day:
             where_clause.append("TO_CHAR(date_start,'MM-DD')='%s-%s'"%("{0:0=2d}".format(start_week_day.month),"{0:0=2d}".format(start_week_day.day)))
@@ -82,24 +82,28 @@ class ResCompany(models.Model):
             if not contract_ids:
                 continue
             for contract in self.env['hr.contract'].browse(contract_ids):
-                #self.env['hr.contract'].browse(contract_ids)
-                if contract.employee_id.correo_electronico:
-                      mail_values = {
-                      #'email_from': contract.employee_id.work_email,
-                      #'reply_to': mailing.reply_to,
-                      'email_to': company.nomina_mail,
-                      'subject': 'Aniversario de un empleado',
-                      'body_html': 'Esta semana es el aniversario de ' +  contract.employee_id.name + ' en la empresa, revisar ajuste en sueldo diario integrado.',
-                      'notification': True,
-                      #'mailing_id': mailing.id,
-                      #'attachment_ids': [(4, attachment.id) for attachment in mailing.attachment_ids],
-                      'auto_delete': True,
-                      }
-                      mail = self.env['mail.mail'].create(mail_values)
-                      mail.send()
-                self.calculate_contract_vacaciones(contract)
+                if contract.state != 'open':
+                   continue
+                if contract.date_start.year == datetime.today().date().year:
+                   continue
+                change_done =  False
+                for vacation_line in contract.tabla_vacaciones:
+                    if str(vacation_line.ano) == str(start_week_day.year):
+                       change_done =  True
+                if not change_done:
+                   if company.nomina_mail:
+                         mail_values = {
+                         'email_to': company.nomina_mail,
+                         'subject': 'Aniversario de un empleado',
+                         'body_html': 'Esta semana es el aniversario de ' +  contract.employee_id.name + ' en la empresa, revisar ajuste en sueldo creado en incidencias.',
+                         'auto_delete': True,
+                         }
+                         mail = self.env['mail.mail'].create(mail_values)
+                         mail.send()
+                   self.calculate_contract_vacaciones(contract)
+                   self.create_cambio_salario(contract)
         return
-    
+
     @api.model
     def calculate_contract_vacaciones(self, contract):
         tablas_cfdi = contract.tablas_cfdi_id
@@ -119,9 +123,9 @@ class ResCompany(models.Model):
         current_year = today.strftime('%Y')
         contract.write({'tabla_vacaciones': [(0, 0, {'ano':current_year, 'dias': tablas_cfdi_line.vacaciones})]})
         return True
-    
+
     @api.model
-    def calculate_sueldo_diario_integrado(self, contract):
+    def create_cambio_salario(self, contract):
         if contract.date_start:
             today = datetime.today().date()
             diff_date = (today - contract.date_start + timedelta(days=1)).days #today - date_start 
@@ -140,10 +144,21 @@ class ResCompany(models.Model):
             tablas_cfdi_line = tablas_cfdi_lines[0]
             sueldo_diario_integrado = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100) ) / 365) * contract.wage/30
             if sueldo_diario_integrado > (tablas_cfdi.uma * 25):
-                sueldo_diario_integrado = tablas_cfdi.uma * 25
-            contract.write({'sueldo_diario_integrado': sueldo_diario_integrado})
+                sueldo_base_cotizacion = tablas_cfdi.uma * 25
+            else:
+                sueldo_base_cotizacion = sueldo_diario_integrado
+            incidencia = self.env['incidencias.nomina'].create({'tipo_de_incidencia':'Cambio salario', 
+                                                                'employee_id': contract.employee_id.id,
+                                                                'sueldo_mensual': contract.wage,
+                                                                'sueldo_diario': contract.sueldo_diario,
+                                                                'sueldo_diario_integrado': sueldo_diario_integrado,
+                                                                'sueldo_por_horas' : contract.sueldo_hora,
+                                                                'sueldo_cotizacion_base': sueldo_base_cotizacion,
+                                                                'fecha': today,
+                                                                'contract_id': contract.id
+                                                                })
         return
-    
+
     @api.model
     def get_saldo_by_cron(self):
         companies = self.search([('proveedor_timbrado','!=',False)])

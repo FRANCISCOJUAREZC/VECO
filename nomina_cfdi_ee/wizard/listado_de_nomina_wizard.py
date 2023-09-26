@@ -31,7 +31,7 @@ class ConfirmadoDeNominaWizard(models.TransientModel):
     payslip_batch_id = fields.Many2one('hr.payslip.run','Payslip Run')
     
     def confirmado_nomina(self):
-        #if not self.todos and self.rango_de_empleados1 and self.rango_de_empleados2:
+        # if not self.todos and self.rango_de_empleados1 and self.rango_de_empleados2:
         start = self.rango_de_empleados1
         end = self.rango_de_empleados2 
         todos = self.todos
@@ -40,3 +40,22 @@ class ConfirmadoDeNominaWizard(models.TransientModel):
         else:
             return self.payslip_batch_id.confirmar_nomina_wizard()
 
+
+class RecalcularDeNominaWizard(models.TransientModel):
+    _name = "recalcular.de.nomina"
+    _description = 'Recalcular de nomina'
+
+    todos = fields.Boolean(string='Rango')
+    rango_de_empleados1 = fields.Integer(string='Rango de empleados')
+    rango_de_empleados2 = fields.Integer(string='a')
+    payslip_batch_id = fields.Many2one('hr.payslip.run', 'Payslip Run')
+
+    def recalcular_nomina(self):
+        # if not self.todos and self.rango_de_empleados1 and self.rango_de_empleados2:
+        start = self.rango_de_empleados1
+        end = self.rango_de_empleados2
+        todos = self.todos
+        if todos:
+            return self.payslip_batch_id.with_context(start_range=start, end_range=end).recalcular_nomina_wizard()
+        else:
+            return self.payslip_batch_id.recalcular_nomina_wizard()
