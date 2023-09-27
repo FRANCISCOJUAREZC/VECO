@@ -69,12 +69,14 @@
                                         <th width="7.5%" rowspan="2">Origen</th>
                                         <th width="25%" rowspan="2">Producto</th>
                                         <th width="5%" rowspan="2">Unidad</th>
-                                        <th width="10%" rowspan="2">Ubicación origen</th>
-                                        <th width="10%" rowspan="2">Ubicación destino</th>
+                                        <th width="8%" rowspan="2">Ubicación origen</th>
+                                        <th width="8%" rowspan="2">Ubicación destino</th>
                                         <th width="10%" rowspan="2">Lote/N° de serie</th>
                                         <th width="7.5%" rowspan="2">Inicial</th>
                                         <th width="7.5%" rowspan="2">Hecho</th>
                                         <th width="7.5%" rowspan="2">Final</th>
+                                        <th width="2%" rowspan="2">Costo</th>
+                                        <th width="2%" rowspan="2">Valor</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -108,13 +110,19 @@
                                                 <span t-esc="a.lot_id.name"/>
                                             </td>
                                             <td style='text-align: right;'>
-                                                <span t-esc="'{0:,.2f}'.format(round(a.initial_balance, 2))"/>
+                                                <span t-esc="a.initial_balance"/>
                                             </td>
                                             <td style='text-align: right;'>
-                                                <span t-esc="'{0:,.2f}'.format(round(a.qty_done, 2))"/>
+                                                <span t-esc="a.qty_done"/>
                                             </td>
                                             <td style='text-align: right;'>
-                                                <span t-esc="'{0:,.2f}'.format(round(a.balance, 2))"/>
+                                                <span t-esc="a.balance"/>
+                                            </td>
+                                            <td style='text-align: right;'>
+                                                <span t-esc="a.unit_cost"/>
+                                            </td>
+                                            <td style='text-align: right;'>
+                                                <span t-esc="a.total_cost"/>
                                             </td>
                                         </tr>
                                     </t>

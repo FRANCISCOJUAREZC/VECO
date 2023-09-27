@@ -20,7 +20,7 @@ class ExportXLSX(models.AbstractModel):
         sub_header = workbook.add_format({'font_size': 12, 'align': 'center'})
         center_format = workbook.add_format({'font_size': 10, 'align': 'center'})
         left_format = workbook.add_format({'font_size': 10, 'align': 'left'})
-        right_format =workbook.add_format({'font_size': 10, 'align': 'right', 'num_format': '#,##0.00'})
+        right_format =workbook.add_format({'font_size': 10, 'align': 'right'})
         right_format_monetary = workbook.add_format({'font_size': 10, 'align': 'right', 'num_format': '$#,##0.00'})
 
         sheet = workbook.add_worksheet('Kárdex de inventario')
