@@ -242,13 +242,14 @@ class StockKardexReportWiz(models.TransientModel):
         if error:
             return error
         tree_view_id = self.env.ref('stock_kardex_report.stock_kardex_report_tree_view').id
+        form_view_id = self.env.ref('stock_kardex_report.stock_kardex_report_form_view').id
         search_id = self.env.ref('stock_kardex_report.stock_kardex_report_search').id
         action = {
             'type': 'ir.actions.act_window',
-            'views': [(tree_view_id, 'tree')],
+            'views': [(tree_view_id, 'tree'),(form_view_id, 'form')],
             'view_id': tree_view_id,
             'search_view_id': search_id,
-            'view_mode': 'list',
+            'view_mode': 'list,form',
             'name': _('Kardex de inventario'),
             'res_model': 'stock.kardex.report',
             'context': {"search_default_group": 1}
