@@ -176,7 +176,7 @@ class StockKardexReportWiz(models.TransientModel):
                     for rec in moves:
                         move_id = self.env["stock.move"].sudo().browse(rec['move_id'])
                         unit_cost = sum(move_id.stock_valuation_layer_ids.mapped("unit_cost"))
-                        total_cost = sum(move_id.stock_valuation_layer_ids.mapped("value"))
+                        total_cost = sum(move_id.stock_valuation_layer_ids.mapped("value"))              
                         product_uom = self.env['uom.uom'].sudo().search([("id", "=", rec['product_uom_id'])])
                         done_qty = rec['qty_done'] / product_uom.factor * product.uom_id.factor
                         if rec['location_id'] == location.id:
@@ -191,28 +191,29 @@ class StockKardexReportWiz(models.TransientModel):
                         else:
                             origin = textwrap.shorten(
                                 rec['move_name'], width=80, placeholder="...")
-                        line = {
-                            'move_id': rec['move_id'],
-                            'product_id': rec['product_id'],
-                            'product_uom_id': product.uom_id.id,
-                            'lot_id': rec['lot_id'],
-                            'owner_id': rec['owner_id'],
-                            'package_id': rec['package_id'],
-                            'qty_done': done_qty,
-                            'location_id': rec['location_id'],
-                            'location_dest_id': rec['location_dest_id'],
-                            'date': rec['date'],
-                            'initial_balance': initial_total,
-                            'balance': total,
-                            'origin': origin,
-                            'group_name': group_name,
-                            'date_from': date_from.strftime('%Y-%m-%d %H:%M:%S'),
-                            'date_to': date_to.strftime('%Y-%m-%d %H:%M:%S'),
-                            'company_id': company_id.id,
-                            'unit_cost': unit_cost,
-                            'total_cost': total_cost
-                        }
-                        report_list.append(line)
+                        if (self.warehouse_ids and move_id.stock_valuation_layer_ids) or (not self.warehouse_ids):
+                            line = {
+                                'move_id': rec['move_id'],
+                                'product_id': rec['product_id'],
+                                'product_uom_id': product.uom_id.id,
+                                'lot_id': rec['lot_id'],
+                                'owner_id': rec['owner_id'],
+                                'package_id': rec['package_id'],
+                                'qty_done': done_qty,
+                                'location_id': rec['location_id'],
+                                'location_dest_id': rec['location_dest_id'],
+                                'date': rec['date'],
+                                'initial_balance': initial_total,
+                                'balance': total,
+                                'origin': origin,
+                                'group_name': group_name,
+                                'date_from': date_from.strftime('%Y-%m-%d %H:%M:%S'),
+                                'date_to': date_to.strftime('%Y-%m-%d %H:%M:%S'),
+                                'company_id': company_id.id,
+                                'unit_cost': unit_cost,
+                                'total_cost': total_cost
+                            }
+                            report_list.append(line)
                     self.env['stock.kardex.report'].create(report_list)
         else:
             return {
@@ -244,6 +245,9 @@ class StockKardexReportWiz(models.TransientModel):
         tree_view_id = self.env.ref('stock_kardex_report.stock_kardex_report_tree_view').id
         form_view_id = self.env.ref('stock_kardex_report.stock_kardex_report_form_view').id
         search_id = self.env.ref('stock_kardex_report.stock_kardex_report_search').id
+        domain = []
+        if self.warehouse_ids:
+            domain = [("unit_cost","!=", 0), ("total_cost","!=", 0) ]
         action = {
             'type': 'ir.actions.act_window',
             'views': [(tree_view_id, 'tree'),(form_view_id, 'form')],
@@ -252,6 +256,7 @@ class StockKardexReportWiz(models.TransientModel):
             'view_mode': 'list,form',
             'name': _('Kardex de inventario'),
             'res_model': 'stock.kardex.report',
+            'domain': domain,
             'context': {"search_default_group": 1}
         }
         return action
