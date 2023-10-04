@@ -377,6 +377,18 @@ class hr_payslip(models.Model):
             else:
                 self.retardo = False
 
+    def monto_a_texto(self, monto):
+        currency_type = 'M.N'
+        # Split integer and decimal part
+        amount_i, amount_d = divmod(monto, 1)
+        amount_d = round(amount_d, 2)
+        amount_d = int(round(amount_d * 100, 2))
+        currency = self.env['res.currency'].search([('name','=', 'MXN')], limit=1)
+        words = currency.with_context(lang='es_MX').amount_to_text(amount_i).upper()
+        invoice_words = '%(words)s %(amount_d)02d/100 %(curr_t)s' % dict(
+            words=words, amount_d=amount_d, curr_t=currency_type)
+        return invoice_words
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
 class HrPayslipRun(models.Model):

@@ -11,7 +11,7 @@ from datetime import timedelta, date
 #from datetime import time as datetime_time
 #from dateutil import relativedelta
 from pytz import timezone
-
+import math
 import urllib.parse
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, Warning
@@ -75,8 +75,8 @@ class HrPayslip(models.Model):
                    ('problemas_factura', 'Problemas con la factura'), ('factura_cancelada', 'Factura cancelada')],
         string=_('Estado de factura'),
         default='factura_no_generada',
-        readonly=False
-    )	
+        readonly=True,
+    )
     imss_dias = fields.Float('Cotizar en el IMSS',default='15') #, readonly=True) 
     imss_mes = fields.Float('Dias a cotizar en el mes',default='30') #, readonly=True)
     nomina_cfdi = fields.Boolean('Nomina CFDI')
@@ -101,7 +101,7 @@ class HrPayslip(models.Model):
     descuento = fields.Float('Descuento')
     #deducciones_lines = []
     number_folio = fields.Char(string=_('No. Folio'), compute='_get_number_folio')
-    fecha_factura = fields.Datetime(string=_('Fecha Factura'), readonly=True)
+    fecha_factura = fields.Datetime(string=_('Fecha Factura'))
     subsidio_periodo = fields.Float('subsidio_periodo')
     isr_periodo = fields.Float('isr_periodo')
     retencion_subsidio_pagado = fields.Float('retencion_subsidio_pagado')
@@ -630,10 +630,9 @@ class HrPayslip(models.Model):
     @api.depends('number')
     def _get_number_folio(self):
         if self.number:
-            self.number_folio = self.number.replace('SLIP','').replace('/','')
+            self.number_folio = self.number.replace('SLIP','').replace('NOM','').replace('/','')
         else:
-            self.write({'number': self.env['ir.sequence'].next_by_code('numero.nomina')})
-            self.number_folio = self.number.replace('NOM','').replace('/','')
+            raise UserError(_('La nómina no tiene un número asignado.'))
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
@@ -690,7 +689,7 @@ class HrPayslip(models.Model):
             mes_actual = self.contract_id.tablas_cfdi_id.tabla_mensual.search([('mes', '=', self.mes), ('form_id', '=', self.contract_id.tablas_cfdi_id.id)],limit =1)
             date_start = mes_actual.dia_inicio # self.date_from
             date_end = mes_actual.dia_fin #self.date_to
-            domain=[('state','in', ['paid', 'done'])]
+            domain=[('state','in', ['draft', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -721,7 +720,7 @@ class HrPayslip(models.Model):
             mes_actual = contract_id.tablas_cfdi_id.tabla_mensual.search([('mes', '=', mes), ('form_id', '=', contract_id.tablas_cfdi_id.id)],limit =1)
             date_start = mes_actual.dia_inicio # self.date_from
             date_end = mes_actual.dia_fin #self.date_to
-            domain=[('state','in', ['paid', 'done'])]
+            domain=[('state','in', ['draft', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -751,7 +750,7 @@ class HrPayslip(models.Model):
         if employee_id and contract_id.tablas_cfdi_id:
             date_start = date(fields.Date.from_string(date_from).year, 1, 1)
             date_end = date(fields.Date.from_string(date_from).year, 12, 31)
-            domain=[('state','in', ['paid', 'done'])]
+            domain=[('state','in', ['draf', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -794,7 +793,7 @@ class HrPayslip(models.Model):
         if self.employee_id and self.contract_id.tablas_cfdi_id:
             date_start = date(fields.Date.from_string(self.date_from).year, 1, 1)
             date_end = date(fields.Date.from_string(self.date_from).year, 12, 31)
-            domain=[('state','in', ['paid', 'done'])]
+            domain=[('state','in', ['draft', 'verify'])]
             if date_start:
                 domain.append(('date_from','>=',date_start))
             if date_end:
@@ -872,9 +871,9 @@ class HrPayslip(models.Model):
         payslip_total_SEIN = 0
         payslip_total_JPRE = 0
         antiguedad = 1
-        if self.contract_id.date_end and self.contract_id.date_start:
-            antiguedad = int((self.contract_id.date_end - self.contract_id.date_start + timedelta(days=1)).days/7)
-        elif self.date_to and self.contract_id.date_start:
+        #if self.contract_id.date_end and self.contract_id.date_start:
+        #    antiguedad = int((self.contract_id.date_end - self.contract_id.date_start + timedelta(days=1)).days/7)
+        if self.date_to and self.contract_id.date_start:
             antiguedad = int((self.date_to - self.contract_id.date_start + timedelta(days=1)).days/7)
 
 #**********  Percepciones ************
@@ -1165,7 +1164,7 @@ class HrPayslip(models.Model):
             self.periodicidad = '99'
         diaspagados = 0
         if self.struct_id.name == 'Reparto de utilidades':
-            diaspagados = 365
+            diaspagados = 1
         else:
             diaspagados = work_days
         regimen = 0
@@ -1205,9 +1204,14 @@ class HrPayslip(models.Model):
         #timezone = tools.ustr(timezone).encode('utf-8')
 
         local = pytz.timezone(timezone)
-        naive_from = datetime.datetime.now() 
+        if not self.fecha_factura:
+            naive_from = datetime.datetime.now()
+        else:
+            naive_from = self.fecha_factura
         local_dt_from = naive_from.replace(tzinfo=pytz.UTC).astimezone(local)
-        date_from = local_dt_from.strftime ("%Y-%m-%d %H:%M:%S")
+        date_from = local_dt_from.strftime("%Y-%m-%d %H:%M:%S")
+        if not self.fecha_factura:
+            self.fecha_factura = datetime.datetime.now()
 
         request_params.update({
                 'factura': {
@@ -1218,7 +1222,7 @@ class HrPayslip(models.Model):
                       'tipocomprobante': self.tipo_comprobante,
                       'moneda': 'MXN',
                       'tipodecambio': '1.0000',
-                      'fecha_factura': date_from, #self.fecha_factura and self.fecha_factura.strftime(DTF),
+                      'fecha_factura': date_from,
                       'LugarExpedicion': self.company_id.zip,
                       'RegimenFiscal': self.company_id.regimen_fiscal,
                       'subtotal': self.subtotal,
@@ -1317,9 +1321,9 @@ class HrPayslip(models.Model):
             if payslip.folio_fiscal:
                 payslip.write({'nomina_cfdi': True, 'estado_factura': 'factura_correcta'})
                 return True
-            if payslip.fecha_factura == False:
-                payslip.fecha_factura= datetime.datetime.now()
-                payslip.write({'fecha_factura': payslip.fecha_factura})
+            #if payslip.fecha_factura == False:
+            #    payslip.fecha_factura= datetime.datetime.now()
+            #    payslip.write({'fecha_factura': payslip.fecha_factura})
             if payslip.estado_factura == 'factura_correcta':
                 raise UserError(_('Error para timbrar factura, Factura ya generada.'))
             if payslip.estado_factura == 'factura_cancelada':
@@ -1452,6 +1456,8 @@ class HrPayslip(models.Model):
                      ('res_model', '=', payslip._name),
                      ('name', '=', payslip.number.replace('/','_') + '.xml')]
                 xml_file = payslip.env['ir.attachment'].search(domain)[0]
+                if not xml_file:
+                    raise UserError(_('No se encontró el archivo XML para enviar a cancelar.'))
                 values = {
                           'rfc': payslip.company_id.vat,
                           'api_key': payslip.company_id.proveedor_timbrado,

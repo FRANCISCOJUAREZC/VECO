@@ -49,12 +49,18 @@ class CreditoInfonavit(models.Model):
                if rec.tipo_de_descuento == '1':
                   rec.valor_infonavit_ant = rec.contract_id.infonavit_porc
                   rec.contract_id.infonavit_porc = rec.valor_descuento
+                  rec.contract_id.infonavit_fijo = 0
+                  rec.contract_id.infonavit_vsm = 0
                elif rec.tipo_de_descuento == '2':
                   rec.valor_infonavit_ant = rec.contract_id.infonavit_fijo
                   rec.contract_id.infonavit_fijo = rec.valor_descuento
+                  rec.contract_id.infonavit_vsm = 0
+                  rec.contract_id.infonavit_porc = 0
                else:
                   rec.valor_infonavit_ant = rec.contract_id.infonavit_vsm
                   rec.contract_id.infonavit_vsm = rec.valor_descuento
+                  rec.contract_id.infonavit_porc = 0
+                  rec.contract_id.infonavit_fijo = 0
             rec.write({'state':'done'})
         return
 
@@ -63,10 +69,16 @@ class CreditoInfonavit(models.Model):
             if rec.contract_id and rec.state == 'done':
                if rec.tipo_de_descuento == '1':
                   rec.contract_id.infonavit_porc = rec.valor_infonavit_ant
+                  rec.contract_id.infonavit_fijo = 0
+                  rec.contract_id.infonavit_vsm = 0
                elif rec.tipo_de_descuento == '2':
                   rec.contract_id.infonavit_fijo = rec.valor_infonavit_ant
+                  rec.contract_id.infonavit_vsm = 0
+                  rec.contract_id.infonavit_porc = 0
                else:
                   rec.contract_id.infonavit_vsm = rec.valor_infonavit_ant
+                  rec.contract_id.infonavit_porc = 0
+                  rec.contract_id.infonavit_fijo = 0
             rec.write({'state':'cancel'})
 
     def action_draft(self):

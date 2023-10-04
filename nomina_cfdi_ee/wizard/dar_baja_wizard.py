@@ -28,9 +28,10 @@ class WizardDarBaja(models.TransientModel):
                     'employee_id': rec.employee_id.id,
                     'fecha': self.fecha,
                     'tipo_de_baja': self.tipo_de_baja,
-                    'state': 'done',
+                    'contract_id': rec.employee_id.contract_id.id,
                 }
-                self.env['incidencias.nomina'].create(vals)
+                record = self.env['incidencias.nomina'].create(vals)
+                record.action_validar()
 
 
     """ THIS WORKS BUT ONLY WITH ONE LINE IN SLIP_IDS

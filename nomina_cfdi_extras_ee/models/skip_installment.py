@@ -37,7 +37,7 @@ class dev_skip_installment(models.Model):
                               ('confirm','Confirmar'),
                               ('done','Hecho'),
                               ('reject','Rechazar'),
-                              ('cancel','Cancelar'),], string='Estado', default='draft', track_visibility='onchange')
+                              ('cancel','Cancelar'),], string='Estado', default='draft', tracking=True)
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
 
     @api.depends('installment_id')

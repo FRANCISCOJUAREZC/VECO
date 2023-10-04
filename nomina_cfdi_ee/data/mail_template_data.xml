@@ -15,18 +15,11 @@
             <field name="report_name">{{object.name.replace('/', '_') + '.pdf'}}</field>
             <!-- <field name="lang">${object.partner_id.lang}</field> -->
             <field name="body_html"><![CDATA[
-<p>Hola, <t t-out="object.employee_id.name or ''" data-oe-t-inline="true" contenteditable="false">
+<p>Hola, <t t-out="object.employee_id.name or ''" data-oe-t-inline="true" contenteditable="false"></p>
 
-<p></p>
 <p>Anexo encontrará su recibo de nómina.</p>
 <p>Saludos,</p>
 
-<p>
-        <t t-if="user.signature" data-oe-t-group="0" data-oe-t-group-active="true" data-oe-t-inline="true">
-            <br>
-            <t t-out="user.signature or ''" data-oe-t-inline="true" contenteditable="false">--<br>Mitchell Admin</t>
-        </t>
-</p>
 ]]></field>
         </record>
         

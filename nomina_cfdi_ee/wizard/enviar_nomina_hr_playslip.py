@@ -30,7 +30,7 @@ class EnviarNomina(models.TransientModel):
                       if not mail:
                           if payslip.employee_id.work_email:
                              mail = payslip.employee_id.work_email
-                      if not mail:return
+                      if not mail:continue
                       template.send_mail(payslip.id, force_send=True,email_values={'email_to': mail})
             else:
                if not template:return
@@ -40,6 +40,6 @@ class EnviarNomina(models.TransientModel):
                if not mail:
                    if payslip.employee_id.work_email:
                       mail = payslip.employee_id.work_email
-               if not mail:return
+               if not mail:continue
                template.send_mail(payslip.id, force_send=True,email_values={'email_to': mail})
         return True

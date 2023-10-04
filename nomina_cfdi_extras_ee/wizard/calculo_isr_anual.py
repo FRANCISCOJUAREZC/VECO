@@ -23,11 +23,11 @@ class CalculoISRAnual(models.TransientModel):
     _name = 'calculo.isr.anual'
     _description = 'CalculoISRAnual'
 
-    ano = fields.Selection([('2019','2019'),('2020','2020'),('2021', '2021')],"Año")
+    ano = fields.Selection([('2019','2019'),('2020','2020'),('2021', '2021'),('2022', '2022')],"Año")
     employee_id =fields.Many2one('hr.employee','Empleado')
     department_id = fields.Many2one('hr.department', 'Departamento')
     tablas_id = fields.Many2one('tablas.cfdi','Tabla CFDI')
-   
+
     def print_calculo_isr_anual_report(self):
         date_from = self.ano+"-01-01"
         date_to = self.ano+"-12-31"

@@ -27,5 +27,4 @@ class GenerarReciboNomina(models.TransientModel):
                 'form': data
             }
             return self.env.ref('nomina_cfdi_ee.report_payslips').with_context(from_transient_model=True).report_action(payslips)
-            
-        
+
