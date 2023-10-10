@@ -19,9 +19,9 @@ class EnviarNomina(models.TransientModel):
 
         template = self.env.ref('nomina_cfdi_ee.email_template_payroll', False)
         for payslip in payslips:
-            emp_no = int(payslip.employee_id.no_empleado)
             if self.todos:
                if self.rango_de_empleados1 and self.rango_de_empleados2:
+                  emp_no = int(payslip.employee_id.no_empleado)
                   if emp_no >= self.rango_de_empleados1 and emp_no <= self.rango_de_empleados2:
                       if not template:return
                       mail = None
