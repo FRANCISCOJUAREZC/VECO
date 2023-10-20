@@ -110,13 +110,13 @@
                                                 <span t-esc="a.lot_id.name"/>
                                             </td>
                                             <td style='text-align: right;'>
-                                                <span t-esc="a.initial_balance"/>
+                                                <span t-esc="'{0:,.2f}'.format(round(a.initial_balance, 2))"/>
                                             </td>
                                             <td style='text-align: right;'>
-                                                <span t-esc="a.qty_done"/>
+                                                <span t-esc="'{0:,.2f}'.format(round(a.qty_done, 2))"/>
                                             </td>
                                             <td style='text-align: right;'>
-                                                <span t-esc="a.balance"/>
+                                                <span t-esc="'{0:,.2f}'.format(round(a.balance, 2))"/>
                                             </td>
                                             <td style='text-align: right;'>
                                                 <span t-esc="a.unit_cost"/>
