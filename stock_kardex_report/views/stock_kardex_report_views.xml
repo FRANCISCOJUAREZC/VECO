@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_kardex_report_tree_view" model="ir.ui.view">
+        <field name="name">stock.kardex.report.tree</field>
+        <field name="model">stock.kardex.report</field>
+        <field name="arch" type="xml">
+            <tree string="Kardex de inventario" edit="false" create="false" delete="false">
+                <field name="date" string="Fecha"/>
+                <field name="origin" string="Origen"/>
+                <field name="product_id" string="Producto"/>
+                <field name="product_uom_id" string="UoM"/>
+                <field name="location_id" string="Ubicación origen"/>
+                <field name="location_dest_id" string="Ubicación destino"/>
+                <field name="lot_id" string="Lote/N° de serie"/>
+                <field name="owner_id" optional="hide"/>
+                <field name="package_id" optional="hide"/>
+                <field name="initial_balance" string="Balance inicial"/>
+                <field name="qty_done" string="Cantidad hecha"/>
+                <field name="balance" string="Balance final"/>
+                <field name="unit_cost"/>
+                <field name="total_cost"/>
+                <field name="group_name" invisible="1"/>
+                <field name="company_id" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="stock_kardex_report_form_view" model="ir.ui.view">
+        <field name="name">stock.kardex.report.form</field>
+        <field name="model">stock.kardex.report</field>
+        <field name="arch" type="xml">           
+            
+            <form string="Kardex de inventario" edit="false" create="false" delete="false">
+                
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date" string="Fecha"/>
+                            <field name="origin" string="Origen"/>
+                            <field name="product_id" string="Producto"/>
+                            <field name="product_uom_id" string="UoM"/>
+                            <field name="location_id" string="Ubicación origen"/>
+                            <field name="initial_balance" string="Balance inicial"/>
+                            <field name="qty_done" string="Cantidad hecha"/>
+                            
+                        </group>
+                        <group>
+                            <field name="location_dest_id" string="Ubicación destino"/>
+                            <field name="lot_id" string="Lote/N° de serie"/>
+                            <field name="owner_id" optional="hide"/>
+                            <field name="package_id" optional="hide"/>
+                            <field name="balance" string="Balance final"/>
+                            <field name="unit_cost"/>
+                            <field name="total_cost"/>
+                            <field name="group_name" invisible="1"/>
+                            <field name="company_id" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+               
+                
+            </form>
+        </field>
+    </record>
+
+    <record id="stock_kardex_report_search" model="ir.ui.view">
+        <field name="name">stock.kardex.report.search</field>
+        <field name="model">stock.kardex.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter name="group" string="Ubicacion - Producto" context="{'group_by':'group_name'}"/>
+            </search>
+        </field>
+    </record>
+</odoo>
