@@ -17,7 +17,7 @@
                 <page name="info_cdfi" string="CFDI">
                         <group cols="4">
                             <group string="Datos CFDI">
-                                <field name="forma_pago" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>
+                                <!--<field name="forma_pago" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>-->
                                 <field name="tipo_comprobante" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>
                                 <field name="methodo_pago" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>
                                 <field name="uso_cfdi" attrs="{'readonly':[('estado_factura','!=','factura_no_generada')]}"/>

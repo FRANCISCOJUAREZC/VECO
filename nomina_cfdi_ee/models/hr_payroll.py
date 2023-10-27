@@ -1218,7 +1218,7 @@ class HrPayslip(models.Model):
                       'serie': self.company_id.serie_nomina,
                       'folio': self.number_folio,
                       'metodo_pago': self.methodo_pago,
-                      'forma_pago': self.forma_pago,
+                   #   'forma_pago': self.forma_pago,
                       'tipocomprobante': self.tipo_comprobante,
                       'moneda': 'MXN',
                       'tipodecambio': '1.0000',

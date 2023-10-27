@@ -197,7 +197,7 @@ class HrPayslipRun(models.Model):
                     if payslip.state == 'draft':
                         payslip.compute_sheet()
             else:
-                if payslip.state == 'draft':
+                if payslip.state in ['draft','verify']:
                     payslip.compute_sheet()
         return True
      
@@ -215,7 +215,7 @@ class HrPayslipRun(models.Model):
     def _compute_payslip_cgdi_generated_draft(self):
         cfdi_generated_draft = True
         for payslip in self.slip_ids:
-            if payslip.state not in ['draft']:
+            if payslip.state not in ['draft','verify']:
                 cfdi_generated_draft=False
                 break
         self.all_payslip_generated_draft = cfdi_generated_draft 
