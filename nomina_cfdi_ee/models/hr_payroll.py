@@ -691,9 +691,9 @@ class HrPayslip(models.Model):
             date_end = mes_actual.dia_fin #self.date_to
             domain=[('state','in', ['draft', 'verify'])]
             if date_start:
-                domain.append(('date_from','>=',date_start))
+                domain.append(('fecha_pago','>=',date_start))
             if date_end:
-                domain.append(('date_to','<=',date_end))
+                domain.append(('fecha_pago','<=',date_end))
             domain.append(('employee_id','=',self.employee_id.id))
             if not self.contract_id.calc_isr_extra:
                domain.append(('tipo_nomina','=','O'))
