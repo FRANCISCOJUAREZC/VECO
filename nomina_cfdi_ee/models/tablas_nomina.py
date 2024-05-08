@@ -163,7 +163,8 @@ class TablasCFDI(models.Model):
 
     uma = fields.Float(string=_('UMA'), default='84.49')
     salario_minimo = fields.Float(string=_('Salario mínimo'))
-    imss_mes = fields.Float('Periodo mensual nómina (dias)',default='30.4')
+    imss_mes = fields.Float('Periodo mensual subsidio (dias)',default='30.4', digits = (12,4))
+    dias_mes = fields.Float('Periodo mensual sueldo (dias)',default='30', digits = (12,4))
 
     importe_utilidades = fields.Float(string=_('Importe a repartir a todos los empleados'), default=0)
     dias_min_trabajados = fields.Float(string=_('Dias mínimos trabajados en empleados eventuales'), default=60)
@@ -208,6 +209,8 @@ class TablasCFDI(models.Model):
     caja_ahorro_retiro = fields.Many2one('hr.salary.rule', string='Caja / Fondo Ahorro retiro')
 
     isn =  fields.Float(string=_('Impuesto sobre nómina'), default='2.0', digits = (12,2))
+    pct_uma = fields.Float(string=_('% Valor mensual UMA'), default='11.82', digits = (12,2))
+    limit_sm = fields.Float(string=_('Límite salario mensual'), default='9081', digits = (12,2))
 
     @api.constrains('name')
     def _check_name(self):

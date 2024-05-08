@@ -38,13 +38,13 @@
                                 <field name="s_excedente"/>
                             </tree>
                         </field>
-                        <field name="tabla_subem" string="Subem mensual/CAS Mensual">
+                       <!-- <field name="tabla_subem" string="Subem mensual/CAS Mensual">
                             <tree editable="bottom">
                                 <field name="lim_inf"/>
                                 <field name="s_mensual"/>
                             </tree>
                         </field>
-                       <!-- <field name="tabla_subsidio" string="Subsidio Mensual Art. 114 LISR"> 
+                        <field name="tabla_subsidio" string="Subsidio Mensual Art. 114 LISR"> 
                             <tree editable="bottom">
                                 <field name="lim_inf"/>
                                 <field name="c_fija"/>
@@ -67,6 +67,11 @@
                             </group>
                             <group string="Periodo nómina">
                                 <field name="imss_mes"/>
+                                <field name="dias_mes"/>
+                            </group>
+                            <group string="Subsidio 2024">
+                                <field name="pct_uma"/>
+                                <field name="limit_sm"/>
                             </group>
                         </group>
              </page>
