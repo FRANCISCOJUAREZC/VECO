@@ -2,4 +2,4 @@
 
 from . import account_edi_format
 from . import account_move
-from . import inf_mercancia
+from . import info_mercancia
