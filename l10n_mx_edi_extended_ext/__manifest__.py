@@ -10,6 +10,7 @@
         'l10n_mx_edi_extended_40',
     ],
     'data': [
+        'security/ir.model.access.csv',
 #        'data/4.0/cfdi.xml',
         'views/account_move_view.xml',
     ],
