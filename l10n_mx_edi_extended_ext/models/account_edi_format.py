@@ -72,7 +72,7 @@ class AccountEdiFormat(models.Model):
                                'Marca': line_vals['line'].info_mercancias.cce_marca,
                                'Modelo': line_vals['line'].info_mercancias.cce_modelo,
                                'SubModelo': line_vals['line'].info_mercancias.cce_submodelo,
-                               'NumeroSerie': line_vals['line'].cce_numeroserie,
+                               'NumeroSerie': serie.cce_numeroserie,
                             })
                         series_len =  len(line_vals['line'].info_mercancias.cce_series)
                     else:
