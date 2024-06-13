@@ -65,23 +65,24 @@ class AccountEdiFormat(models.Model):
 
                 series_len = 0
                 desc_especifica = []
-                if line_vals['line'].info_mercancias:
-                    if line_vals['line'].info_mercancias.cce_series:
-                        for serie in line_vals['line'].info_mercancias.cce_series:
-                            desc_especifica.append({
-                               'Marca': line_vals['line'].info_mercancias.cce_marca,
-                               'Modelo': line_vals['line'].info_mercancias.cce_modelo,
-                               'SubModelo': line_vals['line'].info_mercancias.cce_submodelo,
-                               'NumeroSerie': serie.cce_numeroserie,
-                            })
-                        series_len =  len(line_vals['line'].info_mercancias.cce_series)
-                    else:
-                        desc_especifica.append({
-                               'Marca': line_vals['line'].info_mercancias.cce_marca,
-                               'Modelo': line_vals['line'].info_mercancias.cce_modelo,
-                               'SubModelo': line_vals['line'].info_mercancias.cce_submodelo,
-                               'NumeroSerie': None,
-                        })
+                for line_vals in line_vals_list:
+                   if line_vals['line'].info_mercancias:
+                       if line_vals['line'].info_mercancias.cce_series:
+                           for serie in line_vals['line'].info_mercancias.cce_series:
+                               desc_especifica.append({
+                                  'Marca': line_vals['line'].info_mercancias.cce_marca,
+                                  'Modelo': line_vals['line'].info_mercancias.cce_modelo,
+                                  'SubModelo': line_vals['line'].info_mercancias.cce_submodelo,
+                                  'NumeroSerie': serie.cce_numeroserie,
+                               })
+                           series_len =  len(line_vals['line'].info_mercancias.cce_series)
+                       else:
+                           desc_especifica.append({
+                                  'Marca': line_vals['line'].info_mercancias.cce_marca,
+                                  'Modelo': line_vals['line'].info_mercancias.cce_modelo,
+                                  'SubModelo': line_vals['line'].info_mercancias.cce_submodelo,
+                                  'NumeroSerie': None,
+                           })
 
 #                if series_len > 0:
 #                    if series_len != line_vals['line'].cantidadaduana:

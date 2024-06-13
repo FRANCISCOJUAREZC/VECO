@@ -23,6 +23,11 @@ class AccountMoveLine(models.Model):
 
     info_mercancias = fields.Many2one('account.move.mercancias.info', string='Información mercancia')
 
+# cfdiv40_extended
+#                            <cce20:Mercancias>
+#                                <t t-foreach="ext_trade_goods_details" t-as="good_details">
+#                                    <t t-set="product" t-value="good_details['product']"/>
+#                                    <cce20:Mercancia t-att-NoIdentificacion="format_string(product.default_code, 100)" t-att-FraccionArancelaria="product.l10n_mx_edi_tariff_fraction_id.code" t-att-CantidadAduana="format_float(good_details['quantity_aduana'], 3)" t-att-UnidadAduana="product.l10n_mx_edi_umt_aduana_id.l10n_mx_edi_code_aduana" t-att-ValorUnitarioAduana="format_float(good_details['price_unit_usd'], 6)" t-att-ValorDolares="format_float(good_details['line_total_usd'], 4)">
 #                                        <t t-if="good_details['desc_especifica']">
 #                                            <t t-foreach="good_details['desc_especifica']" t-as="info_merc">
 #                                                <cce20:DescripcionesEspecificas
@@ -32,3 +37,6 @@ class AccountMoveLine(models.Model):
 #                                                    t-att-NumeroSerie="info_merc['NumeroSerie']"/>
 #                                            </t>
 #                                        </t>
+#                                    </cce20:Mercancia>
+#                                </t>
+#                            </cce20:Mercancias>
