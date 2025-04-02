@@ -204,13 +204,12 @@ class TablasVacacioneslLine(models.Model):
     form_id = fields.Many2one('hr.contract', string='Vacaciones', required=True)
     dias = fields.Integer('Dias disponibles')
     ano = fields.Selection(
-        selection=[('2018', '2018'),
-                   ('2019', '2019'),
-                   ('2020', '2020'),
-                   ('2021', '2021'),
-                   ('2022', '2022'),
-                   ('2023', '2023'),
+        selection=[('2023', '2023'),
                    ('2024', '2024'),
+                   ('2025', '2025'),
+                   ('2026', '2026'),
+                   ('2027', '2027'),
+                   ('2028', '2028'),
                    ],
         string=_('Año'), required=True)
     estado = fields.Selection(

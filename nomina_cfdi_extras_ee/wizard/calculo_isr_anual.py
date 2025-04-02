@@ -23,7 +23,7 @@ class CalculoISRAnual(models.TransientModel):
     _name = 'calculo.isr.anual'
     _description = 'CalculoISRAnual'
 
-    ano = fields.Selection([('2019','2019'),('2020','2020'),('2021', '2021'),('2022', '2022')],"Año")
+    ano = fields.Selection([('2027','2027'),('2026','2026'),('2025', '2025'),('2024', '2024')],"Año")
     employee_id =fields.Many2one('hr.employee','Empleado')
     department_id = fields.Many2one('hr.department', 'Departamento')
     tablas_id = fields.Many2one('tablas.cfdi','Tabla CFDI')
