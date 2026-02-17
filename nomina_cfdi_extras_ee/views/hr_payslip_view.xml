@@ -23,9 +23,9 @@
          <field name="arch" type="xml">
              <button name="action_draft" position="after">
                  <field name="show_cancelar_button" invisible="1" />
-                 <button string="Cancelar CFDI" name="action_cancelar_cfdi" type="object" attrs="{'invisible':[('show_cancelar_button','!=',True)]}" class="oe_highlight"/>
+                 <!--<button string="Cancelar CFDI" name="action_cancelar_cfdi" type="object" attrs="{'invisible':[('show_cancelar_button','!=',True)]}" class="oe_highlight"/> -->
                  <button string="Cancelar nómina" name="action_cancelar_nomina" type="object" attrs="{'invisible':[('show_cancelar_button','!=',True)]}" class="oe_highlight"/>
              </button>
          </field>
-    </record> 
+    </record>
 </odoo>

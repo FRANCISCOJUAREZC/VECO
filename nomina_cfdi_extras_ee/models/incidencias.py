@@ -43,6 +43,14 @@ class IncidenciasNomina(models.Model):
     sueldo_cotizacion_base_ant = fields.Float('Sueldo cotización base ant')
     fecha_anterior = fields.Date('Fecha anterior')
 
+    no_credito = fields.Char(string="Número de crédito INFONAVIT")
+    fecha_infonavit = fields.Date(string="Fecha de inicio de descuento")
+    tipo_de_descuento = fields.Selection([('1', 'Porcentaje %'), 
+                                          ('2', 'Cuota fija'),
+                                          ('3', 'Veces SMGV'),],
+                                            string='Tipo de descuento INFONAVIT')
+    valor_descuento = fields.Float(string="Valor descuento", digits = (12,4))
+
     @api.onchange('tipo_de_incidencia')
     def _onchange_incidencia(self):
         if self.tipo_de_incidencia == 'Reingreso':
@@ -53,10 +61,10 @@ class IncidenciasNomina(models.Model):
     
     @api.onchange('sueldo_mensual')
     def _compute_sueldo(self):
-        if self.sueldo_mensual:
+        if self.sueldo_mensual and self.contract_id:
             values = {
-            'sueldo_diario': self.sueldo_mensual/30,
-            'sueldo_por_horas': self.sueldo_mensual/30/8,
+            'sueldo_diario': self.sueldo_mensual/self.contract_id.tablas_cfdi_id.dias_mes,
+            'sueldo_por_horas': self.sueldo_mensual/self.contract_id.tablas_cfdi_id.dias_mes/8,
             'sueldo_diario_integrado': self.calculate_sueldo_diario_integrado(),
             'sueldo_cotizacion_base': self.calculate_sueldo_cotizacion_base(),
             }
@@ -86,7 +94,7 @@ class IncidenciasNomina(models.Model):
                 return 
             tablas_cfdi_line = tablas_cfdi_lines[0]
             max_sdi = tablas_cfdi.uma * 25
-            sdi = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100) ) / 365 ) * self.sueldo_mensual/30
+            sdi = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100) ) / 365 ) * self.sueldo_mensual/tablas_cfdi.dias_mes
             if sdi > max_sdi:
                 sueldo_cotizacion_base = max_sdi
             else:
@@ -119,7 +127,7 @@ class IncidenciasNomina(models.Model):
                 return 
             tablas_cfdi_line = tablas_cfdi_lines[0]
             max_sdi = tablas_cfdi.uma * 25
-            sdi = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100) ) / 365 ) * self.sueldo_mensual/30
+            sdi = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100) ) / 365 ) * self.sueldo_mensual/tablas_cfdi.dias_mes
             sueldo_diario_integrado = sdi
         else: 
             sueldo_diario_integrado = 0
@@ -154,7 +162,7 @@ class IncidenciasNomina(models.Model):
         if employee:
             if self.tipo_de_incidencia=='Cambio reg. patronal':
                 self.registro_patronal_ant = employee.registro_patronal_id.id
-                employee.write({'registro_patronal':self.registro_patronal.id})
+                employee.write({'registro_patronal_id':self.registro_patronal.id})
             elif self.tipo_de_incidencia=='Cambio salario':
                 if self.contract_id:
                     self.sueldo_mensual_ant = self.contract_id.wage

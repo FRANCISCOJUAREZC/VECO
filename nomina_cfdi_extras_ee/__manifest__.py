@@ -52,6 +52,7 @@ This new module will create 2 new models: incidencias and incapacidades, they wi
         'wizard/wizard_reglas_salariales_view.xml',
         'wizard/calculo_isr_anual_view.xml', 
         'wizard/listado_de_nomina_wizard_view.xml',
+        'wizard/year_reparto_utilidades.xml',
         'report/calculo_isr_anual_report.xml',
         'wizard/importar_dias_wizard.xml',
         'report/reporte_isr_imss.xml',
@@ -66,6 +67,9 @@ This new module will create 2 new models: incidencias and incapacidades, they wi
         'wizard/reporte_nominas.xml',
         'wizard/reporte_imss.xml',
         'wizard/wizard_isn.xml',
+        'views/hr_leave_type.xml',
+        'wizard/nomina_liquidaciones_view.xml',
+        'report/liquidaciones_report.xml',
     ],
     'assets': {
         'web.assets_backend': [

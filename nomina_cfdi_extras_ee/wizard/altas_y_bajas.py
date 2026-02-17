@@ -30,9 +30,10 @@ class AltasYBajas(models.TransientModel):
             domain.append(('tipo_de_incidencia', 'in', ('Alta','Reingreso')))
         if self.tipo == 'bajas':
             domain.append(('tipo_de_incidencia', '=', 'Baja'))
-        
+        domain.append(('state', '=', 'done'))
+
         incidencias = self.env['incidencias.nomina'].search(domain)
-        
+
         workbook = xlwt.Workbook()
         worksheet = workbook.add_sheet('Altas y Bajas')
         col_width = 256 * 20

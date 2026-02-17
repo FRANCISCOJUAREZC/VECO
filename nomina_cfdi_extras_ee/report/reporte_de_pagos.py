@@ -7,7 +7,7 @@ from collections import defaultdict
 class ReportPago(models.AbstractModel):
     _name = 'report.nomina_cfdi_extras_ee.report_payslip_batches_pagos2'
     _description = 'Reporte de Pagos'
-    
+
     def slip_by_line(self, batche):
         slip_lines = batche.slip_ids.filtered(lambda x: x.state!='cancel').mapped('line_ids')
         slip_lines = slip_lines.sorted(lambda x: x.salary_rule_id.sequence)
@@ -20,6 +20,7 @@ class ReportPago(models.AbstractModel):
         
         items = [(seq,code,name) for seq,code,name in sorted(lines_by_code.keys(), key=lambda x: x[0])]
         return [items,lines_by_code]
+
     @api.model
     def _get_report_values(self, docids, data=None):
         paclingslip_batches = self.env['hr.payslip.run'].browse(docids)

@@ -52,8 +52,7 @@ class VacacionesNomina(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code('vacaciones.nomina') or _('New')
         result = super(VacacionesNomina, self).create(vals)
         return result
-    
-    
+
     def action_validar(self):
         if self.dias and self.dias > self.dias_de_vacaciones_disponibles:
             raise UserError("No tiene suficientes dias de vacaciones para validar el registro")
@@ -61,7 +60,7 @@ class VacacionesNomina(models.Model):
         if self.company_id.leave_type_vac: 
             leave_type = self.company_id.leave_type_vac
         else:
-            raise UserError(_('Falta configurar el tipo de falta'))
+            raise UserError(_('Falta configurar el tipo de falta en Configuracion - Ajustes'))
         if self.fecha_inicial:
             date_from = self.fecha_inicial
             date_to = date_from + relativedelta(days=self.dias - 1)

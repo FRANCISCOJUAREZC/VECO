@@ -72,12 +72,12 @@ class DiasFeriados(models.Model):
            if self.company_id.leave_type_dfes: 
               leave_type = self.company_id.leave_type_dfes
            else:
-              raise UserError(_('Falta configurar el tipo de falta'))
+              raise UserError(_('Falta configurar el tipo de falta en Configuracion - Ajustes'))
         elif self.tipo=='triple':
            if self.company_id.leave_type_dfes3: 
               leave_type = self.company_id.leave_type_dfes3
            else:
-              raise UserError(_('Falta configurar el tipo de falta'))
+              raise UserError(_('Falta configurar el tipo de falta en Configuracion - Ajustes'))
         if not leave_type:
            leave_type = self.env['hr.leave.type'].create({'name': 'DFES'})
 

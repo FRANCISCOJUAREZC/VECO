@@ -99,7 +99,7 @@ class CajaAhorro(models.Model):
         if self.importe and self.saldo:
             if self.importe > self.saldo:
                 raise UserError(_("El importe a retirar debe ser menor o igual al saldo."))
-    
+
     def action_validar(self):
         self.write({'state':'done'})
         return

@@ -95,7 +95,7 @@
                                 <field name="enf_mat_prestaciones_p"/>
                                 <field name="enf_mat_gastos_med_p"/>
                                 <field name="inv_vida_p"/>
-                                <field name="cesantia_vejez_p"/>
+                               <!-- <field name="cesantia_vejez_p"/>-->
                                 <field name="retiro_p"/>
                                 <field name="guarderia_p"/>
                                 <field name="apotacion_infonavit"/>
@@ -106,6 +106,15 @@
                                 <field name="enf_mat_gastos_med_e"/>
                                 <field name="inv_vida_e"/>
                                 <field name="cesantia_vejez_e"/>
+                            </group>
+                            <group>
+                                <field name="tabla_cesantia" string="Cesantia">
+                                   <tree editable="bottom">
+                                      <field name="lim_inf"/>
+                                   <!--   <field name="lim_sup"/>-->
+                                      <field name="cuota"/>
+                                   </tree>
+                                </field>
                             </group>
                         </group>
              </page>

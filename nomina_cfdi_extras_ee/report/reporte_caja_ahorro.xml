@@ -127,14 +127,16 @@
 	     </t>
     </template>
 
-    <report 
-        id="reporte_caja_ahorro"
-        string="Caja de ahorro"
-        model="caja.nomina" 
-        report_type="qweb-pdf"
-        file="nomina_cfdi_extras_ee.reporte_caja_ahorro_document" 
-        name="nomina_cfdi_extras_ee.reporte_caja_ahorro_document" 
-        paperformat="nomina_cfdi_extras_ee.paperformat_landscape_caja_ahorro"
-    />
+
+	<record id="reporte_caja_ahorro" model="ir.actions.report">
+        <field name="name">Caja de ahorro</field>
+        <field name="model">caja.nomina</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">nomina_cfdi_extras_ee.reporte_caja_ahorro_document</field>
+        <field name="report_file">nomina_cfdi_extras_ee.reporte_caja_ahorro_document</field>
+        <field name="paperformat_id" ref="nomina_cfdi_extras_ee.paperformat_landscape_caja_ahorro"/>
+        <field name="binding_model_id" ref="nomina_cfdi_ee.model_caja_nomina"/>
+        <field name="binding_type">report</field>
+    </record>
 
 </odoo>

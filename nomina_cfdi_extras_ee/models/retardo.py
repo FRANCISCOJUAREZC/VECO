@@ -15,7 +15,8 @@ class RetardoNomina(models.Model):
     state = fields.Selection([('draft', 'Borrador'), ('done', 'Hecho'), ('cancel', 'Cancelado')], string='State', default='draft')
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
     crear_ausencia = fields.Boolean('Descuento en nómina')
-    tiempo = fields.Float('Tiempo retardo (minutos)')
+#    tiempo = fields.Float('Tiempo retardo (minutos)')
+    tiempo_retardo = fields.Selection([('10.5', '30 min'), ('11', '1 hr'), ('11.5', '1.5 hrs'), ('12', '2 hrs')], string='Tiempo retardo')
 
     @api.model
     def init(self):
@@ -43,11 +44,14 @@ class RetardoNomina(models.Model):
     
     def action_validar(self):
         if self.crear_ausencia:
-           leave_type = self.company_id.leave_type_fr or False
+           if self.company_id.leave_type_fr: 
+              leave_type = self.company_id.leave_type_fr
+           else:
+              raise UserError(_('Falta configurar el tipo de falta en Configuracion - Ajustes'))
 
            date_from = self.fecha.strftime('%Y-%m-%d') +' 15:00:00'
-           date_to = self.fecha.strftime('%Y-%m-%d') +' 15:00:00' + datetime.timedelta(minutes=self.tiempo)
-        
+#           date_to = self.fecha.strftime('%Y-%m-%d') +' 15:00:00' + timedelta(minutes=self.tiempo)
+
 #           timezone = self._context.get('tz')
 #           if not timezone:
 #               timezone = self.env.user.partner_id.tz or 'UTC'
@@ -68,9 +72,12 @@ class RetardoNomina(models.Model):
            registro_falta = self.env['hr.leave'].search([('name','=', nombre)], limit=1)
            if registro_falta:
               registro_falta.write({'date_from' : date_from,
-                      'date_to' : date_to,
-                      'employee_id' : self.employee_id.id,
                       'holiday_status_id' : leave_type and leave_type.id,
+                      'employee_id' : self.employee_id.id,
+                      'request_hour_from': '10',
+                      'request_hour_to': self.tiempo_retardo,
+                      'request_unit_hours' : True,
+                    #  'date_to' : date_from,
                       'state': 'validate',
                       })
            else:
@@ -78,10 +85,12 @@ class RetardoNomina(models.Model):
               vals = {'date_from' : date_from,
                   'holiday_status_id' : leave_type and leave_type.id,
                   'employee_id' : self.employee_id.id,
-                  'name' : 'Retardo_'+self.name,
-                  'date_to' : date_to,
+                  'name' : 'Retardo_' + self.name,
+                  'request_unit_hours' : True,
                   'request_date_from' : date_from,
-                  'request_date_to' : date_to,
+             #     'request_date_to' : date_from,
+                  'request_hour_from': '10',
+                  'request_hour_to': self.tiempo_retardo,
                   'state': 'confirm',}
 
               holiday = holidays_obj.new(vals)

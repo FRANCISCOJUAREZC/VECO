@@ -4,7 +4,7 @@ import xlwt
 from xlwt import easyxf
 import io
 from docutils.nodes import line
-from odoo.exceptions import UserError, Warning
+from odoo.exceptions import UserError
 
 class Payslip(models.Model):
     _inherit = 'hr.payslip'
@@ -79,7 +79,7 @@ class PayslipBatches(models.Model):
                    else:
                        result[line.code] = round(line.total, 2)
         return result
-    
+
     def get_payslip_group_by_department(self):
         result = {}
         start_range = self._context.get('start_range')
@@ -96,7 +96,6 @@ class PayslipBatches(models.Model):
                     continue
                 if emp_no >= start_range and emp_no <= end_range:
                     slips += slip
-            
         else:
             slips = self.slip_ids
         for line in slips:
@@ -106,7 +105,6 @@ class PayslipBatches(models.Model):
                 result[line.employee_id.department_id.id] = [line]
         return result
 
-   
     def get_all_columns(self):
         result = {}
         all_col_list_seq = []

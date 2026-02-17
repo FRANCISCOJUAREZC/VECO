@@ -14,3 +14,5 @@ from . import wizard_caja_ahorro
 from . import reporte_nominas
 from . import reporte_imss
 from . import wizard_isn
+from . import nomina_liquidaciones
+from . import year_repato_utilides
