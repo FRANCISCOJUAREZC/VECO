@@ -63,17 +63,17 @@ class IncapacidadesNomina(models.Model):
             if self.company_id.leave_type_rie_id: 
                leave_type = self.company_id.leave_type_rie_id
             else:
-               raise UserError(_('Falta configurar el tipo de falta'))
+               raise UserError(_('Falta configurar el tipo de falta en Configuracion - Ajustes'))
         elif self.ramo_de_seguro=='Enfermedad general':
             if self.company_id.leave_type_enf_id: 
                leave_type = self.company_id.leave_type_enf_id
             else:
-               raise UserError(_('Falta configurar el tipo de falta'))
+               raise UserError(_('Falta configurar el tipo de falta en Configuracion - Ajustes'))
         elif self.ramo_de_seguro=='Maternidad':
             if self.company_id.leave_type_mat_id: 
                leave_type = self.company_id.leave_type_mat_id
             else:
-               raise UserError(_('Falta configurar el tipo de falta'))
+               raise UserError(_('Falta configurar el tipo de falta en Configuracion - Ajustes'))
 
         if self.fecha:
             date_from = self.fecha

@@ -73,7 +73,7 @@ class WizardReporteNominas(models.TransientModel):
             worksheet.write(row, 4, payslip.employee_id.rfc)
             worksheet.write(row, 5, payslip.employee_id.name)
             worksheet.write(row, 6, payslip.estado_factura)
-            worksheet.write(row, 7, payslip.total_nomina)
+            worksheet.write(row, 7, payslip.total_nom)
             worksheet.write(row, 8, payslip.folio_fiscal)
             worksheet.write(row, 9, payslip.fecha_factura)
             worksheet.write(row, 10, payslip.fecha_certificacion)

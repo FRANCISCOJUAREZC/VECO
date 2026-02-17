@@ -28,3 +28,5 @@ access_enviar_nomina,access_enviar_nomina,model_enviar_nomina,,1,1,1,1
 access_import_payslip_from_xml,access_import_payslip_from_xml,model_import_payslip_from_xml,,1,1,1,1
 access_reason_cancelation_wizard,reason_cancelation_wizard,nomina_cfdi_ee.model_reason_cancelation,hr_payroll.group_hr_payroll_user,1,1,1,1
 access_nomina_message_wizard,nomina_message_wizard,nomina_cfdi_ee.model_nomina_message_wizard,base.group_user,1,1,1,1
+access_dar_baja,access_dar_baja,nomina_cfdi_ee.model_wizard_dar_baja,hr_payroll.group_hr_payroll_user,1,1,1,1
+access_cesantia,tablas_cesantia,nomina_cfdi_ee.model_tablas_cesantia_line,hr_payroll.group_hr_payroll_user,1,1,1,1

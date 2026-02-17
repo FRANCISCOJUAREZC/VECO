@@ -54,15 +54,14 @@ class WizardCajaAhorro(models.TransientModel):
         worksheet.write(4, 2, 'Empleado', bold)
         worksheet.write(4, 3, 'Nomina', bold)
         worksheet.write(4, 4, 'Fecha', bold)
-        worksheet.write(4, 5, 'Monto', bold)
+        worksheet.write(4, 5, 'Abono', bold)
         worksheet.write(4, 6, 'Retiro', bold)
-        worksheet.write(4, 7, 'Fecha', bold)
-        worksheet.write(4, 8, 'Monto', bold)
         col = 4
         row = 5
         for empleado in employee_ids:
              total = 0
              if empleado.contract_ids:
+                ############ Abono ###################
                 rule = self.env['hr.salary.rule'].search([('id', '=', empleado.contract_ids[0].tablas_cfdi_id.caja_ahorro_abono.id)])
                 payslips = self.env['hr.payslip'].search([('employee_id', '=', empleado.id), ('state','=', 'done'), ('date_from','>=',self.date_from), ('date_to','<=',self.date_to)])
                 payslip_lines = payslips.mapped('line_ids').filtered(lambda x: x.salary_rule_id.id == rule.id)
@@ -75,17 +74,16 @@ class WizardCajaAhorro(models.TransientModel):
                    worksheet.write(row, 5, line.total)
                    total += line.total
                    row +=1
-             domain_retiro=[('state','=', 'done'),('employee_id','=',empleado.id)]
-             if self.date_from:
-                 domain_retiro.append(('fecha_aplicacion','>=',self.date_from))
-             if self.date_to:
-                 domain_retiro.append(('fecha_aplicacion','<=',self.date_to))
-             retiros = self.env['caja.nomina'].search(domain_retiro) #falta fecha
-             for line in retiros:
-                   worksheet.write(row, 6, line.name)
-                   worksheet.write(row, 7, line.fecha_aplicacion)
-                   worksheet.write(row, 8, line.importe)
-                   total -= line.importe
+
+                ############ Retiro ###################
+                rule = self.env['hr.salary.rule'].search([('id', '=', empleado.contract_ids[0].tablas_cfdi_id.caja_ahorro_retiro.id)])
+                payslips = self.env['hr.payslip'].search([('employee_id', '=', empleado.id), ('state','=', 'done'), ('date_from','>=',self.date_from), ('date_to','<=',self.date_to)])
+                payslip_lines = payslips.mapped('line_ids').filtered(lambda x: x.salary_rule_id.id == rule.id)
+                for line in payslip_lines:
+                   worksheet.write(row, 3, line.slip_id.name)
+                   worksheet.write(row, 4, line.slip_id.date_from)
+                   worksheet.write(row, 6, line.total)
+                   total -= line.total
                    row +=1
              worksheet.write(row, 4, 'Total')
              worksheet.write(row, 5, total)

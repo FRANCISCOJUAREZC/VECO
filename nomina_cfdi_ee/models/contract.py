@@ -89,10 +89,10 @@ class Contract(models.Model):
 
     @api.onchange('wage')
     def _compute_sueldo(self):
-        if self.wage:
+        if self.wage and self.tablas_cfdi_id:
             values = {
-            'sueldo_diario': self.wage/30,
-            'sueldo_hora': self.wage/30/8,
+            'sueldo_diario': self.wage/self.tablas_cfdi_id.dias_mes,
+            'sueldo_hora': self.wage/self.tablas_cfdi_id.dias_mes/8,
             'sueldo_diario_integrado': self.calculate_sueldo_diario_integrado(),
             'sueldo_base_cotizacion': self.calculate_sueldo_base_cotizacion(),
             }
@@ -179,7 +179,7 @@ class Contract(models.Model):
                 return 
             tablas_cfdi_line = tablas_cfdi_lines[0]
             max_sdi = tablas_cfdi.uma * 25
-            sdi = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100.0) ) / 365.0 ) * self.wage/30.0
+            sdi = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100.0) ) / 365.0 ) * self.wage/self.tablas_cfdi_id.dias_mes
             sueldo_diario_integrado = sdi
         else: 
             sueldo_diario_integrado = 0

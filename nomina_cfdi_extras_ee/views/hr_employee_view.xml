@@ -15,7 +15,7 @@
          <field name="model">hr.employee</field>
          <field name="inherit_id" ref="hr.view_employee_form"/>
          <field name="arch" type="xml">
-         <xpath expr="//div[@class='oe_button_box']" position="inside">
+         <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
          	<!-- <button string="Chat" position="before"> -->
                     <button name="%(act_hr_employee_loan_list)d"
                         class="oe_stat_button"

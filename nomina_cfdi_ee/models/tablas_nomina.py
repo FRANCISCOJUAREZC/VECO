@@ -94,7 +94,7 @@ class TablasPeriodoMensuallLine(models.Model):
                    ('12', 'Diciembre / Periodo 12'),
                    ],
         string=_('Mes / Periodo'),)
-    no_dias = fields.Float('Número de dias', store=True) 
+    no_dias = fields.Float('Número de dias', store=True)
 
 class TablasPeriodoSemanalLine(models.Model):
     _name = 'tablas.periodo.semanal'

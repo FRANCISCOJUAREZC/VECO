@@ -12,11 +12,9 @@ class ResCompany(models.Model):
 
     curp = fields.Char(string=_('CURP'))
     proveedor_timbrado= fields.Selection(
-        selection=[('multifactura', _('Servidor 1')),
-                   ('gecoerp', _('Servidor 2')),
-                   ('multifactura2', _('Servidor 3')),
-                   ('multifactura3', _('Servidor 4')),],
-        string=_('Proveedor de timbrado'), 
+        selection=[('servidor', _('Principal')),
+                   ('servidor2', _('Respaldo')),],
+        string=_('Servidor de timbrado'), default='servidor'
     )
     api_key = fields.Char(string=_('API Key'))
     modo_prueba = fields.Boolean(string=_('Modo prueba'))
@@ -111,7 +109,14 @@ class ResCompany(models.Model):
             tablas_cfdi = self.env['tablas.cfdi'].search([],limit=1)
         if not tablas_cfdi:
             return
-        antiguedad_anos = contract.antiguedad_anos
+        if contract.date_start:
+            date_start = contract.date_start
+            today = datetime.today().date()
+            diff_date = today - date_start
+            years = diff_date.days /365.0
+            antiguedad_anos = round(years)
+        else:
+            antiguedad_anos = 0
         if antiguedad_anos < 1.0:
             tablas_cfdi_lines = tablas_cfdi.tabla_antiguedades.filtered(lambda x: x.antiguedad >= antiguedad_anos).sorted(key=lambda x:x.antiguedad)
         else:
@@ -142,7 +147,7 @@ class ResCompany(models.Model):
             if not tablas_cfdi_lines:
                 return
             tablas_cfdi_line = tablas_cfdi_lines[0]
-            sueldo_diario_integrado = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100) ) / 365) * contract.wage/30
+            sueldo_diario_integrado = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100) ) / 365) * contract.wage/tablas_cfdi.dias_mes
             if sueldo_diario_integrado > (tablas_cfdi.uma * 25):
                 sueldo_base_cotizacion = tablas_cfdi.uma * 25
             else:
@@ -159,138 +164,3 @@ class ResCompany(models.Model):
                                                                 })
         return
 
-    @api.model
-    def get_saldo_by_cron(self):
-        companies = self.search([('proveedor_timbrado','!=',False)])
-        for company in companies:
-            company.get_saldo()
-            if company.saldo_timbres < company.saldo_alarma and company.correo_alarma:
-                email_template = self.env.ref("nomina_cfdi_ee.email_template_alarma_de_saldo",False)
-                if not email_template:return
-                emails = company.correo_alarma.split(",")
-                for email in emails:
-                    email = email.strip()
-                    if email:
-                        email_template.send_mail(company.id, force_send=True,email_values={'email_to':email})
-            if company.aviso_csd and company.fecha_csd and company.correo_alarma: #valida vigencia de CSD
-                if datetime.today() + timedelta(days=int(company.aviso_csd)) > fields.Datetime.from_string(company.fecha_csd):
-                   email_template = self.env.ref("nomina_cfdi_ee.email_template_alarma_de_csd",False)
-                   if not email_template:return
-                   emails = company.correo_alarma.split(",")
-                   for email in emails:
-                       email = email.strip()
-                       if email:
-                          email_template.send_mail(company.id, force_send=True,email_values={'email_to':email})
-        return True
-
-    def get_saldo(self):
-        values = {
-                 'rfc': self.vat,
-                 'api_key': self.proveedor_timbrado,
-                 'modo_prueba': self.modo_prueba,
-                 }
-        url=''
-        if self.proveedor_timbrado == 'multifactura':
-            url = '%s' % ('http://facturacion.itadmin.com.mx/api/saldo')
-        elif self.proveedor_timbrado == 'gecoerp':
-            if self.modo_prueba:
-                #url = '%s' % ('https://ws.gecoerp.com/itadmin/pruebas/invoice/?handler=OdooHandler33')
-                url = '%s' % ('https://itadmin.gecoerp.com/invoice/?handler=OdooHandler33')
-            else:
-                url = '%s' % ('https://itadmin.gecoerp.com/invoice/?handler=OdooHandler33')
-        if not url:
-            return
-        try:
-            response = requests.post(url,auth=None,verify=False, data=json.dumps(values),headers={"Content-type": "application/json"})
-            json_response = response.json()
-        except Exception as e:
-            print(e)
-            json_response = {}
-    
-        if not json_response:
-            return
-        
-        estado_factura = json_response['estado_saldo']
-        if estado_factura == 'problemas_saldo':
-            raise UserError(_(json_response['problemas_message']))
-        if json_response.get('saldo'):
-            xml_saldo = base64.b64decode(json_response['saldo'])
-        values2 = {
-                    'saldo_timbres': xml_saldo
-                  }
-        self.update(values2)
-
-    def validar_csd(self):
-        values = {
-                 'rfc': self.vat,
-                 'archivo_cer': self.archivo_cer.decode("utf-8"),
-                 'archivo_key': self.archivo_key.decode("utf-8"),
-                 'contrasena': self.contrasena,
-                 }
-        url=''
-        if self.proveedor_timbrado == 'multifactura':
-            url = '%s' % ('http://facturacion.itadmin.com.mx/api/validarcsd')
-        elif self.proveedor_timbrado == 'multifactura2':
-            url = '%s' % ('http://facturacion2.itadmin.com.mx/api/validarcsd')
-        elif self.proveedor_timbrado == 'multifactura3':
-            url = '%s' % ('http://facturacion3.itadmin.com.mx/api/validarcsd')
-        if not url:
-            return
-        try:
-            response = requests.post(url,auth=None,verify=False, data=json.dumps(values),headers={"Content-type": "application/json"})
-            json_response = response.json()
-        except Exception as e:
-            print(e)
-            json_response = {}
-
-        if not json_response:
-            return
-        #_logger.info('something ... %s', response.text)
-
-        respuesta = json_response['respuesta']
-        if json_response['respuesta'] == 'Certificados CSD correctos':
-           self.fecha_csd = parser.parse(json_response['fecha'])
-           values2 = {
-               'fecha_csd': self.fecha_csd,
-               'estado_csd': json_response['respuesta'],
-               }
-           self.update(values2)
-        else:
-           raise UserError(respuesta)
-
-    def borrar_csd(self):
-        values = {
-                 'rfc': self.vat,
-                 }
-        url=''
-        if self.proveedor_timbrado == 'multifactura':
-            url = '%s' % ('http://facturacion.itadmin.com.mx/api/borrarcsd')
-        elif self.proveedor_timbrado == 'multifactura2':
-            url = '%s' % ('http://facturacion2.itadmin.com.mx/api/borrarcsd')
-        elif self.proveedor_timbrado == 'multifactura3':
-            url = '%s' % ('http://facturacion3.itadmin.com.mx/api/borrarcsd')
-        if not url:
-            return
-        try:
-            response = requests.post(url,auth=None,verify=False, data=json.dumps(values),headers={"Content-type": "application/json"})
-            json_response = response.json()
-        except Exception as e:
-            print(e)
-            json_response = {}
-
-        if not json_response:
-            return
-        #_logger.info('something ... %s', response.text)
-        respuesta = json_response['respuesta']
-        raise UserError(respuesta)
-
-    def borrar_estado(self):
-           values2 = {
-               'fecha_csd': '',
-               'estado_csd': '',
-               }
-           self.update(values2)
-
-    def button_dummy(self):
-        self.get_saldo()
-        return True

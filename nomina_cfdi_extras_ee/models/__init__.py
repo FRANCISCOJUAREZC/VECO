@@ -22,3 +22,4 @@ from . import hr_contract
 from . import dias_feriados
 from . import credito_infonavit
 from . import prima_dominical
+from . import hr_leave_type

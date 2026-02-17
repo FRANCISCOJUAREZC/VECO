@@ -33,9 +33,9 @@
                      <group>
                          <field name="fecha" attrs="{'readonly' : [('state', '!=','draft')], 'required': [('state', '=','draft')]}"/>
                          <field name="employee_id" attrs="{'readonly' : [('state', '!=','draft')], 'required': [('state', '=','draft')]}"/>
-                         <field name="tiempo" attrs="{'readonly' : [('state', '!=','draft')]}" />
-                        <!-- <field name="crear_ausencia" attrs="{'readonly' : [('state', '!=','draft')]}"/>-->
-                     	<field name="company_id" groups="base.group_multi_company"/>
+                         <field name="tiempo_retardo" attrs="{'readonly' : [('state', '!=','draft')]}"/>
+                         <field name="crear_ausencia" attrs="{'readonly' : [('state', '!=','draft')]}"/>
+                         <field name="company_id" groups="base.group_multi_company"/>
                      </group>
                  </group>
              </sheet>

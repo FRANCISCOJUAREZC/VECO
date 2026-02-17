@@ -49,6 +49,12 @@
                                                    'required': [('tipo_de_incidencia', 'in',('Cambio salario','Reingreso', 'Baja'))]}" domain="[('employee_id','=',employee_id)]"/>
                      	<field name="company_id" groups="base.group_multi_company"/>
                      </group>
+                     <group string='Datos INFONAVIT' attrs="{'invisible': [('tipo_de_incidencia','not in',('Alta'))]}">
+                         <field name="no_credito" attrs="{'readonly' : [('state', '!=','draft')]}"/>
+                         <field name="fecha_infonavit" attrs="{'readonly' : [('state', '!=','draft')]}"/>
+                         <field name="tipo_de_descuento" attrs="{'readonly' : [('state', '!=','draft')]}"/>
+                         <field name="valor_descuento" attrs="{'readonly' : [('state', '!=','draft')]}"/>
+                     </group>
                  </group>
              </sheet>
          </form> 
