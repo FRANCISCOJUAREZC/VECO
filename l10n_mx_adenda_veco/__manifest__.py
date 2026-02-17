@@ -21,4 +21,5 @@
 	],
     'application': False,
     'installable': True,
+    'license': 'AGPL-3',
 }
