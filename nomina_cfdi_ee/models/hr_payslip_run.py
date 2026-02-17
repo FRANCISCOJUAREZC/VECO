@@ -239,6 +239,9 @@ class HrPayslipRun(models.Model):
             'context': ctx,
         }
 
+    def timbrar_nomina(self):
+        return
+
     def download_zip(self):
         return {
             'type': 'ir.actions.act_url',
