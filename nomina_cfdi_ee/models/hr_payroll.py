@@ -889,6 +889,9 @@ class HrPayslip(models.Model):
             rec._get_fondo_ahorro()
         return res
 
+    def action_cfdi_nomina_generate(self):
+        return
+
     def compute_sheet(self):
         for invoice in self:
             invoice._validate_slip_fields()
