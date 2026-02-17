@@ -12,6 +12,7 @@
                     <field name="ultima_nomina"/>
                     <field name="periodicidad_pago" invisible="1"/>
                     <field name="nomina_cfdi" invisible="1"/>
+                    <field name="estado_factura" invisible="1"/>
               </field>
 
               <xpath expr="//notebook" position="inside">
