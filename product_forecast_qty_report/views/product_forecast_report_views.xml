@@ -4,7 +4,7 @@
         <field name='name'>view.product.forecast.report.tree</field>
         <field name='model'>product.forecast.report</field>
         <field name='arch' type='xml'>
-            <tree decoration-info="line_type == 'on_hand'" decoration-danger="line_type == 'outgoing'" decoration-success="line_type == 'incoming'">
+            <list decoration-info="line_type == 'on_hand'" decoration-danger="line_type == 'outgoing'" decoration-success="line_type == 'incoming'">
                 <field name='line_type' invisible="1"/>
                 <field name='product_id'/>
                 <field name="product_qty" sum="Product Qty"/>
@@ -15,7 +15,7 @@
                 <field name="location_id"/>
                 <field name="location_dest_id"/>
                 <field name="state"/>
-            </tree>
+            </list>
         </field>
     </record>
     <record model="ir.ui.view" id="view_product_forecast_report_form">
@@ -24,7 +24,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" nolabel="1" attrs="{'invisible': [('line_type', '=', 'on_hand')]}"/>
+                    <field name="state" widget="statusbar" nolabel="1" invisible="line_type == 'on_hand'"/>
                 </header>
                 <sheet>
                     <h1>
@@ -34,10 +34,10 @@
                     <group>
                         <group>
                             <field name="line_type" invisible="1"/>
-                            <field name="picking_id" attrs="{'invisible': [('line_type', '=', 'on_hand')]}"/>
-                            <field name="stock_move_id" attrs="{'invisible': [('line_type', '=', 'on_hand')]}"/>
+                            <field name="picking_id" invisible="line_type == 'on_hand'"/>
+                            <field name="stock_move_id" invisible="line_type == 'on_hand'"/>
                             <field name="location_id" groups="stock.group_stock_multi_locations"/>
-                            <field name="location_dest_id" groups="stock.group_stock_multi_locations" attrs="{'invisible': [('line_type', '=', 'on_hand')]}"/>
+                            <field name="location_dest_id" groups="stock.group_stock_multi_locations" invisible="line_type == 'on_hand'"/>
                             <field name="lot_id" groups="stock.group_production_lot"/>
                             <label for="product_qty"/>
                             <div>

@@ -5,7 +5,7 @@
         <field name='name'>view.manufacture.cost.report.tree</field>
         <field name='model'>manufacture.cost.report</field>
         <field name='arch' type='xml'>
-            <tree>
+            <list>
                 <field name='date'/>
                 <field name="product_id"/>
                 <field name="description"/>
@@ -26,7 +26,7 @@
                 <field name="sale_amount"/>
                 <field name="price_unit"/>
                 <field name="factor"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -59,7 +59,10 @@
         <field name="arch" type="xml">
             <search string="Manufacture Cost">
                 <field name="date"/>
-                <filter string="Date" name="month" invisible="1" date="date" default_period="this_month"/>
+                <filter string="Date" name="month" date="date" domain="[
+            ('date', '&gt;=', (context_today()).strftime('%Y-%m-01')), 
+            ('date', '&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))
+        ]"/>
                 <separator/>
                 <field name="product_id"/>
                 <field name="customer"/>

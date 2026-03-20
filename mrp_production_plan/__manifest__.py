@@ -12,7 +12,7 @@
     'author': "Morwi Econders",
     'website': "http://www.morwi.mx",
     'category': 'MRP',
-    'version': '15.0.1.0.0',
+    'version': '1.0.0',
     'depends': [
         'mrp',
         'sale_stock',

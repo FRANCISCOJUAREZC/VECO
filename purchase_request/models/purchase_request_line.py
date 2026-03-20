@@ -1,23 +1,23 @@
 # Copyright 2018-2019 ForgeFlow, S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 _STATES = [
     ("draft", "Draft"),
     ("to_approve", "To be approved"),
     ("approved", "Approved"),
-    ("rejected", "Rejected"),
+    ("in_progress", "In progress"),
     ("done", "Done"),
+    ("rejected", "Rejected"),
 ]
 
 
 class PurchaseRequestLine(models.Model):
-
     _name = "purchase.request.line"
     _description = "Purchase Request Line"
-    _inherit = ["mail.thread", "mail.activity.mixin"]
+    _inherit = ["mail.thread", "mail.activity.mixin", "analytic.mixin"]
     _order = "id desc"
 
     name = fields.Char(string="Description", tracking=True)
@@ -25,9 +25,7 @@ class PurchaseRequestLine(models.Model):
         comodel_name="uom.uom",
         string="UoM",
         tracking=True,
-        domain="[('category_id', '=', product_uom_category_id)]",
     )
-    product_uom_category_id = fields.Many2one(related="product_id.uom_id.category_id")
     product_qty = fields.Float(
         string="Quantity", tracking=True, digits="Product Unit of Measure"
     )
@@ -37,21 +35,13 @@ class PurchaseRequestLine(models.Model):
         ondelete="cascade",
         readonly=True,
         index=True,
-        auto_join=True,
     )
     company_id = fields.Many2one(
         comodel_name="res.company",
         related="request_id.company_id",
         string="Company",
         store=True,
-    )
-    analytic_account_id = fields.Many2one(
-        comodel_name="account.analytic.account",
-        string="Analytic Account",
-        tracking=True,
-    )
-    analytic_tag_ids = fields.Many2many(
-        "account.analytic.tag", string="Analytic Tags", tracking=True
+        index=True,
     )
     requested_by = fields.Many2one(
         comodel_name="res.users",
@@ -114,7 +104,9 @@ class PurchaseRequestLine(models.Model):
     purchase_state = fields.Selection(
         compute="_compute_purchase_state",
         string="Purchase Status",
-        selection=lambda self: self.env["purchase.order"]._fields["state"].selection,
+        selection=lambda self: self.env["purchase.order"]
+        ._fields["state"]
+        ._description_selection(self.env),
         store=True,
     )
     move_dest_ids = fields.One2many(
@@ -170,7 +162,7 @@ class PurchaseRequestLine(models.Model):
         default=0.0,
         help="Estimated cost of Purchase Request Line, not propagated to PO.",
     )
-    currency_id = fields.Many2one(related="request_id.currency_id")
+    currency_id = fields.Many2one(related="company_id.currency_id", readonly=True)
     product_id = fields.Many2one(
         comodel_name="product.product",
         string="Product",
@@ -250,18 +242,18 @@ class PurchaseRequestLine(models.Model):
                 request.qty_cancelled = qty_cancelled
 
     @api.depends(
-        "product_id",
-        "name",
-        "product_uom_id",
-        "product_qty",
-        "analytic_account_id",
-        "date_required",
-        "specifications",
         "purchase_lines",
+        "request_id.state",
     )
     def _compute_is_editable(self):
         for rec in self:
-            if rec.request_id.state in ("to_approve", "approved", "rejected", "done"):
+            if rec.request_id.state in (
+                "to_approve",
+                "approved",
+                "rejected",
+                "in_progress",
+                "done",
+            ):
                 rec.is_editable = False
             else:
                 rec.is_editable = True
@@ -272,16 +264,16 @@ class PurchaseRequestLine(models.Model):
     def _compute_supplier_id(self):
         for rec in self:
             sellers = rec.product_id.seller_ids.filtered(
-                lambda si: not si.company_id or si.company_id == rec.company_id
+                lambda si, rec=rec: not si.company_id or si.company_id == rec.company_id
             )
-            rec.supplier_id = sellers[0].name if sellers else False
+            rec.supplier_id = sellers[0].partner_id if sellers else False
 
     @api.onchange("product_id")
     def onchange_product_id(self):
         if self.product_id:
             name = self.product_id.name
             if self.product_id.code:
-                name = "[{}] {}".format(self.product_id.code, name)
+                name = f"[{self.product_id.code}] {name}"
             if self.product_id.description_purchase:
                 name += "\n" + self.product_id.description_purchase
             self.product_uom_id = self.product_id.uom_id.id
@@ -297,7 +289,7 @@ class PurchaseRequestLine(models.Model):
         self.write({"cancelled": False})
 
     def write(self, vals):
-        res = super(PurchaseRequestLine, self).write(vals)
+        res = super().write(vals)
         if vals.get("cancelled"):
             requests = self.mapped("request_id")
             requests.check_auto_reject()
@@ -307,8 +299,8 @@ class PurchaseRequestLine(models.Model):
         for rec in self:
             rec.purchased_qty = 0.0
             for line in rec.purchase_lines.filtered(lambda x: x.state != "cancel"):
-                if rec.product_uom_id and line.product_uom != rec.product_uom_id:
-                    rec.purchased_qty += line.product_uom._compute_quantity(
+                if rec.product_uom_id and line.product_uom_id != rec.product_uom_id:
+                    rec.purchased_qty += line.product_uom_id._compute_quantity(
                         line.product_qty, rec.product_uom_id
                     )
                 else:
@@ -319,7 +311,11 @@ class PurchaseRequestLine(models.Model):
         for rec in self:
             temp_purchase_state = False
             if rec.purchase_lines:
-                if any(po_line.state == "done" for po_line in rec.purchase_lines):
+                if any(
+                    po_line.qty_received >= po_line.product_qty
+                    and po_line.state == "purchase"
+                    for po_line in rec.purchase_lines
+                ):
                     temp_purchase_state = "done"
                 elif all(po_line.state == "cancel" for po_line in rec.purchase_lines):
                     temp_purchase_state = "cancel"
@@ -342,9 +338,9 @@ class PurchaseRequestLine(models.Model):
     def _get_supplier_min_qty(self, product, partner_id=False):
         seller_min_qty = 0.0
         if partner_id:
-            seller = product.seller_ids.filtered(lambda r: r.name == partner_id).sorted(
-                key=lambda r: r.min_qty
-            )
+            seller = product.seller_ids.filtered(
+                lambda r: r.partner_id == partner_id
+            ).sorted(key=lambda r: r.min_qty)
         else:
             seller = product.seller_ids.sorted(key=lambda r: r.min_qty)
         if seller:
@@ -353,7 +349,8 @@ class PurchaseRequestLine(models.Model):
 
     @api.model
     def _calc_new_qty(self, request_line, po_line=None, new_pr_line=False):
-        purchase_uom = po_line.product_uom or request_line.product_id.uom_po_id
+        # In Odoo 19, uom_po_id doesn't exist, use product.uom_id
+        purchase_uom = po_line.product_uom_id or request_line.product_id.uom_id
         # TODO: Not implemented yet.
         #  Make sure we use the minimum quantity of the partner corresponding
         #  to the PO. This does not apply in case of dropshipping
@@ -365,14 +362,8 @@ class PurchaseRequestLine(models.Model):
 
         rl_qty = 0.0
         # Recompute quantity by adding existing running procurements.
-        if new_pr_line:
-            rl_qty = po_line.product_uom_qty
-        else:
-            for prl in po_line.purchase_request_lines:
-                for alloc in prl.purchase_request_allocation_ids:
-                    rl_qty += alloc.product_uom_id._compute_quantity(
-                        alloc.requested_product_uom_qty, purchase_uom
-                    )
+        for rl in po_line.purchase_request_lines:
+            rl_qty += rl.product_uom_id._compute_quantity(rl.product_qty, purchase_uom)
         qty = max(rl_qty, supplierinfo_min_qty)
         return qty
 
@@ -380,26 +371,26 @@ class PurchaseRequestLine(models.Model):
         self.ensure_one()
         return self.request_state == "draft"
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_draft(self):
         if self.mapped("purchase_lines"):
             raise UserError(
-                _("You cannot delete a record that refers to purchase lines!")
+                self.env._("You cannot delete a record that refers to purchase lines!")
             )
         for line in self:
             if not line._can_be_deleted():
                 raise UserError(
-                    _(
+                    self.env._(
                         "You can only delete a purchase request line "
                         "if the purchase request is in draft state."
                     )
                 )
-        return super(PurchaseRequestLine, self).unlink()
 
     def action_show_details(self):
         self.ensure_one()
         view = self.env.ref("purchase_request.view_purchase_request_line_details")
         return {
-            "name": _("Detailed Line"),
+            "name": self.env._("Detailed Line"),
             "type": "ir.actions.act_window",
             "view_mode": "form",
             "res_model": "purchase.request.line",

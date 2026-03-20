@@ -1,22 +1,23 @@
 # Copyright 2018-2019 ForgeFlow, S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 _STATES = [
     ("draft", "Draft"),
     ("to_approve", "To be approved"),
     ("approved", "Approved"),
-    ("rejected", "Rejected"),
+    ("in_progress", "In progress"),
     ("done", "Done"),
+    ("rejected", "Rejected"),
 ]
 
 
 class PurchaseRequest(models.Model):
-
     _name = "purchase.request"
     _description = "Purchase Request"
+    _mail_post_access = "read"
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "id desc"
 
@@ -48,7 +49,13 @@ class PurchaseRequest(models.Model):
     @api.depends("state")
     def _compute_is_editable(self):
         for rec in self:
-            if rec.state in ("to_approve", "approved", "rejected", "done"):
+            if rec.state in (
+                "to_approve",
+                "approved",
+                "rejected",
+                "in_progress",
+                "done",
+            ):
                 rec.is_editable = False
             else:
                 rec.is_editable = True
@@ -56,7 +63,7 @@ class PurchaseRequest(models.Model):
     name = fields.Char(
         string="Request Reference",
         required=True,
-        default=lambda self: _("New"),
+        default=lambda self: self.env._("New"),
         tracking=True,
     )
     is_name_editable = fields.Boolean(
@@ -74,7 +81,7 @@ class PurchaseRequest(models.Model):
         required=True,
         copy=False,
         tracking=True,
-        default=_get_default_requested_by,
+        default=lambda self: self._get_default_requested_by(),
         index=True,
     )
     assigned_to = fields.Many2one(
@@ -83,7 +90,7 @@ class PurchaseRequest(models.Model):
         tracking=True,
         domain=lambda self: [
             (
-                "groups_id",
+                "group_ids",
                 "in",
                 self.env.ref("purchase_request.group_purchase_request_manager").id,
             )
@@ -94,7 +101,7 @@ class PurchaseRequest(models.Model):
     company_id = fields.Many2one(
         comodel_name="res.company",
         required=False,
-        default=_company_get,
+        default=lambda self: self._company_get(),
         tracking=True,
     )
     line_ids = fields.One2many(
@@ -126,13 +133,7 @@ class PurchaseRequest(models.Model):
         comodel_name="stock.picking.type",
         string="Picking Type",
         required=True,
-        default=_default_picking_type,
-    )
-    group_id = fields.Many2one(
-        comodel_name="procurement.group",
-        string="Procurement Group",
-        copy=False,
-        index=True,
+        default=lambda self: self._default_picking_type(),
     )
     line_count = fields.Integer(
         string="Purchase Request Line count",
@@ -145,11 +146,7 @@ class PurchaseRequest(models.Model):
     purchase_count = fields.Integer(
         string="Purchases count", compute="_compute_purchase_count", readonly=True
     )
-    currency_id = fields.Many2one(
-        comodel_name="res.currency",
-        default=lambda self: self.env.user.company_id.currency_id,
-        required=True,
-    )
+    currency_id = fields.Many2one(related="company_id.currency_id", readonly=True)
     estimated_cost = fields.Monetary(
         compute="_compute_estimated_cost",
         string="Total Estimated Cost",
@@ -233,25 +230,27 @@ class PurchaseRequest(models.Model):
         default = dict(default or {})
         self.ensure_one()
         default.update({"state": "draft", "name": self._get_default_name()})
-        return super(PurchaseRequest, self).copy(default)
+        return super().copy(default)
 
     @api.model
     def _get_partner_id(self, request):
         user_id = request.assigned_to or self.env.user
         return user_id.partner_id.id
 
-    @api.model
-    def create(self, vals):
-        if vals.get("name", _("New")) == _("New"):
-            vals["name"] = self._get_default_name()
-        request = super(PurchaseRequest, self).create(vals)
-        if vals.get("assigned_to"):
-            partner_id = self._get_partner_id(request)
-            request.message_subscribe(partner_ids=[partner_id])
-        return request
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get("name", self.env._("New")) == self.env._("New"):
+                vals["name"] = self._get_default_name()
+        requests = super().create(vals_list)
+        for vals, request in zip(vals_list, requests, strict=True):
+            if vals.get("assigned_to"):
+                partner_id = self._get_partner_id(request)
+                request.message_subscribe(partner_ids=[partner_id])
+        return requests
 
     def write(self, vals):
-        res = super(PurchaseRequest, self).write(vals)
+        res = super().write(vals)
         for request in self:
             if vals.get("assigned_to"):
                 partner_id = self._get_partner_id(request)
@@ -262,13 +261,15 @@ class PurchaseRequest(models.Model):
         self.ensure_one()
         return self.state == "draft"
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_draft(self):
         for request in self:
             if not request._can_be_deleted():
                 raise UserError(
-                    _("You cannot delete a purchase request which is not draft.")
+                    self.env._(
+                        "You cannot delete a purchase request which is not draft."
+                    )
                 )
-        return super(PurchaseRequest, self).unlink()
 
     def button_draft(self):
         self.mapped("line_ids").do_uncancel()
@@ -285,6 +286,9 @@ class PurchaseRequest(models.Model):
         self.mapped("line_ids").do_cancel()
         return self.write({"state": "rejected"})
 
+    def button_in_progress(self):
+        return self.write({"state": "in_progress"})
+
     def button_done(self):
         return self.write({"state": "done"})
 
@@ -292,16 +296,16 @@ class PurchaseRequest(models.Model):
         """When all lines are cancelled the purchase request should be
         auto-rejected."""
         for pr in self:
-            if not pr.line_ids.filtered(lambda l: l.cancelled is False):
+            if not pr.line_ids.filtered(lambda line: line.cancelled is False):
                 pr.write({"state": "rejected"})
 
     def to_approve_allowed_check(self):
         for rec in self:
             if not rec.to_approve_allowed:
                 raise UserError(
-                    _(
+                    self.env._(
                         "You can't request an approval for a purchase request "
-                        "which is empty. (%s)"
+                        "which is empty. (%(name)s)",
+                        name=rec.name,
                     )
-                    % rec.name
                 )

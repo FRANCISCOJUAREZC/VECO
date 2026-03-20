@@ -13,7 +13,7 @@
                 />
                 <field
                     name="include_child_locations"
-                    attrs="{'invisible': [('location_id', '=', False)]}"
+                    invisible="not location_id"
                 />
             </field>
         </field>

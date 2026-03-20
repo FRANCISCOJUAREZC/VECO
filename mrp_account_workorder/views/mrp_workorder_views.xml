@@ -5,9 +5,9 @@
         <field name="model">mrp.workorder</field>
         <field name="inherit_id" ref="mrp.mrp_production_workorder_form_view_inherit"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='time_ids']/tree/field[last()]" position="after">
+            <xpath expr="//field[@name='time_ids']/list/field[last()]" position="after">
                 <field name="workforce_entry_id" invisible="1"/>
-            	<button name="get_account_move" class="oe_highlight" type="object" string="View Journal Entry" attrs="{'invisible': [('workforce_entry_id', '=', False)]}"/>
+            	<button name="get_account_move" class="oe_highlight" type="object" string="View Journal Entry" invisible="not workforce_entry_id"/>
             </xpath>
         </field>
     </record>

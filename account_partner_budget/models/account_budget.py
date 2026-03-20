@@ -5,8 +5,8 @@
 from odoo import api, fields, models
 
 
-class CrossoveredBudgetLines(models.Model):
-    _inherit = "crossovered.budget.lines"
+class BudgetLine(models.Model):
+    _inherit = "budget.line"
 
     partner_id = fields.Many2one(
         comodel_name='res.partner',
@@ -14,60 +14,37 @@ class CrossoveredBudgetLines(models.Model):
          the partner on the analytic lines to achievement computation.''',
     )
 
-    def _compute_practical_amount(self):
-        """Method overriden in order to compute the practical amount
-        filtered by the base filter adding the partner field"""
-        for line in self:
-            acc_ids = line.general_budget_id.account_ids.ids
-            partner_id = line.partner_id.id
-            date_to = line.date_to
-            date_from = line.date_from
-            if line.analytic_account_id.id:
-                analytic_line_obj = self.env['account.analytic.line']
-                domain = [('account_id', '=', line.analytic_account_id.id),
-                          ('date', '>=', date_from),
-                          ('date', '<=', date_to),
-                          ]
-                if acc_ids:
-                    domain += [('general_account_id', 'in', acc_ids)]
-                if partner_id:
-                    domain += [('partner_id', '=', line.partner_id.id)]
-
-                where_query = analytic_line_obj._where_calc(domain)
-                analytic_line_obj._apply_ir_rules(where_query, 'read')
-                from_clause, where_clause, where_clause_params = (
-                    where_query.get_sql())
-                select = (
-                    "SELECT SUM(amount) FROM " + from_clause + " WHERE " +
-                    where_clause
+    def _compute_all(self):
+        if self.partner_id:
+            grouped = {
+                line: (committed, achieved)
+                for line, committed, achieved in self.env['budget.report']._read_group(
+                    domain=[('budget_line_id', 'in', self.ids), ('budget_line_id.partner_id', '=', self.partner_id.id)],
+                    groupby=['budget_line_id'],
+                    aggregates=['committed:sum', 'achieved:sum'],
                 )
-
-            else:
-                aml_obj = self.env['account.move.line']
-                domain = [('account_id', 'in',
-                           line.general_budget_id.account_ids.ids),
-                          ('date', '>=', date_from),
-                          ('date', '<=', date_to),
-                          ('move_id.state', '=', 'posted'),
-                          ]
-                if partner_id:
-                    domain += [('partner_id', '=', line.partner_id.id)]
-                where_query = aml_obj._where_calc(domain)
-                aml_obj._apply_ir_rules(where_query, 'read')
-                from_clause, where_clause, where_clause_params = (
-                    where_query.get_sql())
-                select = (
-                    "SELECT sum(credit)-sum(debit) FROM " +
-                    from_clause + " WHERE " + where_clause)
-
-            self.env.cr.execute(select, where_clause_params)
-            line.practical_amount = self.env.cr.fetchone()[0] or 0.0
+            }
+        else:
+            grouped = {
+                line: (committed, achieved)
+                for line, committed, achieved in self.env['budget.report']._read_group(
+                    domain=[('budget_line_id', 'in', self.ids)],
+                    groupby=['budget_line_id'],
+                    aggregates=['committed:sum', 'achieved:sum'],
+                )
+            }
+        for line in self:
+            committed, achieved = grouped.get(line, (0, 0))
+            line.committed_amount = committed
+            line.achieved_amount = achieved
+            line.committed_percentage = line.budget_amount and (line.committed_amount / line.budget_amount)
+            line.achieved_percentage = line.budget_amount and (line.achieved_amount / line.budget_amount)
 
     def action_open_budget_entries(self):
         """Super method overriden in order to
         add the partner to the action domain"""
         action = super(
-            CrossoveredBudgetLines, self).action_open_budget_entries()
+            BudgetLine, self).action_open_budget_entries()
         self.ensure_one()
         if self.partner_id:
             action['domain'].append(('partner_id', '=', self.partner_id.id))

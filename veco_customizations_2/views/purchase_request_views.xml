@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record model="ir.ui.view" id="view_purchase_request_veco_customizations_2_form">
+        <field name="name">view.purchase.request.veco.customizations.2.form</field>
+        <field name="model">purchase.request</field>
+        <field name="inherit_id" ref="purchase_request.view_purchase_request_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="before">
+                <!-- v17+: attrs reemplazado por invisible directo -->
+                <field name="approval_date" invisible="not approval_date"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -9,7 +9,7 @@ class StockKardexReportWiz(models.TransientModel):
     _description = 'Generación de kárdex'
 
     def _get_category_domain(self):
-        products = self.env["product.product"].search([("detailed_type", "=", "product")])
+        products = self.env["product.product"].search([("is_storable", "=", True)])
         categ_ids = products.mapped('categ_id')
         return [('id', 'in', categ_ids.ids)]
 

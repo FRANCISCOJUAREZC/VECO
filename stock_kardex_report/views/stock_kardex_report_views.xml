@@ -4,7 +4,7 @@
         <field name="name">stock.kardex.report.tree</field>
         <field name="model">stock.kardex.report</field>
         <field name="arch" type="xml">
-            <tree string="Kardex de inventario" edit="false" create="false" delete="false">
+            <list string="Kardex de inventario" edit="false" create="false" delete="false">
                 <field name="date" string="Fecha"/>
                 <field name="origin" string="Origen"/>
                 <field name="product_id" string="Producto"/>
@@ -21,7 +21,7 @@
                 <field name="total_cost"/>
                 <field name="group_name" invisible="1"/>
                 <field name="company_id" invisible="1"/>
-            </tree>
+            </list>
         </field>
     </record>
 

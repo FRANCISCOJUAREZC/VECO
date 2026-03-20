@@ -58,7 +58,6 @@ class MrpWorkcenterProductivity(models.Model):
         string='Workforce Journal Entry',
     )
 
-    @api.multi
     def get_account_move(self):
         self.ensure_one()
         action = self.env.ref('account.action_move_journal_line').read()[0]
@@ -158,7 +157,6 @@ class MrpWorkcenterProductivity(models.Model):
             res.create_workforce_entry()
         return res
 
-    @api.multi
     def write(self, vals):
         res = super(MrpWorkcenterProductivity, self).write(vals)
         if vals.get('workforce_entry_id'):
