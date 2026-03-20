@@ -2,14 +2,14 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 import time
 
-from odoo.tests.common import TransactionCase
+from .common import AuditLogRuleCommon
 
 
-class TestAuditlogAutovacuum(TransactionCase):
+class TestAuditlogAutovacuum(AuditLogRuleCommon):
     def setUp(self):
-        super(TestAuditlogAutovacuum, self).setUp()
+        super().setUp()
         self.groups_model_id = self.env.ref("base.model_res_groups").id
-        self.groups_rule = self.env["auditlog.rule"].create(
+        self.groups_rule = self.create_rule(
             {
                 "name": "testrule for groups",
                 "model_id": self.groups_model_id,
@@ -17,14 +17,14 @@ class TestAuditlogAutovacuum(TransactionCase):
                 "log_create": True,
                 "log_write": True,
                 "log_unlink": True,
-                "state": "subscribed",
+                "state": "confirmed",
                 "log_type": "full",
             }
         )
 
     def tearDown(self):
         self.groups_rule.unlink()
-        super(TestAuditlogAutovacuum, self).tearDown()
+        super().tearDown()
 
     def test_autovacuum(self):
         log_model = self.env["auditlog.log"]

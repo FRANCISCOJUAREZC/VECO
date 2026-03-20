@@ -12,12 +12,12 @@
                         <field name="workforce_account_id" options="{'no_create': 1, 'no_create_edit': 1, 'no_open': 1}"/>
                     </group>
                     <group string="Counterpart Distribution">
-                        <field name="workforce_account_ids" nolabel="1" context="{'default_warehouse_id': active_id}">
-                            <tree editable="top">
+                        <field name="workforce_account_ids" nolabel="1" context="{'default_warehouse_id': id}">
+                            <list editable="top">
                                 <field name="warehouse_id" invisible="1"/>
                                 <field name="account_id" options="{'no_create': 1, 'no_create_edit': 1, 'no_open': 1}" required="1"/>
                                 <field name="percentage" required="1"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </page>

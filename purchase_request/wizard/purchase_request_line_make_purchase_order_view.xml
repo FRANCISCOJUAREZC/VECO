@@ -26,19 +26,24 @@
                 <newline />
                 <group>
                     <field name="item_ids" nolabel="1" colspan="2">
-                        <tree name="Details" create="false" editable="bottom">
+                        <list name="Details" create="false" editable="bottom">
                             <field
                                 name="line_id"
                                 options="{'no_open': true}"
-                                invisible="1"
+                                column_invisible="1"
                             />
-                            <field name="request_id" attrs="{'readonly': True}" />
+                            <field name="request_id" readonly="1" />
                             <field name="product_id" />
                             <field name="name" />
                             <field name="product_qty" />
+                            <field
+                                name="product_uom_id"
+                                column_invisible="1"
+                                groups="!uom.group_uom"
+                            />
                             <field name="product_uom_id" groups="uom.group_uom" />
-                            <field name="keep_description" widget="boolean_toggle" />
-                        </tree>
+                            <field name="keep_description" />
+                        </list>
                     </field>
                 </group>
                 <newline />

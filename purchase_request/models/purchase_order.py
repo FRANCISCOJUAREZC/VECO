@@ -1,7 +1,10 @@
 # Copyright 2018-2019 ForgeFlow, S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0)
 
-from odoo import _, api, exceptions, fields, models
+from markupsafe import Markup
+
+from odoo import api, exceptions, fields, models
+from odoo.tools import html_escape
 
 
 class PurchaseOrder(models.Model):
@@ -11,29 +14,28 @@ class PurchaseOrder(models.Model):
         self.ensure_one()
         if not request_dict:
             request_dict = {}
-        title = _("Order confirmation %(po_name)s for your Request %(pr_name)s") % {
-            "po_name": self.name,
-            "pr_name": request.name,
-        }
-        message = "<h3>%s</h3><ul>" % title
-        message += _(
+        title = self.env._(
+            "Order confirmation %(po_name)s for your Request %(pr_name)s",
+            po_name=self.name,
+            pr_name=request.name,
+        )
+        message = f"<h3>{title}</h3><ul>"
+        message += self.env._(
             "The following requested items from Purchase Request %(pr_name)s "
-            "have now been confirmed in Purchase Order %(po_name)s:"
-        ) % {
-            "po_name": self.name,
-            "pr_name": request.name,
-        }
+            "have now been confirmed in Purchase Order %(po_name)s:",
+            po_name=self.name,
+            pr_name=request.name,
+        )
 
         for line in request_dict.values():
-            message += _(
+            message += self.env._(
                 "<li><b>%(prl_name)s</b>: Ordered quantity %(prl_qty)s %(prl_uom)s, "
-                "Planned date %(prl_date_planned)s</li>"
-            ) % {
-                "prl_name": line["name"],
-                "prl_qty": line["product_qty"],
-                "prl_uom": line["product_uom"],
-                "prl_date_planned": line["date_planned"],
-            }
+                "Planned date %(prl_date_planned)s</li>",
+                prl_name=html_escape(line["name"]),
+                prl_qty=line["product_qty"],
+                prl_uom=line["product_uom"],
+                prl_date_planned=line["date_planned"],
+            )
         message += "</ul>"
         return message
 
@@ -46,11 +48,11 @@ class PurchaseOrder(models.Model):
                     request_id = request_line.request_id.id
                     if request_id not in requests_dict:
                         requests_dict[request_id] = {}
-                    date_planned = "%s" % line.date_planned
+                    date_planned = line.date_planned
                     data = {
                         "name": request_line.name,
                         "product_qty": line.product_qty,
-                        "product_uom": line.product_uom.name,
+                        "product_uom": line.product_uom_id.name,
                         "date_planned": date_planned,
                     }
                     requests_dict[request_id][request_line.id] = data
@@ -60,7 +62,10 @@ class PurchaseOrder(models.Model):
                     request, requests_dict[request_id]
                 )
                 request.message_post(
-                    body=message, subtype_id=self.env.ref("mail.mt_comment").id
+                    body=Markup(message),
+                    subtype_id=self.env.ref(
+                        "purchase_request.mt_request_po_confirmed"
+                    ).id,
                 )
         return True
 
@@ -70,14 +75,16 @@ class PurchaseOrder(models.Model):
                 for request_line in line.purchase_request_lines:
                     if request_line.sudo().purchase_state == "done":
                         raise exceptions.UserError(
-                            _("Purchase Request %s has already been completed")
-                            % (request_line.request_id.name)
+                            self.env._(
+                                "Purchase Request %(name)s has already been completed",
+                                name=request_line.request_id.name,
+                            )
                         )
         return True
 
     def button_confirm(self):
         self._purchase_request_line_check()
-        res = super(PurchaseOrder, self).button_confirm()
+        res = super().button_confirm()
         self._purchase_request_confirm_message()
         return res
 
@@ -87,7 +94,9 @@ class PurchaseOrder(models.Model):
             for alloc in (
                 rec.order_line.mapped("purchase_request_lines")
                 .mapped("purchase_request_allocation_ids")
-                .filtered(lambda alloc: alloc.purchase_line_id.order_id.id == rec.id)
+                .filtered(
+                    lambda alloc, rec=rec: alloc.purchase_line_id.order_id.id == rec.id
+                )
             ):
                 alloc_to_unlink += alloc
         res = super().unlink()
@@ -125,16 +134,16 @@ class PurchaseOrderLine(models.Model):
         domain = [("id", "in", request_line_ids)]
 
         return {
-            "name": _("Purchase Request Lines"),
+            "name": self.env._("Purchase Request Lines"),
             "type": "ir.actions.act_window",
             "res_model": "purchase.request.line",
-            "view_mode": "tree,form",
+            "view_mode": "list,form",
             "domain": domain,
         }
 
     def _prepare_stock_moves(self, picking):
         self.ensure_one()
-        val = super(PurchaseOrderLine, self)._prepare_stock_moves(picking)
+        val = super()._prepare_stock_moves(picking)
         all_list = []
         for v in val:
             all_ids = self.env["purchase.request.allocation"].search(
@@ -178,7 +187,8 @@ class PurchaseOrderLine(models.Model):
                     message_data
                 )
                 alloc.purchase_request_line_id.request_id.message_post(
-                    body=message, subtype_id=self.env.ref("mail.mt_comment").id
+                    body=Markup(message),
+                    subtype_id=self.env.ref("mail.mt_note").id,
                 )
 
                 alloc.purchase_request_line_id._compute_qty()
@@ -186,34 +196,32 @@ class PurchaseOrderLine(models.Model):
 
     @api.model
     def _purchase_request_confirm_done_message_content(self, message_data):
-        title = _("Service confirmation for Request %s") % (
-            message_data["request_name"]
+        title = self.env._(
+            "Service confirmation for Request %(request_name)s",
+            request_name=message_data["request_name"],
         )
-        message = "<h3>%s</h3>" % title
-        message += _(
-            "The following requested services from Purchase"
-            " Request %(request_name)s requested by %(requestor)s "
-            "have now been received:"
-        ) % {
-            "request_name": message_data["request_name"],
-            "requestor": message_data["requestor"],
-        }
-        message += "<ul>"
-        message += _(
-            "<li><b>%(product_name)s</b>: "
-            "Received quantity %(product_qty)s %(product_uom)s</li>"
-        ) % {
-            "product_name": message_data["product_name"],
-            "product_qty": message_data["product_qty"],
-            "product_uom": message_data["product_uom"],
-        }
-        message += "</ul>"
-        return message
+
+        message_body = self.env._(
+            "The following requested services from Purchase Request %(request_name)s "
+            "requested by %(requestor)s have now been received:",
+            request_name=message_data["request_name"],
+            requestor=message_data["requestor"],
+        )
+
+        product_line = Markup(
+            "<ul><li><b>{}</b>: " + self.env._("Received quantity") + " {} {}</li></ul>"
+        ).format(
+            html_escape(message_data["product_name"]),
+            message_data["product_qty"],
+            html_escape(message_data["product_uom"]),
+        )
+
+        return Markup("<h3>{}</h3>{}{}").format(title, message_body, product_line)
 
     def _prepare_request_message_data(self, alloc, request_line, allocated_qty):
         return {
             "request_name": request_line.request_id.name,
-            "product_name": request_line.product_id.name_get()[0][1],
+            "product_name": request_line.product_id.display_name,
             "product_qty": allocated_qty,
             "product_uom": alloc.product_uom_id.name,
             "requestor": request_line.request_id.requested_by.partner_id.name,
@@ -224,10 +232,12 @@ class PurchaseOrderLine(models.Model):
         #  to allocate them.
         prev_qty_received = {}
         if vals.get("qty_received", False):
-            service_lines = self.filtered(lambda l: l.product_id.type == "service")
+            service_lines = self.filtered(
+                lambda line: line.product_id.type == "service"
+            )
             for line in service_lines:
                 prev_qty_received[line.id] = line.qty_received
-        res = super(PurchaseOrderLine, self).write(vals)
+        res = super().write(vals)
         if prev_qty_received:
             for line in service_lines:
                 line.update_service_allocations(prev_qty_received[line.id])

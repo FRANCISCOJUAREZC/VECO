@@ -3,13 +3,16 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import fields
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import Form
+
+from odoo.addons.base.tests.common import DISABLED_MAIL_CONTEXT, BaseCommon
 
 
-class TestPurchaseOrder(TransactionCase):
+class TestPurchaseOrder(BaseCommon):
     @classmethod
     def setUpClass(cls):
-        super(TestPurchaseOrder, cls).setUpClass()
+        super().setUpClass()
+        cls.env = cls.env(context=dict(cls.env.context, **DISABLED_MAIL_CONTEXT))
         cls.categ_cost_average = cls.env["product.category"].create(
             {"name": "Average cost method category", "property_cost_method": "average"}
         )
@@ -59,7 +62,7 @@ class TestPurchaseOrder(TransactionCase):
             {
                 "name": "Test account",
                 "code": "TEST",
-                "user_type_id": cls.env.ref("account.data_account_type_expenses").id,
+                "account_type": "expense",
             }
         )
         cls.tax = cls.env["account.tax"].create(
@@ -108,6 +111,15 @@ class TestPurchaseOrder(TransactionCase):
                 "price_unit": 10.0,
             }
         )
+        cls.po_line_4 = po_model.create(
+            {
+                "order_id": cls.purchase_order.id,
+                "display_type": "line_section",
+                "name": "Test Section",
+                "product_qty": 0.0,
+                "product_uom_qty": 0.0,
+            }
+        )
 
     def test_purchase_order_vals(self):
         self.assertEqual(self.po_line_1.price_subtotal, 5.0)
@@ -124,11 +136,11 @@ class TestPurchaseOrder(TransactionCase):
     def test_move_price_unit(self):
         self.purchase_order.button_confirm()
         picking = self.purchase_order.picking_ids
-        moves = picking.move_lines
+        moves = picking.move_ids
         move1 = moves.filtered(lambda x: x.purchase_line_id == self.po_line_1)
-        self.assertEqual(move1.price_unit, 5)
+        self.assertEqual(move1.price_unit, 10)
         move2 = moves.filtered(lambda x: x.purchase_line_id == self.po_line_2)
-        self.assertEqual(move2.price_unit, 161)
+        self.assertEqual(move2.price_unit, 230)
         move3 = moves.filtered(lambda x: x.purchase_line_id == self.po_line_3)
         self.assertEqual(move3.price_unit, 10)
         # Confirm the picking to see the cost price
@@ -139,12 +151,41 @@ class TestPurchaseOrder(TransactionCase):
         self.assertAlmostEqual(self.po_line_1.price_unit, 10.0)
         self.assertAlmostEqual(self.po_line_1.discount, 50.0)
 
+    def test_move_price_unit_discount_sync(self):
+        self.purchase_order.button_confirm()
+        picking = self.purchase_order.picking_ids
+        moves = picking.move_ids
+        self.po_line_1.discount = 25
+        self.po_line_2.discount = 50
+        self.po_line_3.discount = 10
+        move1 = moves.filtered(lambda x: x.purchase_line_id == self.po_line_1)
+        self.assertEqual(move1.price_unit, 7.5)
+        move2 = moves.filtered(lambda x: x.purchase_line_id == self.po_line_2)
+        self.assertEqual(move2.price_unit, 115.0)
+        move3 = moves.filtered(lambda x: x.purchase_line_id == self.po_line_3)
+        self.assertEqual(move3.price_unit, 9.0)
+        self.po_line_1.price_unit = 1000
+        self.po_line_2.price_unit = 500
+        self.po_line_3.price_unit = 250
+        move1 = moves.filtered(lambda x: x.purchase_line_id == self.po_line_1)
+        self.assertEqual(move1.price_unit, 750.0)
+        move2 = moves.filtered(lambda x: x.purchase_line_id == self.po_line_2)
+        self.assertEqual(move2.price_unit, 250.0)
+        move3 = moves.filtered(lambda x: x.purchase_line_id == self.po_line_3)
+        self.assertEqual(move3.price_unit, 225.0)
+
     def test_report_price_unit(self):
         rec = self.env["purchase.report"].search(
             [("product_id", "=", self.product_1.id)]
         )
         self.assertEqual(rec.price_total, 5)
         self.assertEqual(rec.discount, 50)
+
+    def test_no_product(self):
+        purchase_form = Form(self.purchase_order)
+        with purchase_form.order_line.edit(3) as line:
+            line.product_qty = 0.0
+        self.assertEqual(self.po_line_4.discount, 0.0)
 
     def test_invoice(self):
         invoice = self.env["account.move"].new(
@@ -158,12 +199,12 @@ class TestPurchaseOrder(TransactionCase):
         line = invoice.invoice_line_ids.filtered(
             lambda x: x.purchase_line_id == self.po_line_1
         )
-        self.assertEqual(line.discount, 50)
+        self.assertAlmostEqual(line.discount, 50)
         line = invoice.invoice_line_ids.filtered(
             lambda x: x.purchase_line_id == self.po_line_2
         )
-        self.assertEqual(line.discount, 30)
+        self.assertAlmostEqual(line.discount, 30)
         line = invoice.invoice_line_ids.filtered(
             lambda x: x.purchase_line_id == self.po_line_3
         )
-        self.assertEqual(line.discount, 0)
+        self.assertAlmostEqual(line.discount, 0)

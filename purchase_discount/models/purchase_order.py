@@ -30,9 +30,12 @@ class PurchaseOrderLine(models.Model):
     def _compute_amount(self):
         return super()._compute_amount()
 
-    def _prepare_compute_all_values(self):
-        vals = super()._prepare_compute_all_values()
-        vals.update({"price_unit": self._get_discounted_price_unit()})
+    def _convert_to_tax_base_line_dict(self):
+        # Inject the new price_unit with discount if there's any. There's an specific
+        # value in the dictionary for the discount, but we need to include it in the
+        # price unit for the stock move price unit valuation to be correct
+        vals = super()._convert_to_tax_base_line_dict()
+        vals["price_unit"] = self._get_discounted_price_unit()
         return vals
 
     discount = fields.Float(string="Discount (%)", digits="Discount")
@@ -57,43 +60,23 @@ class PurchaseOrderLine(models.Model):
             return self.price_unit * (1 - self.discount / 100)
         return self.price_unit
 
-    def _get_stock_move_price_unit(self):
-        """Get correct price with discount replacing current price_unit
-        value before calling super and restoring it later for assuring
-        maximum inheritability.
-
-        HACK: This is needed while https://github.com/odoo/odoo/pull/29983
-        is not merged.
+    def _compute_price_unit_and_date_planned_and_name(self):
+        """Get also the discount from the seller. Unfortunately, this requires to
+        select again the seller to be used, as there isn't any hook to use the already
+        selected one.
         """
-        price_unit = False
-        price = self._get_discounted_price_unit()
-        if price != self.price_unit:
-            # Only change value if it's different
-            price_unit = self.price_unit
-            self.price_unit = price
-        price = super()._get_stock_move_price_unit()
-        if price_unit:
-            self.price_unit = price_unit
-        return price
-
-    @api.onchange("product_qty", "product_uom")
-    def _onchange_quantity(self):
-        """
-        Check if a discount is defined into the supplier info and if so then
-        apply it to the current purchase order line
-        """
-        res = super()._onchange_quantity()
-        if self.product_id:
-            date = None
-            if self.order_id.date_order:
-                date = self.order_id.date_order.date()
-            seller = self.product_id._select_seller(
-                partner_id=self.partner_id,
-                quantity=self.product_qty,
-                date=date,
-                uom_id=self.product_uom,
+        res = super()._compute_price_unit_and_date_planned_and_name()
+        for line in self.filtered("product_id"):
+            seller = line.product_id._select_seller(
+                partner_id=line.partner_id,
+                quantity=line.product_qty,
+                date=line.order_id.date_order
+                and line.order_id.date_order.date()
+                or fields.Date.context_today(line),
+                uom_id=line.product_uom,
+                params={"order_id": line.order_id},
             )
-            self._apply_value_from_seller(seller)
+            line._apply_value_from_seller(seller)
         return res
 
     @api.model
@@ -105,8 +88,12 @@ class PurchaseOrderLine(models.Model):
         self.discount = seller.discount
 
     def _prepare_account_move_line(self, move=False):
-        vals = super(PurchaseOrderLine, self)._prepare_account_move_line(move)
-        vals["discount"] = self.discount
+        vals = super()._prepare_account_move_line(move)
+        if self.env["account.move.line"]._fields.get("discount1", False):
+            # OCA/account_invoice_triple_discount is installed
+            vals["discount1"] = self.discount
+        else:
+            vals["discount"] = self.discount
         return vals
 
     @api.model
@@ -117,7 +104,8 @@ class PurchaseOrderLine(models.Model):
         res = super()._prepare_purchase_order_line(
             product_id, product_qty, product_uom, company_id, supplier, po
         )
-        partner = supplier.name
+        import ipdb; ipdb.set_trace()
+        partner = supplier.partner_id
         uom_po_qty = product_uom._compute_quantity(product_qty, product_id.uom_po_id)
         seller = product_id.with_company(company_id)._select_seller(
             partner_id=partner,
@@ -132,6 +120,19 @@ class PurchaseOrderLine(models.Model):
     def _prepare_purchase_order_line_from_seller(self, seller):
         """Overload this function to prepare other data from seller,
         like in purchase_triple_discount module"""
+        import ipdb; ipdb.set_trace()
         if not seller:
             return {}
         return {"discount": seller.discount}
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "discount" in vals or "price_unit" in vals:
+            for line in self.filtered(lambda li: li.order_id.state == "purchase"):
+                # Avoid updating kit components' stock.move
+                moves = line.move_ids.filtered(
+                    lambda s, line=line: s.state not in ("cancel", "done")
+                    and s.product_id == line.product_id
+                )
+                moves.write({"price_unit": line._get_discounted_price_unit()})
+        return res
