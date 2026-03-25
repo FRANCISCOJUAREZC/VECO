@@ -8,7 +8,7 @@ class StockKardexReport(models.Model):
     move_id = fields.Many2one('stock.move', readonly=True)
     product_id = fields.Many2one('product.product', string="Producto",readonly=True)
     product_uom_id = fields.Many2one('uom.uom', string="UoM", readonly=True)
-    lot_id = fields.Many2one('stock.production.lot', readonly=True)
+    lot_id = fields.Many2one('stock.lot', readonly=True)
     owner_id = fields.Many2one('res.partner', string="Lote/N° de serie", readonly=True)
     package_id = fields.Many2one('stock.quant.package', readonly=True)
     location_id = fields.Many2one('stock.location', string="Ubicación origen", readonly=True)
