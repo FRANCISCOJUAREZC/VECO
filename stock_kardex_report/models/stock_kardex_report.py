@@ -10,7 +10,7 @@ class StockKardexReport(models.Model):
     product_uom_id = fields.Many2one('uom.uom', string="UoM", readonly=True)
     lot_id = fields.Many2one('stock.lot', readonly=True)
     owner_id = fields.Many2one('res.partner', string="Lote/N° de serie", readonly=True)
-    package_id = fields.Many2one('stock.quant.package', readonly=True)
+    package_id = fields.Many2one('stock.package', readonly=True)
     location_id = fields.Many2one('stock.location', string="Ubicación origen", readonly=True)
     location_dest_id = fields.Many2one('stock.location', string="Ubicación destino", readonly=True)
     qty_done = fields.Float('Cantidad hecha', readonly=True)
