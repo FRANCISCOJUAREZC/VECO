@@ -260,9 +260,12 @@
         <field name="arch" type="xml">
             <search string="Search Purchase Request">
                 <field name="name" string="Purchase Request" />
-                <separator />
                 <field name="product_id" />
                 <field name="state" />
+                <field name="requested_by" />
+                <field name="assigned_to" />
+                <field name="picking_type_id" />
+                <separator />
                 <filter
                     name="unassigned"
                     string="Unassigned"
@@ -322,9 +325,6 @@
                     domain="[('requested_by','=', uid)]"
                     help="My requests"
                 />
-                <field name="requested_by" />
-                <field name="assigned_to" />
-                <field name="picking_type_id" />
                 <filter
                     invisible="1"
                     string="Late Activities"

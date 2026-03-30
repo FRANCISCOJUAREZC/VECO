@@ -222,10 +222,10 @@
                     <field name="name" string="Payslips"
                            filter_domain="['|',('name','ilike',self),('number','ilike',self)]"/>
                     <field name="date_from"/>
-                    <filter string="Draft" name="draft" domain="[('state','=','draft')]" help="Draft Slip"/>
-                    <filter string="Done" name="done" domain="[('state','=','done')]" help="Done Slip"/>
                     <field name="employee_id"/>
                     <field name="payslip_run_id"/>
+                    <filter string="Draft" name="draft" domain="[('state','=','draft')]" help="Draft Slip"/>
+                    <filter string="Done" name="done" domain="[('state','=','done')]" help="Done Slip"/>
                     <group> <!--expand="0" string="Group By"-->
                         <filter string="Employees" name="employee_id" context="{'group_by':'employee_id'}"/>
                         <filter string="PaySlip Batch" name="payslip_run_id" context="{'group_by':'payslip_run_id'}"/>

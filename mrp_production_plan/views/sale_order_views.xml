@@ -8,7 +8,7 @@
             <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom']" position="after">
             	<field name="plant_commitment_date"/>
             </xpath>
-            <xpath expr="//field[@name='order_line']/form/group[1]/group[2]/field[@name='tax_id']" position="after">
+            <xpath expr="//field[@name='order_line']/form//field[@name='tax_id']" position="after">
             	<field name="plant_commitment_date"/>
             </xpath>
         </field>

@@ -6,7 +6,7 @@
 
 {
     'name': 'Adenda OC',
-    'version': '15.01',
+    'version': '19.0.15.02',
     'description': ''' Agrega nodo de Adenda con la OC
     ''',
     'category': 'Accounting',

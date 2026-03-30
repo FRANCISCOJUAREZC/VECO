@@ -2,7 +2,8 @@
 
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-from odoo import fields, models
+from odoo import fields, models, _
+from odoo.exceptions import ValidationError
 
 class HrPayslipRun(models.Model):
     _name = 'hr.payslip.run'

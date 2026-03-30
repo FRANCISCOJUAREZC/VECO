@@ -21,6 +21,12 @@ class HrPayrollStructure(models.Model):
     code = fields.Char(string='Reference', required=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company.id)
     note = fields.Text(string='Description')
+    # Declared here so that _setup_models__ can resolve Properties field
+    # definitions on hr.version (payroll_properties / payslip_properties)
+    # regardless of model setup order when both om_hr_payroll and enterprise
+    # hr_payroll are installed simultaneously.
+    version_properties_definition = fields.PropertiesDefinition("Version Properties Definition")
+    payslip_properties_definition = fields.PropertiesDefinition("Payslip Properties Definition")
     #parent_id = fields.Many2one('hr.payroll.structure', string='Parent', default=_get_parent)
     #children_ids = fields.One2many('hr.payroll.structure', 'parent_id', string='Children', copy=True)
     rule_ids = fields.Many2many('hr.salary.rule', 'hr_structure_salary_rule_rel', 'struct_id', 'rule_id', string='Salary Rules')

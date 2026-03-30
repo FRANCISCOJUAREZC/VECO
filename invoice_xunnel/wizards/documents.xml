@@ -6,13 +6,13 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <group attrs="{'invisible': [('message', '!=', False)]}">
+                    <group invisible="message">
                         <field name="date_from"/>
                         <div class="text-muted">
                             SAT's invoices older than this date won't be fetched.
                         </div>
                     </group>
-                    <group attrs="{'invisible': [('message', '=', False)]}">
+                    <group invisible="not message">
                         <div role="alert" class="alert alert-warning">
                             <field readonly="1" name="message"/>
                         </div>
@@ -20,8 +20,8 @@
                 </sheet>
                 <footer>
                     <field name="no_attachment_action" invisible="1" />
-                    <button attrs="{'invisible': [('message', '!=', False)]}" name="synchronize_documents" type="object" string="Confirm" class="oe_highlight"/>
-                    <button attrs="{'invisible': ['|', ('message', '=', False),('no_attachment_action', '=', True)]}" name="open_documents" type="object" string="See XMLs" class="oe_highlight"/>
+                    <button invisible="message" name="synchronize_documents" type="object" string="Confirm" class="oe_highlight"/>
+                    <button invisible="not message or no_attachment_action" name="open_documents" type="object" string="See XMLs" class="oe_highlight"/>
                     <button special="cancel" string="Close"/>
                 </footer>
             </form>

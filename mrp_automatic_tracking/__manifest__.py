@@ -3,7 +3,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 {
     'name': 'MRP Automatic Tracking',
-    'version': '1.0.0',
+    'version': '19.0.1.0.1',
     'author': 'Morwi Encoders Consulting SA DE CV',
     'category': 'Manufacture',
     'website': 'http://www.morwi.mx/',

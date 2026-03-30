@@ -194,6 +194,11 @@
                 <field name="assigned_to" />
                 <field name="date_start" />
                 <field name="date_required" />
+                <field
+                    name="analytic_distribution"
+                    groups="analytic.group_analytic_accounting"
+                />
+                <field name="cancelled" invisible="1" />
                 <filter
                     name="purchase_state_none"
                     string="Purchasing not started"
@@ -218,11 +223,6 @@
                     domain="[('purchase_state','=','done')]"
                     help="At least a PO has been completed"
                 />
-                <field
-                    name="analytic_distribution"
-                    groups="analytic.group_analytic_accounting"
-                />
-                <field name="cancelled" invisible="1" />
                 <filter
                     name="request_state_draft"
                     string="Draft"

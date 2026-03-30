@@ -12,7 +12,8 @@
     'license': 'LGPL-3',
     'depends': [
         'mail',
-        'hr_holidays', 'hr_work_entry'
+        'hr_holidays', 'hr_work_entry',
+        'hr_payroll',
     ],
     'data': [
         'security/hr_payroll_security.xml',

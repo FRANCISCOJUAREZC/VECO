@@ -15,7 +15,9 @@
         'sale',
         'purchase',
         'mrp_workorder',
+        'mrp_account_enterprise',
         'purchase_request',
+        'stock_account',
     ],
     'data': [
         'views/mrp_production_views.xml',
