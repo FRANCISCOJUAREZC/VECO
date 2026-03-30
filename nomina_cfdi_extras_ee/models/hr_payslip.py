@@ -48,7 +48,7 @@ class hr_payslip(models.Model):
     rp_cuota_fija = fields.Float('rp_cuota_fija', compute='get_tablas_values')
     rp_porcentaje = fields.Float('rp_porcentaje', compute='get_tablas_values')
     rp_subsidio = fields.Float('rp_subsidio', compute='get_tablas_values')
-    retardo = fields.Boolean(string=_('Retardo'), compute='_get_retardo', default = False)
+    retardo = fields.Boolean('Retardo', compute='_get_retardo', default = False)
 
     
     def compute_sheet(self):
@@ -440,29 +440,10 @@ class HrPayslipRun(models.Model):
     
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
-    
-    refunded_id = fields.Many2one(
-        'hr.payslip',
-        string='Refunded Payslip',
-        readonly=True
-    )
-    
-    
-    def refund_sheet(self):
-        res = super(HrPayslip, self).refund_sheet()
-        self.write({'refunded_id': eval(res['domain'])[0][2][0] or False})
-        return res
 
-    
     def action_payslip_cancel(self):
         for payslip in self:
-            if payslip.refunded_id and payslip.refunded_id.state != 'cancel':
-                raise ValidationError(_("""To cancel the Original Payslip the
-                    Refunded Payslip needs to be canceled first!"""))
-                """
-                     Change by tushar update_posted not availabel in account.journal
-                """
-            module = self.env['ir.module.module'].sudo().search([('name','=','hr_payroll_account')])
+            module = self.env['ir.module.module'].sudo().search([('name','=','om_hr_payroll_account_ee')])
             if module and module.state == 'installed':
                moves = payslip.mapped('move_id')
                moves.filtered(lambda x: x.state == 'posted').button_cancel()

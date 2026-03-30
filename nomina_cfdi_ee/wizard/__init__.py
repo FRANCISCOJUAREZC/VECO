@@ -9,3 +9,4 @@ from . import dar_baja_wizard
 from . import entrega_fondo_caja
 from . import enviar_nomina_hr_playslip
 from . import reason_cancelation_sat
+from . import crear_faltas_from_retardos

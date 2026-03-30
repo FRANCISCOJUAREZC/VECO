@@ -22,13 +22,13 @@ class dev_skip_installment(models.Model):
         return self.env.user
 
     name = fields.Char('Nombre', default='/')
-    employee_id = fields.Many2one('hr.employee',string='Empleado',required="1", default=_get_employee)
-    loan_id = fields.Many2one('employee.loan',string='Deducción',required="1")
-    installment_id = fields.Many2one('installment.line',string='Entrega', required="1")
+    employee_id = fields.Many2one('hr.employee',string='Empleado',required=True, default=_get_employee)
+    loan_id = fields.Many2one('employee.loan',string='Deducción',required=True)
+    installment_id = fields.Many2one('installment.line',string='Entrega', required=True)
     date = fields.Date(string='Fecha')#, default=fields.date.today())
     user_id = fields.Many2one('res.users',string='Usuario', default=_get_default_user)
-    notes = fields.Text('Razón', required="1")
-#    manager_id = fields.Many2one('hr.employee',string='Gerente de departamento', required="1")
+    notes = fields.Text('Razón', required=True)
+#    manager_id = fields.Many2one('hr.employee',string='Gerente de departamento', required=True)
     skip_installment_url = fields.Char('URL', compute='get_url')
 #    hr_manager_id = fields.Many2one('hr.employee',string='Gerente de RH')
     state = fields.Selection([('draft','Borrador'),
@@ -59,99 +59,23 @@ class dev_skip_installment(models.Model):
         request = len(request_id)
         if request > 0:
             raise ValidationError("La línea %s salto de pago está en estado %s" % (self.installment_id.name,request_id.state))
-
-#    @api.onchange('loan_id')
-#    def onchange_loan_id(self):
-#        if self.loan_id:
-#            self.manager_id = self.loan_id.manager_id
-
    
     def action_send_request(self):
-#        if not self.manager_id:
-#            raise ValidationError(_('Por favor seleccione el gerente del departamento'))
-#        if self.manager_id and self.manager_id.id != self.loan_id.manager_id.id:
-#            raise ValidationError(_('Gestor de préstamos y gestor de departamento seleccionado no es el mismo'))
-        #if self.manager_id and self.manager_id.work_email:
-        #    ir_model_data = self.env['ir.model.data']
-        #    template_id = ir_model_data.get_object_reference('dev_hr_loan',
-        #                                                          'dev_skip_dep_manager_approval')
-        #    mtp = self.env['mail.template']
-        #    template_id = mtp.browse(template_id[1])
-        #    template_id.write({'email_to': self.manager_id.work_email})
-        #    s=template_id.send_mail(self.ids[0], True)
         self.state = 'confirm'
         
-        
-#   
-#    def get_hr_manager_email(self):
-#        group_id = self.env['ir.model.data'].get_object_reference('hr', 'group_hr_manager')[1]
-#        group_ids = self.env['res.groups'].browse(group_id)
-#        email=''
-#        if group_ids:
-#            employee_ids = self.env['hr.employee'].search([('user_id', 'in', group_ids.users.ids)])
-#            for emp in employee_ids:
-#                if email:
-#                    email = email+','+emp.work_email
-#                else:
-#                    email= emp.work_email
-#        return email
-
-   
     def approve_skip_installment(self):
-        #email = self.get_hr_manager_email()
-        #if email:
-        #    ir_model_data = self.env['ir.model.data']
-        #    template_id = ir_model_data.get_object_reference('dev_hr_loan',
-        #                                                     'dev_skip_ins_hr_manager_request')
-        #    mtp = self.env['mail.template']
-        #    template_id = mtp.browse(template_id[1])
-        #    template_id.write({'email_to': email})
-        #    template_id.send_mail(self.ids[0], True)
         self.state = 'approve'
 
    
     def dep_reject_skip_installment(self):
-        #if self.employee_id.work_email:
-        #    ir_model_data = self.env['ir.model.data']
-        #    template_id = ir_model_data.get_object_reference('dev_hr_loan',
-        #                                                     'dep_manager_reject_skip_installment')
-
-        #    mtp = self.env['mail.template']
-        #    template_id = mtp.browse(template_id[1])
-        #    template_id.write({'email_to': self.employee_id.work_email})
-        #    template_id.send_mail(self.ids[0], True)
-            
         self.state = 'reject'
 
    
     def hr_reject_skip_installment(self):
-        #employee_id = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)], limit=1)
-        #self.hr_manager_id = employee_id and employee_id.id or False
-        #if self.employee_id.work_email and self.hr_manager_id:
-        #    ir_model_data = self.env['ir.model.data']
-        #    template_id = ir_model_data.get_object_reference('dev_hr_loan',
-        #                                                     'hr_manager_reject_skip_installment')
-
-        #    mtp = self.env['mail.template']
-        #    template_id = mtp.browse(template_id[1])
-        #    template_id.write({'email_to': self.employee_id.work_email})
-        #    template_id.send_mail(self.ids[0], True)
         self.state = 'reject'
 
    
     def confirm_skip_installment(self):
-        #employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        #self.hr_manager_id = employee_id and employee_id.id or False
-        #if self.employee_id.work_email and self.hr_manager_id:
-        #    ir_model_data = self.env['ir.model.data']
-        #    template_id = ir_model_data.get_object_reference('dev_hr_loan',
-        #                                                     'hr_manager_confirm_skip_installment')
-
-        #    mtp = self.env['mail.template']
-        #    template_id = mtp.browse(template_id[1])
-        #    template_id.write({'email_to': self.employee_id.work_email})
-        #    template_id.send_mail(self.ids[0], True)
-            
         self.state = 'confirm'
     
     def done_skip_installment(self):
@@ -223,18 +147,16 @@ class dev_skip_installment(models.Model):
                         'company_id': company.id,
                     })
     
-    @api.model
-    def create(self, vals):
-        if vals.get('name', '/') == '/':
-            if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code(
-                    'dev.skip.installment') or '/'
-            else:
-                vals['name'] = self.env['ir.sequence'].next_by_code(
-                    'dev.skip.installment') or '/'
-        return super(dev_skip_installment, self).create(vals)
-        
-   
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+           if vals.get('name', '/') == '/':
+               if 'company_id' in vals:
+                   vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code('dev.skip.installment') or '/'
+               else:
+                   vals['name'] = self.env['ir.sequence'].next_by_code('dev.skip.installment') or '/'
+        return super(dev_skip_installment, self).create(vals_list)
+
     def copy(self, default=None):
         if default is None:
             default = {}

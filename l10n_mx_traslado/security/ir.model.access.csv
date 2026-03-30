@@ -5,3 +5,8 @@ access_ubicaciones_line,access_ubicaciones_line,model_ccp_ubicaciones_line,base.
 access_remolques_line,access_remolques_line,model_ccp_remolques_line,base.group_user,1,1,1,1
 access_autotransporte,access_autotransporte,model_ccp_autotransporte,base.group_user,1,1,1,1
 access_figura_line,access_figura_line,model_ccp_figura_line,base.group_user,1,1,1,1
+access_aduanera_line,access_aduanera_line,model_cfdi_aduanera_line,base.group_user,1,1,1,1
+access_guias_line,access_guias_line,model_cfdi_guias_line,base.group_user,1,1,1,1
+access_aduanero_line,access_aduanero_line,model_ccp_aduanero_line,base.group_user,1,1,1,1
+access_transporta_line,access_transporta_line,model_cfdi_transporta_line,base.group_user,1,1,1,1
+access_reason_cancelation_wizard,reason_cancelation_wizard,model_reason_cancelation,base.group_user,1,1,1,1

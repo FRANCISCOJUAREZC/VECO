@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from . import crear_faltas_from_retardos
 from . import listado_de_nomina_wizard
 #from . import import_loan
 from . import import_logs

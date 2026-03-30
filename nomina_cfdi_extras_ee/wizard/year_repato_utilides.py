@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 import io
-from odoo.tools.misc import xlwt
+#from odoo.tools.misc import xlwt
+import xlwt
 import base64
 from odoo.exceptions import UserError
 import logging
@@ -36,8 +37,32 @@ class XLSUploadWizard(models.TransientModel):
         domain.append(('tipo_nomina','=','O'))
         payslips2 = self.env['hr.payslip'].search(domain)
 
-        payslip_lines = payslips.mapped('line_ids').filtered(lambda x: x.code == 'NET')
-        work_lines = payslips2.mapped('worked_days_line_ids').filtered(lambda x: x.code in ['WORK100', 'VAC', 'FJC', 'SEPT'])
+        payslip_lines_all = payslips.mapped('line_ids').filtered(lambda x: x.code == 'P001')
+        work_lines_all = payslips2.mapped('worked_days_line_ids').filtered(lambda x: x.code in ['WORK100', 'VAC', 'FJC', 'SEPT'])
+        payslip_lines = []
+        work_lines = []
+
+        for slip in payslip_lines_all:
+            if slip.contract_id.date_end:
+                first_day_date = date(datetime.today().date().year - 1, 1, 1)
+                if slip.contract_id.date_start > first_day_date:
+                    first_day_date = slip.contract_id.date_start
+                if (slip.contract_id.date_end - first_day_date).days < 60:
+                    continue
+            if slip.employee_id.regimen != '02':
+                continue
+            payslip_lines += slip
+
+        for work in work_lines_all:
+            if work.contract_id.date_end:
+                first_day_date = date(datetime.today().date().year - 1, 1, 1)
+                if work.contract_id.date_start > first_day_date:
+                    first_day_date = work.contract_id.date_start
+                if (work.contract_id.date_end - first_day_date).days < 60:
+                    continue
+            if slip.employee_id.regimen != '02':
+                continue
+            work_lines += work
 
         for slip in payslip_lines:
            monto_total += slip.total
@@ -97,7 +122,7 @@ class XLSUploadWizard(models.TransientModel):
             else:
                 days[line.payslip_id.employee_id] += line.number_of_days
 
-        _logger.info('days %s', days)
+        #_logger.info('days %s', days)
         tot_empl_amount = 0
         tot_empl_days = 0
         for employee in amount.items():
@@ -117,10 +142,10 @@ class XLSUploadWizard(models.TransientModel):
              worksheet.write(row, 4, tot_empl_days * coef_dias)
              total01 = tot_empl_amount * coef_monto + tot_empl_days * coef_dias
              # revisar monto exento  límite máximo tres meses del salario del trabajador o el promedio de la participación recibida en los últimos tres años.
-             contract_id = employee[0].contract_id
-             if not contract_id:
-                 contract_id = self.env['hr.contract'].search([('employee_id','=',employee[0].id)], limit=1)
-             max_limit = contract_id.sueldo_diario * 90
+             #contract_id = employee[0].contract_id
+             #if not contract_id:
+             #    contract_id = self.env['hr.contract'].search([('employee_id','=',employee[0].id)], limit=1)
+             max_limit = employee[0].sueldo_diario * 90
              if total01 > max_limit:
                  total01 = max_limit
              worksheet.write(row, 5, total01)
@@ -162,8 +187,32 @@ class XLSUploadWizard(models.TransientModel):
         domain.append(('tipo_nomina','=','O'))
         payslips2 = self.env['hr.payslip'].search(domain)
 
-        payslip_lines = payslips.mapped('line_ids').filtered(lambda x: x.code == 'NET')
-        work_lines = payslips2.mapped('worked_days_line_ids').filtered(lambda x: x.code in ['WORK100', 'VAC', 'FJC', 'SEPT'])
+        payslip_lines_all = payslips.mapped('line_ids').filtered(lambda x: x.code == 'P001')
+        work_lines_all = payslips2.mapped('worked_days_line_ids').filtered(lambda x: x.code in ['WORK100', 'VAC', 'FJC', 'SEPT'])
+        payslip_lines = []
+        work_lines = []
+
+        for slip in payslip_lines_all:
+            if slip.contract_id.date_end:
+                first_day_date = date(datetime.today().date().year - 1, 1, 1)
+                if slip.contract_id.date_start > first_day_date:
+                    first_day_date = slip.contract_id.date_start
+                if (slip.contract_id.date_end - first_day_date).days < 60:
+                    continue
+            if slip.employee_id.regimen != '02':
+                continue
+            payslip_lines += slip
+
+        for work in work_lines_all:
+            if work.contract_id.date_end:
+                first_day_date = date(datetime.today().date().year - 1, 1, 1)
+                if work.contract_id.date_start > first_day_date:
+                    first_day_date = work.contract_id.date_start
+                if (work.contract_id.date_end - first_day_date).days < 60:
+                    continue
+            if slip.employee_id.regimen != '02':
+                continue
+            work_lines += work
 
         for slip in payslip_lines:
            monto_total += slip.total
@@ -216,10 +265,10 @@ class XLSUploadWizard(models.TransientModel):
             tot_empl_days = list(days.values())[id_days]
             total01 = tot_empl_amount * coef_monto + tot_empl_days * coef_dias
             # revisar monto exento  límite máximo tres meses del salario del trabajador o el promedio de la participación recibida en los últimos tres años.
-            contract_id = employee[0].contract_id
-            if not contract_id:
-                contract_id = self.env['hr.contract'].search([('employee_id','=',employee[0].id)], limit=1)
-            max_limit = contract_id.sueldo_diario * 90
+            #contract_id = employee[0].contract_id
+            #if not contract_id:
+            #    contract_id = self.env['hr.contract'].search([('employee_id','=',employee[0].id)], limit=1)
+            max_limit = employee[0].sueldo_diario * 90
             if total01 > max_limit:
                  total01 = max_limit
 
@@ -232,9 +281,9 @@ class XLSUploadWizard(models.TransientModel):
                 payslip_vals2['struct_id'] = structure.id
 
             other_inputs = []
-            other_inputs.append((0,0,{'name' :'Reparto utilidades', 'code' : 'PTU', 'contract_id':contract_id.id, 'amount': total01}))
+            other_inputs.append((0,0,{'name' :'Reparto utilidades', 'code' : 'PTU', 'contract_id': employee[0].version_id.id, 'amount': total01}))
             worked_days2 = []
-            worked_days2.append((0,0,{'name' :'Dias a pagar', 'code' : 'WORK100', 'contract_id':contract_id.id, 'number_of_days': 0}))
+            worked_days2.append((0,0,{'name' :'Dias a pagar', 'code' : 'WORK100', 'contract_id':employee[0].version_id.id, 'number_of_days': 0}))
 
             payslip_vals2.update({
                'employee_id' : employee[0].id,
@@ -243,7 +292,7 @@ class XLSUploadWizard(models.TransientModel):
                'payslip_run_id' : batch.id,
                'date_from': self.date_slip,
                'date_to': self.date_slip,
-               'contract_id' : contract_id.id,
+               'contract_id' : employee[0].version_id.id,
                'dias_pagar': 1,
                'fecha_pago' : self.date_slip,
                'worked_days_line_ids': worked_days2,

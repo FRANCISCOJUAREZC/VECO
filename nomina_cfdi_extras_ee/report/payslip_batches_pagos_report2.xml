@@ -45,29 +45,28 @@
 
                 <!--INICIA LOGO DE LA EMPRESA-->
                 <div class="col-4">
-                    <img t-if="company.logo" t-att-src="'data:image/png;base64,%s' % to_text(company.logo)"
-                         style="max-height: 130px;max-width: 130px;"/>
+                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 130px;max-width:130px;" />
                 </div>
                 <!--TERMINA LOGO DE LA EMPRESA-->
 
                 <!--EMPIEZA DATOS DEL EMISOR-->
                 <div class="col-4">
                     <div>
-                        <span t-field="company.partner_id.name"/>
+                        <span t-esc="company.name"/>
                     </div>
                     <t t-if="company">
-                        <span t-field="company.street"/>
+                        <span t-esc="company.street"/>
                     </t>
                     <t t-if="company.street2">
-                        <span t-field="company.street2"/>
+                        <span t-esc="company.street2"/>
                     </t>
                     <div>
-                        <span t-if="company.city" t-field="company.city"/>
-                        <span t-if="company.state_id" t-field="company.state_id.name"/>
-                        <span t-if="company.zip" t-field="company.zip"/>
+                        <span t-if="company.city" t-esc="company.city"/>
+                        <span t-if="company.state_id" t-esc="company.state_id.name"/>
+                        <span t-if="company.zip" t-esc="company.zip"/>
                     </div>
                     <t t-if="company.country_id">
-                        <span t-field="company.country_id.name"/>
+                        <span t-esc="company.country_id.name"/>
                     </t>
                 </div>
                 <!--TERMINA DATOS DEL EMISOR-->
@@ -82,19 +81,19 @@
             <div class="text-center" style="border-top: 1px solid black;">
                 <ul class="list-inline mb4">
                     <li t-if="company.phone" class="list-inline-item">Teléfono:
-                        <span t-field="company.phone"/>
+                        <span t-esc="company.phone"/>
                     </li>
                     <li t-if="company.email" class="list-inline-item">&amp;bull;</li>
                     <li t-if="company.email" class="list-inline-item">Correo Electrónico:
-                        <span t-field="company.email"/>
+                        <span t-esc="company.email"/>
                     </li>
                     <li t-if="company.website" class="list-inline-item">&amp;bull;</li>
                     <li t-if="company.website" class="list-inline-item">Página web:
-                        <span t-field="company.website"/>
+                        <span t-esc="company.website"/>
                     </li>
                 </ul>
                 <div name="financial_infos">
-                    <span t-field="company.report_footer"/>
+                    <span t-esc="company.report_footer"/>
                 </div>
                 <div class="text-muted">
                     Hoja:

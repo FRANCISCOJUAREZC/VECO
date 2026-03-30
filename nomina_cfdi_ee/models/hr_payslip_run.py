@@ -29,7 +29,7 @@ class HrPayslipRun(models.Model):
     all_payslip_generated = fields.Boolean("Payslip Generated",compute='_compute_payslip_cgdi_generated')
     all_payslip_generated_draft = fields.Boolean("Payslip Generated draft",compute='_compute_payslip_cgdi_generated_draft')
     tipo_nomina = fields.Selection(
-        selection=[('O', 'Nómina ordinaria'), ('E', 'Nómina extraordinaria'),], string=_('Tipo de nómina'), required=True, default='O')
+        selection=[('O', 'Nómina ordinaria'), ('E', 'Nómina extraordinaria'),], string='Tipo de nómina', required=True, default='O')
     estructura = fields.Many2one('hr.payroll.structure', string='Estructura')
     tabla_otras_entradas = fields.One2many('otras.entradas', 'form_id')
     dias_pagar = fields.Float(string='Dias a pagar', store=True)
@@ -52,9 +52,9 @@ class HrPayslipRun(models.Model):
                    ('09', 'Precio alzado'), 
                    ('10', 'Pago por consignación'), 
                    ('99', 'Otra periodicidad'),],
-        string=_('Frecuencia de pago'), required=True
+        string='Frecuencia de pago',
     )
-    fecha_pago = fields.Date(string=_('Fecha de pago'), required=True)
+    fecha_pago = fields.Date('Fecha de pago')
     isr_anual = fields.Boolean(string='ISR anual')
     mes = fields.Selection(
         selection=[('01', 'Enero / Periodo 1'), 
@@ -70,7 +70,16 @@ class HrPayslipRun(models.Model):
                    ('11', 'Noviembre / Periodo 11'),
                    ('12', 'Diciembre / Periodo 12'),
                    ],
-        string=_('Mes / Periodo'),)
+        string='Mes / Periodo',)
+    company_cfdi = fields.Boolean(related="company_id.company_cfdi",store=True)
+    total_procesamiento = fields.Float(string='Total Nominas', compute='_compute_total_procesamiento')
+
+    def _compute_total_procesamiento(self):
+        for payslip_run in self:
+           payslip_run.total_procesamiento = 0
+           for payslip in payslip_run.slip_ids:
+               if payslip.state != 'cancel':
+                  payslip_run.total_procesamiento += payslip.total_nom
 
     @api.onchange('tipo_configuracion')
     def _set_periodicidad(self):
@@ -109,17 +118,22 @@ class HrPayslipRun(models.Model):
                     delta = self.date_end - self.date_start
                     self.dias_pagar = delta.days + 1
                     self.imss_dias = delta.days + 1
-                else:
+                elif self.tipo_configuracion.tipo_pago == '03':
                     self.dias_pagar = 15.21
                     self.imss_dias = 15.21
+                else:
+                    self.dias_pagar = 15.2083
+                    self.imss_dias = 15.2083
             elif self.periodicidad_pago == '05':
                 if self.tipo_configuracion.tipo_pago == '01':
                     self.dias_pagar = 30
                 elif self.tipo_configuracion.tipo_pago == '02':
                     delta = self.date_end - self.date_start
                     self.dias_pagar = delta.days + 1
-                else:
+                elif self.tipo_configuracion.tipo_pago == '03':
                     self.dias_pagar = 30.42
+                else:
+                    self.dias_pagar = 30.4166
             else:
                 delta = self.date_end - self.date_start
                 self.dias_pagar = delta.days + 1
@@ -197,7 +211,7 @@ class HrPayslipRun(models.Model):
                     if payslip.state == 'draft':
                         payslip.compute_sheet()
             else:
-                if payslip.state in ['draft','verify']:
+                if payslip.state == 'draft':
                     payslip.compute_sheet()
         return True
      
@@ -215,7 +229,7 @@ class HrPayslipRun(models.Model):
     def _compute_payslip_cgdi_generated_draft(self):
         cfdi_generated_draft = True
         for payslip in self.slip_ids:
-            if payslip.state not in ['draft','verify']:
+            if payslip.state not in ['draft']:
                 cfdi_generated_draft=False
                 break
         self.all_payslip_generated_draft = cfdi_generated_draft 
@@ -240,13 +254,80 @@ class HrPayslipRun(models.Model):
         }
 
     def timbrar_nomina(self):
-        return
+        self.ensure_one()
+        view = self.env.ref('nomina_cfdi_ee.timbrado_nomina_wizard')
+        ctx = self.env.context.copy()
+        ctx .update({'default_payslip_batch_id':self.id})
+        return {
+            'name': 'Timbrado De Nomina',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'timbrado.de.nomina',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'context': ctx,
+        }
 
     def download_zip(self):
         return {
             'type': 'ir.actions.act_url',
-            'url': f'/payroll/download_document?id={self.id}',
+            'url': '/payroll/download_document/' + str(self.id),
             'target': 'new',
+        }
+
+    def timbrar_nomina_wizard(self):
+        self.ensure_one()
+        #cr = self._cr
+        err_msg = 'Sin errores'
+        correct = 0
+        errors = 0
+        payslip_obj = self.env['hr.payslip']
+        start_range = self._context.get('start_range')
+        end_range = self._context.get('end_range')
+        for payslip_id in self.slip_ids.ids:
+            payslip = payslip_obj.browse(payslip_id)
+            if start_range and end_range:
+                emp_no = int(payslip.employee_id.no_empleado)
+                if emp_no >= start_range and emp_no <= end_range:
+                    if payslip.state == 'cancel':
+                        continue
+                    if payslip.state in ['draft','verify']:
+                        payslip.action_payslip_done()
+                    try:
+                        if not payslip.nomina_cfdi:
+                           payslip.action_cfdi_nomina_generate()
+                           correct += 1
+                    except Exception as e:
+                       err_msg += payslip.employee_id.name + ' ' + e.args[0] + '\n'
+                       errors += 1
+                       pass
+            else:
+                if payslip.state == 'cancel':
+                    continue
+                if payslip.state in ['draft','verify']:
+                   payslip.action_payslip_done()
+                try:
+                   if not payslip.nomina_cfdi:
+                      payslip.action_cfdi_nomina_generate()
+                      correct += 1
+                except Exception as e:
+                   err_msg += payslip.employee_id.name + ' ' + e.args[0] + '\n'
+                   errors += 1
+                   pass
+            self.env.cr.commit()
+
+        respuesta = ('Nóminas timbradas correctamente %s \n Nóminas no timbradas %s') % (correct, errors)
+
+        message_id = self.env['nomina.message.wizard'].create({'message': respuesta, 'log_txt': err_msg, 'nombre': self.name})
+        return {
+                'name': 'Respuesta timbrado',
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'nomina.message.wizard',
+                'res_id': message_id.id,
+                'target': 'new'
         }
 
     def confirmar_nomina(self):
@@ -346,8 +427,9 @@ class ConfiguracionNomina(models.Model):
     tipo_pago = fields.Selection(
         selection=[('01', 'Por periodo'), 
                    ('02', 'Por día'),
-                   ('03', 'Mes proporcional'),],
-        string=_('Conteo de días'),
+                   ('03', 'Mes proporcional 15.21'),
+                   ('04', 'Mes proporcional 15.2083'),],
+        string='Conteo de días',
     )
     fijo_imss = fields.Boolean(string='Dias fijos')
     imss_dias = fields.Float(string='Dias a cotizar en la nómina', store=True)
@@ -366,7 +448,7 @@ class ConfiguracionNomina(models.Model):
                    ('09', 'Precio alzado'), 
                    ('10', 'Pago por consignación'), 
                    ('99', 'Otra periodicidad'),],
-        string=_('Periodicidad de pago CFDI'), required=True
+        string='Periodicidad de pago CFDI', required=True
     )
 
 class NominaMessageWizard(models.TransientModel):

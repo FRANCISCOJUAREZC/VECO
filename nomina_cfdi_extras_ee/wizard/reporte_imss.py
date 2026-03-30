@@ -6,7 +6,8 @@ from odoo import models, fields, api
 #from dateutil import relativedelta
 from collections import defaultdict
 import io
-from odoo.tools.misc import xlwt
+#from odoo.tools.misc import xlwt
+import xlwt
 import base64
 
 class WizardReporteImss(models.TransientModel):
@@ -22,7 +23,7 @@ class WizardReporteImss(models.TransientModel):
 
     def print_reporte_imss_report(self):
         #domain=[('state','=', 'done')]
-        domain=[('state','in', ('done','paid'))]
+        domain=[]
         if self.date_from:
             domain.append(('date_from','>=',self.date_from))
             

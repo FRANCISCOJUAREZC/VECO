@@ -32,8 +32,7 @@
                     name="Reparto utilidades" 
                     parent="nomina_cfdi_extras_ee.menu_payroll_payslip_reportes" 
                     action="reparto_utilidades_wizard_action"
-                    groups="hr_payroll.group_hr_payroll_user"
+                    groups="nomina_cfdi_ee.group_nomina_mx"
                     sequence="100"/>
 
 </odoo>
-

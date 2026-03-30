@@ -39,8 +39,7 @@
 
 						<!--LOGO-->	
 						<div class="col-4">
-								<img t-if="docs.company_id.logo" t-att-src="'data:image/png;base64,%s' % to_text(docs.company_id.logo)"
-								style="max-height: 180px;max-width: 180px;" />
+								<img t-if="docs.company_id.logo" t-att-src="image_data_uri(docs.company_id.logo)" style="max-height: 180px;max-width:180px;" />
 						</div>
 						<div class="col-4">
 								

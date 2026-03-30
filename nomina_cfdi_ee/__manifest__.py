@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+##############################################################################
+#                 @author IT Admin
+#
+##############################################################################
 
 {
     'name': 'Nomina Electrónica para México CFDI v1.2 EE',
@@ -7,10 +11,10 @@
     Nomina CFDI Module
     ''',
     'author': 'IT Admin',
-    'version': '15.04',
+    'version': '19.1.4',
     'category': 'Employees',
     'depends': [
-        'hr_payroll',
+        'om_hr_payroll','account', 'hr_work_entry_holidays', 'hr_work_entry_attendance', 'hr_work_entry_enterprise'
     ],
     'data': [
         'security/security.xml',
@@ -21,12 +25,15 @@
         'data/nomina.otropago.csv',
         'data/nomina.percepcion.csv',
         'data/nomina.deduccion.csv',
+        'data/hr_payroll_data.xml',
+        'data/hr_data.xml',
+        'data/4.0/cfdi.xml',
         'views/hr_employee_view.xml',
-        'views/hr_contract_view.xml',
+        'views/hr_version_views.xml',
         'views/hr_salary_view.xml',
         'views/hr_payroll_payslip_view.xml',
         'views/tablas_cfdi_view.xml',
-        #'views/res_company_view.xml',
+        'views/res_company_view.xml',
         'report/report_payslip.xml',
         'views/res_bank_view.xml',
         'data/mail_template_data.xml',
@@ -42,11 +49,19 @@
         'wizard/enviar_nomina_view.xml',
         'views/registro_patronal.xml',
         'views/caja_ahorro_view.xml',
+        'views/prima_dominical_view.xml',
+        'views/incidencias_view.xml',
+        'views/retardos_view.xml',
+        'views/credito_infonavit_view.xml',
         'wizard/entrega_fondo_caja_view.xml',
+        'wizard/crear_faltas_from_retardos.xml',
     ],
     'assets': {
         'web.assets_backend': [
             'nomina_cfdi_ee/static/src/js/caja_nomina.js',
+            'nomina_cfdi_ee/static/src/xml/caja_nomina.xml',
+            'nomina_cfdi_ee/static/src/js/list_button.js',
+            'nomina_cfdi_ee/static/src/xml/list_buttons.xml',
         ],
     },
     'installable': True,

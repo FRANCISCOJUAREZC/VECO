@@ -32,8 +32,8 @@
     <menuitem id="menu_action_wizard_imss"
                 name="Reporte IMSS"
                 action="action_reporte_imss"
-                parent="menu_payroll_payslip_reportes" 
-                groups="hr_payroll.group_hr_payroll_user"
+                parent="menu_payroll_payslip_reportes"
+                groups="om_hr_payroll.group_hr_payroll_user"
                 sequence="85"/>
 
 </odoo>

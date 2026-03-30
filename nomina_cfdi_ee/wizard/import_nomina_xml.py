@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models,fields,api, _
-from odoo.exceptions import Warning, UserError
+from odoo.exceptions import UserError
 import os
 from lxml import etree
 import base64

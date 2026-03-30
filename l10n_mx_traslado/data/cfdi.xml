@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="cfdi_traslado">
+        <cfdi:Comprobante
+            xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd http://www.sat.gob.mx/CartaPorte31 http://www.sat.gob.mx/sitio_internet/cfd/CartaPorte/CartaPorte31.xsd "
+            xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:cartaporte31="http://www.sat.gob.mx/CartaPorte31"
+            Version="4.0"
+            t-att-Fecha="factura['fecha_expedicion']"
+            t-att-Folio="factura['folio']"
+            t-att-Serie="factura['serie']"
+            Sello="TO BE INJECTED"
+            t-att-NoCertificado="factura['no_certificado']"
+            t-att-Certificado="factura['certificado']"
+            t-att-SubTotal="factura['subtotal']"
+            t-att-Moneda="factura['moneda']"
+            t-att-Total="factura['total']"
+            t-att-TipoDeComprobante="factura['tipocomprobante']"
+            t-att-Exportacion="factura['Exportacion']"
+            t-att-MetodoPago="factura['metodo_pago']"
+            t-att-LugarExpedicion="factura['LugarExpedicion']">
+            <t t-if="CfdisRelacionados">
+               <t t-foreach="CfdisRelacionados['UUID']" t-as="cfdi_relationado">
+                  <cfdi:CfdiRelacionados t-att-TipoRelacion="CfdisRelacionados['TipoRelacion']">
+                       <cfdi:CfdiRelacionado t-att-UUID="cfdi_relationado['uuid']"/>
+                  </cfdi:CfdiRelacionados>
+               </t>
+            </t>
+                <cfdi:Emisor
+                    t-att-Rfc="emisor['rfc']"
+                    t-att-Nombre="emisor['nombre']"
+                    t-att-RegimenFiscal="emisor['RegimenFiscal']"/>
+                <cfdi:Receptor
+                    t-att-Rfc="receptor['rfc']"
+                    t-att-Nombre="receptor['nombre']"
+                    t-att-ResidenciaFiscal="receptor['ResidenciaFiscal']"
+                    t-att-DomicilioFiscalReceptor="receptor['DomicilioFiscalReceptor']"
+                    t-att-RegimenFiscalReceptor="receptor['RegimenFiscalReceptor']"
+                    t-att-UsoCFDI="receptor['UsoCFDI']"/>
+                <cfdi:Conceptos>
+                    <t t-foreach="conceptos" t-as="line_values">
+                        <cfdi:Concepto
+                            t-att-ClaveProdServ="line_values['ClaveProdServ']"
+                            t-att-NoIdentificacion="line_values['NoIdentificacion']"
+                            t-att-Cantidad="line_values['cantidad']"
+                            t-att-ClaveUnidad="line_values['ClaveUnidad']"
+                            t-att-Unidad="line_values['unidad']"
+                            t-att-Descripcion="line_values['descripcion']"
+                            t-att-ValorUnitario="line_values['valorunitario']"
+                            t-att-Importe="line_values['importe']"
+                            t-att-ObjetoImp="line_values['ObjetoImp']">
+                        </cfdi:Concepto>
+                    </t>
+                </cfdi:Conceptos>
+                <t t-if="cartaporte31">
+                    <cfdi:Complemento
+                            xmlns:cfdi="http://www.sat.gob.mx/cfd/4">
+                        <cartaporte31:CartaPorte
+                            xmlns:cartaporte31="http://www.sat.gob.mx/CartaPorte31"
+                            Version="3.1" 
+                            t-att-IdCCP= "cartaporte31['IdCCP']"
+                            t-att-TranspInternac= "cartaporte31['TranspInternac']"
+                            t-att-EntradaSalidaMerc= "cartaporte31['EntradaSalidaMerc']"
+                            t-att-ViaEntradaSalida= "cartaporte31['ViaEntradaSalida']"
+                            t-att-TotalDistRec= "cartaporte31['TotalDistRec']"
+                            t-att-PaisOrigenDestino= "cartaporte31['PaisOrigenDestino']">
+                            <t t-if="'Aduaneros' in cartaporte31">
+                                <t t-foreach="cartaporte31['Aduaneros']" t-as="aduanera">
+                                    <cartaporte31:RegimenAduaneroCCP
+                                              t-att-RegimenAduanero="aduanera['RegimenAduanero']"/>
+                                </t>
+                            </t>
+                            <cartaporte31:Ubicaciones>
+                               <t t-foreach="cartaporte31['Ubicaciones']" t-as="ubicacion">
+                                  <cartaporte31:Ubicacion
+                                        t-att-TipoUbicacion="ubicacion['TipoUbicacion']"
+                                        t-att-IDUbicacion="ubicacion['IDUbicacion']"
+                                        t-att-RFCRemitenteDestinatario="ubicacion['RFCRemitenteDestinatario']"
+                                        t-att-NombreRemitenteDestinatario="ubicacion['NombreRemitenteDestinatario']"
+                                        t-att-NumRegIdTrib="ubicacion['NumRegIdTrib'] or None"
+                                        t-att-ResidenciaFiscal="ubicacion['ResidenciaFiscal'] or None"
+                                        t-att-NumEstacion="ubicacion['NumEstacion'] or None"
+                                        t-att-NombreEstacion="ubicacion['NombreEstacion'] or None"
+                                        t-att-FechaHoraSalidaLlegada="ubicacion['FechaHoraSalidaLlegada']"
+                                        t-att-TipoEstacion="ubicacion['TipoEstacion'] or None"
+                                        t-att-DistanciaRecorrida="ubicacion['DistanciaRecorrida'] or None">
+                                     <t t-set="domicilio" t-value="ubicacion['Domicilio']"/>
+                                     <cartaporte31:Domicilio
+                                        t-att-Calle="domicilio['Calle']"
+                                        t-att-NumeroExterior="domicilio['NumeroExterior']"
+                                        t-att-NumeroInterior="domicilio['NumeroInterior'] or None"
+                                        t-att-Colonia="domicilio['Colonia']"
+                                        t-att-Municipio="domicilio['Municipio']"
+                                        t-att-Localidad="domicilio['Localidad']"
+                                        t-att-Estado="domicilio['Estado']"
+                                        t-att-Pais="domicilio['Pais']"
+                                        t-att-CodigoPostal="domicilio['CodigoPostal']"/>
+                                  </cartaporte31:Ubicacion>
+                               </t>
+                            </cartaporte31:Ubicaciones>
+
+                           <t t-set="mercancias" t-value="cartaporte31['Mercancias']"/>
+                            <cartaporte31:Mercancias
+                                    t-att-NumTotalMercancias="mercancias['NumTotalMercancias']" 
+                                    t-att-PesoBrutoTotal="mercancias['PesoBrutoTotal']"
+                                    t-att-UnidadPeso="mercancias['UnidadPeso']"
+                                    t-att-PesoNetoTotal="mercancias['PesoNetoTotal']"
+                                    t-att-CargoPorTasacion="mercancias['CargoPorTasacion'] or None">
+                                <t t-set="mercancia" t-value="mercancias['mercancia']"/>
+                                <t t-foreach="mercancia['atributos']" t-as="atributos">
+                                    <cartaporte31:Mercancia 
+                                        t-att-BienesTransp="atributos['BienesTransp']"
+                                        t-att-ClaveSTCC="atributos['ClaveSTCC']"
+                                        t-att-Descripcion="atributos['Descripcion']"
+                                        t-att-Cantidad="atributos['Cantidad']"
+                                        t-att-ClaveUnidad="atributos['ClaveUnidad']"
+                                        t-att-Unidad="atributos['Unidad']"
+                                        t-att-Dimensiones="atributos['Dimensiones'] or None"
+                                        t-att-MaterialPeligroso="atributos['MaterialPeligroso'] or None"
+                                        t-att-CveMaterialPeligroso="atributos['CveMaterialPeligroso'] or None"
+                                        t-att-Embalaje="atributos['Embalaje'] or None"
+                                        t-att-DescripEmbalaje="atributos['DescripEmbalaje'] or None"
+                                        t-att-SectorCOFEPRIS="atributos['SectorCofepris'] or None"
+                                        t-att-NombreIngredienteActivo="atributos['IngredienteActivo'] or None"
+                                        t-att-NomQuimico="atributos['NomQuimico'] or None"
+                                        t-att-DenominacionGenericaProd="atributos['DenominacionGenerica'] or None"
+                                        t-att-DenominacionDistintivaProd="atributos['DenominacionDistintiva'] or None"
+                                        t-att-Fabricante="atributos['Fabricante'] or None"
+                                        t-att-FechaCaducidad="atributos['FechaCaducidad'] or None"
+                                        t-att-LoteMedicamento="atributos['LoteMedicamento'] or None"
+                                        t-att-FormaFarmaceutica="atributos['FormaFarmaceutica'] or None"
+                                        t-att-CondicionesEspTransp="atributos['CondicionesEsp'] or None"
+                                        t-att-RegistroSanitarioFolioAutorizacion="atributos['RegistroSanitario'] or None"
+                                        t-att-PermisoImportacion="atributos['PermisoImportacion'] or None"
+                                        t-att-FolioImpoVUCEM="atributos['FolioImpoVUCEM'] or None"
+                                        t-att-NumCAS="atributos['NumCAS'] or None"
+                                        t-att-RazonSocialEmpImp="atributos['RazonSocialEmpImp'] or None"
+                                        t-att-NumRegSanPlagCOFEPRIS="atributos['NumRegSan'] or None"
+                                        t-att-DatosFabricante="atributos['DatosFabricante'] or None"
+                                        t-att-DatosFormulador="atributos['DatosFormulador'] or None"
+                                        t-att-DatosMaquilador="atributos['DatosMaquilador'] or None"
+                                        t-att-UsoAutorizado="atributos['UsoAutorizado'] or None"
+                                        t-att-TipoMateria="atributos['TipoMateria'] or None"
+                                        t-att-DescripcionMateria="atributos['DescripcionMateria'] or None"
+                                        t-att-PesoEnKg="atributos['PesoEnKg']"
+                                        t-att-ValorMercancia="atributos['ValorMercancia']"
+                                        t-att-FraccionArancelaria="atributos['FraccionArancelaria'] or None"
+                                        t-att-Moneda="atributos['Moneda'] if atributos['ValorMercancia'] else None">
+
+                                        <t t-if="'GuiasIdentificacion' in atributos">
+                                            <t t-foreach="atributos['GuiasIdentificacion']" t-as="guias">
+                                                <cartaporte31:GuiasIdentificacion
+                                                      t-att-NumeroGuiaIdentificacion="guias['NumeroGuiaIdentificacion']"
+                                                      t-att-DescripGuiaIdentificacion="guias['DescripGuiaIdentificacion']"
+                                                      t-att-PesoGuiaIdentificacion="guias['PesoGuiaIdentificacion']"/>
+                                            </t>
+                                        </t>
+                                        <t t-if="'DocumentacionAduanera' in atributos">
+                                            <t t-foreach="atributos['DocumentacionAduanera']" t-as="aduanera">
+                                                <cartaporte31:DocumentacionAduanera
+                                                      t-att-TipoDocumento="aduanera['TipoDocumento']"
+                                                      t-att-NumPedimento="aduanera['NumPedimento']"
+                                                      t-att-IdentDocAduanero="aduanera['IdentDocAduanero']"
+                                                      t-att-RFCImpo="aduanera['RFCImpo']"/>
+                                            </t>
+                                        </t>
+                                        <t t-if="'CantidadTransporta' in atributos">
+                                            <t t-foreach="atributos['CantidadTransporta']" t-as="transporta">
+                                                <cartaporte31:CantidadTransporta
+                                                      t-att-Cantidad="transporta['Cantidad']"
+                                                      t-att-IDOrigen="transporta['IDOrigen']"
+                                                      t-att-IDDestino="transporta['IDDestino']"/>
+                                            </t>
+                                        </t>
+                                        </cartaporte31:Mercancia>
+                                </t>
+                                <t t-if="mercancias['Autotransporte']">
+                                        <t t-set="transporte" t-value="mercancias['Autotransporte']"/>
+                                        <cartaporte31:Autotransporte
+                                            t-att-PermSCT="transporte['PermSCT']"
+                                            t-att-NumPermisoSCT= "transporte['NumPermisoSCT']">
+                                            <t t-set="idvehicular" t-value="transporte['IdentificacionVehicular']"/>
+                                            <cartaporte31:IdentificacionVehicular
+                                                t-att-ConfigVehicular="idvehicular['ConfigVehicular']"
+                                                t-att-PesoBrutoVehicular="idvehicular['PesoBrutoVehicular']"
+                                                t-att-PlacaVM="idvehicular['PlacaVM']"
+                                                t-att-AnioModeloVM="idvehicular['AnioModeloVM']"/>
+                                            <t t-set="seguro" t-value="transporte['Seguros']"/>
+                                            <cartaporte31:Seguros
+                                                t-att-AseguraRespCivil="seguro['AseguraRespCivil']"
+                                                t-att-PolizaRespCivil="seguro['PolizaRespCivil']"
+                                                t-att-AseguraCarga="seguro['AseguraCarga']"
+                                                t-att-PolizaCarga="seguro['PolizaCarga']"
+                                                t-att-PrimaSeguro="seguro['PrimaSeguro']"
+                                                t-att-AseguraMedAmbiente="seguro['AseguraMedAmbiente']"
+                                                t-att-PolizaMedAmbiente="seguro['PolizaMedAmbiente']"/>
+                                            <t t-if="'Remolques' in transporte">
+                                               <cartaporte31:Remolques>
+                                                  <t t-foreach="transporte['Remolques']" t-as="remolque">
+                                                      <cartaporte31:Remolque
+                                                         t-att-SubTipoRem="remolque['SubTipoRem']"
+                                                         t-att-Placa="remolque['Placa']"/>
+                                                  </t>
+                                               </cartaporte31:Remolques>
+                                            </t>
+                                        </cartaporte31:Autotransporte>
+                                </t>
+                            </cartaporte31:Mercancias>
+
+                            <t t-set="figuras" t-value="cartaporte31['FiguraTransporte']"/>
+                            <cartaporte31:FiguraTransporte>
+                                <t t-foreach="figuras" t-as="figura">
+                                     <t t-set="tipofigura" t-value="figura['TiposFigura']"/>
+                                     <cartaporte31:TiposFigura
+                                                 t-att-TipoFigura="tipofigura['TipoFigura']"
+                                                 t-att-RFCFigura="tipofigura['RFCFigura']"
+                                                 t-att-NumLicencia="tipofigura['NumLicencia']"
+                                                 t-att-NombreFigura="tipofigura['NombreFigura']"
+                                                 t-att-NumRegIdTribFigura="tipofigura['NumRegIdTribFigura'] or None"
+                                                 t-att-ResidenciaFiscalFigura="tipofigura['ResidenciaFiscalFigura'] or None">
+                                                 <t t-set="partestransporte" t-value="figura['PartesTransporte']"/>
+                                                 <t t-foreach="partestransporte" t-as="parte">
+                                                     <cartaporte31:PartesTransporte
+                                                          t-att-ParteTransporte="parte['ParteTransporte']">
+                                                     </cartaporte31:PartesTransporte>
+                                                 </t>
+                                                 <t t-set="domicilio_ft" t-value="tipofigura['Domicilio']"/>
+                                                 <cartaporte31:Domicilio
+                                                     t-att-Calle="domicilio_ft['Calle']"
+                                                     t-att-NumeroExterior="domicilio_ft['NumeroExterior']"
+                                                     t-att-Colonia="domicilio_ft['Colonia']"
+                                                     t-att-Localidad="domicilio_ft['Localidad']"
+                                                     t-att-Municipio="domicilio_ft['Municipio']"
+                                                     t-att-Estado="domicilio_ft['Estado']"
+                                                     t-att-Pais="domicilio_ft['Pais']"
+                                                     t-att-CodigoPostal="domicilio_ft['CodigoPostal']"/>
+                                     </cartaporte31:TiposFigura>
+                                </t>
+                            </cartaporte31:FiguraTransporte>
+
+                       </cartaporte31:CartaPorte>
+                    </cfdi:Complemento>
+                </t>
+            </cfdi:Comprobante>
+        </template>
+
+</odoo>

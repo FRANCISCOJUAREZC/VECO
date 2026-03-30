@@ -9,7 +9,7 @@ class installment_line(models.Model):
 
     name = fields.Char('Nombre')
     employee_id = fields.Many2one('hr.employee',string='Empleado')
-    loan_id = fields.Many2one('employee.loan',string='Deducción',required="1", ondelete='cascade')
+    loan_id = fields.Many2one('employee.loan',string='Deducción',required=True, ondelete='cascade')
     date = fields.Date('Fecha')
     is_paid = fields.Boolean('Pagado')
     amount = fields.Float('Monto de la deducción')
@@ -40,10 +40,7 @@ class installment_line(models.Model):
     def get_total_installment(self):
         for line in self:
             line.total_installment = line.ins_interest + line.installment_amt
-            
-            
-        
-   
+
     def action_view_payslip(self):
         if self.payslip_id:
             return {
@@ -54,5 +51,3 @@ class installment_line(models.Model):
                 'type': 'ir.actions.act_window',
                 
             }
-            
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

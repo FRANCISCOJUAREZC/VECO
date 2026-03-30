@@ -1,0 +1,5 @@
+id,clave,descripcion
+catalogos_cond_esp1,01,Congelados
+catalogos_cond_esp2,02,Refrigerados
+catalogos_cond_esp3,03,Refrigerados
+catalogos_cond_esp4,04,Temperatura ambiente

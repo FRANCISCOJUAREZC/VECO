@@ -1,0 +1,11 @@
+id,clave,descripcion
+catalogos_regimen_aduanero1,IMD,Definitivo de importación.
+catalogos_regimen_aduanero2,EXD,Definitivo de exportación.
+catalogos_regimen_aduanero3,ITR,Temporales de importación para retomar al extranjero en el mismo estado.
+catalogos_regimen_aduanero4,ITE,Temporales de importación para elaboración, transformación o reparación para empresas con programa IMMEX.
+catalogos_regimen_aduanero5,ETR,Temporales de exportación para retornar al país en el mismo estado.
+catalogos_regimen_aduanero6,ETE,Temporales de exportación para elaboración, transformación o reparación.
+catalogos_regimen_aduanero7,DFI,Depósito Fiscal.
+catalogos_regimen_aduanero8,RFE,Elaboración, transformación o reparación en recinto fiscalizado.
+catalogos_regimen_aduanero9,RFS,Recinto fiscalizado estratégico.
+catalogos_regimen_aduanero10,TRA,Tránsitos

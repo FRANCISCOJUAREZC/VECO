@@ -39,8 +39,8 @@
 					<div style="border-bottom: 1px solid black;"></div>
 				</div>
 			</div>
-			<t t-if="o.estado_factura == 'factura_cancelada'">			 
-			   <h1 style="text-align:center;">FACTURA CANCELADA</h1>			 
+			<t t-if="o.estado_factura == 'factura_cancelada'">
+			   <h1 style="text-align:center;">FACTURA CANCELADA</h1>
 			</t>
         </div>
 
@@ -62,12 +62,8 @@
 	                <li t-if="company.website" class="list-inline-item">Página web: <span t-field="company.website"/></li>
                 </ul>
 
-                <div name="financial_infos">
-                    <span t-field="company.report_footer"/>
-                </div>
-
                 <div class="text-muted">
-                    Page: <span class="page"/> / <span class="topage"/>
+                    Hoja: <span class="page"/> / <span class="topage"/>
                 </div>
             </div>
         </div>
@@ -87,8 +83,7 @@
 
 					<!--INICIA LOGO DE LA EMPRESA-->
 						<div class="col-4">
-							<img t-if="o.company_id.logo" t-att-src="'data:image/png;base64,%s' % to_text(o.company_id.logo)"
-							style="max-height: 130px;max-width: 130px;" />
+						    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="height: 130px;width: 130px;padding-left:10px;" />
 						</div>
 					<!--TERMINA LOGO DE LA EMPRESA-->
 
@@ -249,7 +244,7 @@
 					</table>
 
 				<!--INICIO DE TABLA SUBTOTAL Y TOTAL -->
-					<div class="row">
+					<div class="row" align="right">
 							<div t-attf-class="#{'col-4' if report_type != 'html' else 'col-sm-7 col-md-5'} ml-auto">
 								<table class="table table-sm">
 									<tr class="border-black">
@@ -337,52 +332,24 @@
 						<table class="borderless" cellspacing="0"  style="width:100%;border:none;border-collapse:separate;border-spacing: 2px;">
 							<tr>
 								<td>
-									<strong>Método de pago</strong>
-								</td>
-								<td >
-									<span t-field="o.methodo_pago" />
-								</td>
-								<td>
 									<strong>Fecha y hora de certificación</strong>
 								</td>
-								<td >
-									<span t-field="o.fecha_certificacion" />
-								</td>
-							</tr>
-							<tr>
 								<td>
-									<strong>Forma de pago</strong>
-								</td>
-								<td >
-									<span t-field="o.forma_pago" />
+									<span t-field="o.fecha_certificacion" />
 								</td>
 								<td>
 									<strong>Número de certificado</strong>
 								</td>
-								<td >
+								<td>
 									<span t-field="o.numero_cetificado" />
 								</td>
 							</tr>
 							<tr>
-							   <td>
-									<strong>Moneda</strong>
-								</td>
-								<td >
-									<span t-field="o.moneda" />
-								</td>
 								<td>
 									<strong>Certificado SAT</strong>
 								</td>
 								<td >
 									<span t-field="o.cetificaso_sat" />
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<strong>Tipo de cambio</strong>
-								</td>
-								<td >
-									<span t-field="o.tipocambio" />
 								</td>
 								<td>
 									<strong>Folio fiscal</strong>
@@ -429,13 +396,21 @@
 				<!--TERMINA TABLA DE MERCANCIAS A TRASLADAR-->
 
 				<!--TABLA DE ATRIBUTOS CARTA PORTE-->
-				<table class="table table-bordered">
+				<div name="atributos" class="row" style="page-break-inside: avoid">
+						<!--INICIA CODIGOQR-->
+						<div class="col-5">
+                            <img t-if="o.qrcode_ccp_image" t-att-src="image_data_uri(o.qrcode_ccp_image)" style="height: 180px;width: 180px;" />
+						</div>
+						<!--TERMINA CODIGO QR-->
+					    <div class="col-7" >
+				<table class="table table-bordered" style="width:100%">
 					<thead class="thead-light">
-						<tr>
+						<tr style="width:100%">
 							<td style="text-align:center;padding:3px;">ATRIBUTOS DE CARTA PORTE</td>
 						</tr>
 					</thead>
 					<tbody>
+						<tr style="width:100%">
 						<td>
 							<strong>Tipo de transporte: </strong><span t-field="o.tipo_transporte"/><br/>
 							<strong>¿Es un transporte internacional? </strong><span t-field="o.transpinternac"/>
@@ -443,22 +418,31 @@
 								<strong>¿Las mercancías ingresan o salen del territorio nacional? </strong><span t-field="o.entradasalidamerc"/><br/>
 								<strong>Vía de ingreso / salida </strong><span t-field="o.viaentradasalida"/>
 							</t>
+							<br/>
+							<strong>IdCCP: </strong><span t-field="o.IdCCP"/><br/>
 						</td>
+						</tr>
 					</tbody>
 				</table>
+						</div>
 				<!--TERMINA TABLA DE ATRIBUTOS CARTA PORTE-->
+				</div>
 
 				<!--TABLA DE UBICACIONES-->
 				<table class="table table-bordered">
 					<thead class="thead-light">
 						<tr><td colspan="6" style="text-align:center;padding:3px;">UBICACIONES</td></tr>
 						<tr>
-					    	<td style="padding:2px;">Tipo de ubicación</td>
-					    	<td style="padding:2px;">Dirección</td>
-					    	<td style="padding:2px;">Fecha de salida/llegada</td>
-					    	<td style="padding:2px;">Tipo de estación</td>
-					    	<td style="padding:2px;">Número de estación</td>
-					    	<td style="padding:2px;">Distancia recorrida</td>
+                            <td style="padding:2px;">Tipo de ubicación</td>
+                            <td style="padding:2px;">Dirección</td>
+                            <td style="padding:2px;">Fecha de salida/llegada</td>
+                            <t t-if="o.tipo_transporte != '01'">
+                               <td style="padding:2px;">Tipo de estación</td>
+                               <td style="padding:2px;">Número de estación</td>
+                            </t>
+                            <t t-if="o.tipo_transporte == '01'">
+                               <td style="padding:2px;">Distancia recorrida (Km.)</td>
+                            </t>
 					    </tr>
 					</thead>
 
@@ -518,13 +502,21 @@
 							<strong>Año del vehículo </strong><span t-field="o.autotrasporte_ids.aniomodelo"/><br/>
 							<strong>Nombre de la aseguradora </strong><span t-field="o.autotrasporte_ids.nombreaseg"/><br/>
 							<strong>Número de póliza </strong><span t-field="o.autotrasporte_ids.numpoliza"/><br/>
+
+							<t t-if="o.remolque_line_ids">
+								<br/><strong>Remolque</strong><br/>
+								<t t-foreach="o.remolque_line_ids" t-as="l">
+										<strong>Subtipo: </strong><span t-field="l.subtipo_id.descripcion"/> --- 
+										<strong>Placa: </strong><span t-field="l.placa"/><br/>
+								</t>
+							</t>
 						</td>
 					</tbody>
 				</table>
 				<table class="table table-bordered" style="margin-top:0px;">
 					<thead class="thead-light">
 						<tr>
-							<td colspan="2" style="text-align:center;padding:3px;">FIGURAS DE TRANSPORE</td>
+							<td colspan="2" style="text-align:center;padding:3px;">FIGURAS DE TRANSPORTE</td>
 						</tr>
 						<tr>
 							<td style="text-align:center;padding:3px;width:50%;">Tipo de figura</td>
@@ -543,44 +535,32 @@
 				<!--TERMINA TABLA DE DATOS DE TRANSPORTE-->
 			</t>
 
-
-
-
 				<!--INICIAN ELEMENTOS DEL SAT-->
-				<!--CORRECCIÓN DE ETIQUETAS STRONG-->
+                    <div name="cadenas" class="row" style="page-break-inside: avoid">
+                         <!--INICIA CODIGO QR-->
+                         <div class="barcode col-3">
+                            <img t-if="o.qrcode_image" t-att-src="image_data_uri(o.qrcode_image)" style="height: 180px;width: 180px;" />
+                         </div>
+                          <!--TERMINA CODIGO QR-->
+                         <div class="col-9" style="font-size:10px;">
+                            <div>
+                                <strong>Cadena Original del Complemento digital del SAT</strong>
+                                <span t-field="o.cadena_origenal" style="word-break:break-word;font-size:8px;" />
+                            </div>
+                            <div>
+                                <strong>Sello Digital del CFDI</strong>
+                                <span t-field="o.selo_digital_cdfi" style="word-break:break-word;font-size:8px;" />
+                            </div>
+                            <div>
+                                <strong>Sello del SAT</strong>
+                                <span t-field="o.selo_sat" style="word-break:break-word;font-size:8px;" />
+                            </div>
+                         </div>
+                    </div>
 
-
-				<div name="cadenas" class="row" style="page-break-inside: avoid">
-						<!--INICIA CODIGOQR-->
-						<div class="col-xs-5">
-							<img t-if="o.qrcode_image" t-att-src="'data:image/png;base64,%s' % to_text(o.qrcode_image)"
-							style="height: 190px;width: 190px;padding-left:10px;" />
-						</div>
-						<!--TERMINA CODIGO QR-->
-					<div class="col-xs-7" style="font-size:13px;">
-						<!--CADENA ORIGINAL>  -->
-						<div >
-							<strong>Cadena Original del Complemento digital del SAT</strong>
-								<span t-field="o.cadena_origenal" style="word-break:break-word;" />
-						</div>
-						<div >
-							<strong>Sello digital del CFDI</strong>
-								<span t-field="o.selo_digital_cdfi" style="word-break:break-word;" />
-						</div>
-						<div >
-							<strong>Sello del SAT</strong>
-								<span t-field="o.selo_sat" style="word-break:break-word;" />
-						</div>
-					</div>
-				</div>
-				<!--TERMINAN ELEMENTOS DEL SAT-->
-
-
-					<!--DOCUMENTO LEGAL-->
 					<p>
 						<center>
-							<strong>ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI
-							</strong>
+							<strong>ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI</strong>
 						</center>
 					</p>
 
@@ -601,12 +581,17 @@
 			</t>
 		</template>
 
-		<report id="report_facturatraslado"
-				model="cfdi.traslado"
-				string="Factura Traslado"
-        		menu="True"
-				report_type="qweb-pdf"
-				name="l10n_mx_traslado.report_facturatraslado1"
-				paperformat="l10n_mx_traslado.paperformat_a4_landscape"/> 
+        <record id="report_facturatraslado" model="ir.actions.report">
+            <field name="name">Factura Traslado</field>
+            <field name="model">cfdi.traslado</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">l10n_mx_traslado.report_facturatraslado1</field>
+            <field name="report_file">l10n_mx_traslado.report_facturatraslado1</field>
+            <field name="paperformat_id" ref="l10n_mx_traslado.paperformat_a4_landscape"/>
+            <field name="binding_model_id" ref="model_cfdi_traslado"/>
+            <field name="binding_type">report</field>
+            <field name="print_report_name">(object.number)</field>
+        </record>
+
 
 </odoo>

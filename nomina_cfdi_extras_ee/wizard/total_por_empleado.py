@@ -49,7 +49,7 @@ class TotalPorEmpleado(models.TransientModel):
             hr_payslips=sorted(hr_payslips, key=lambda x: int(x.employee_id.no_empleado), reverse=False)
             for slip in hr_payslips:
                 row+=1
-                if slip.state == "cancel":
+                if slip.state != "done":
                     continue
 #                if slip.employee_id.no_empleado:
 #                    print(slip.employee_id.no_empleado)

@@ -2,7 +2,6 @@
 
 from odoo import models
 
-
 class PartnerXlsx(models.AbstractModel):
     _name = 'report.nomina_cfdi_extras_ee.report_imss_payslip_batch'
     _inherit = 'report.report_xlsx.abstract'

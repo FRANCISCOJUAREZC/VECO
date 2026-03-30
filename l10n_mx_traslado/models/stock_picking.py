@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from odoo import models,_
 from odoo.exceptions import UserError
 from datetime import date, datetime
-from odoo.exceptions import UserError, Warning
+from odoo.exceptions import UserError
 
 class StockPicking(models.Model):
     _inherit = "stock.picking"
@@ -18,16 +20,16 @@ class StockPicking(models.Model):
                        for l in line_vals:
                            if l.get('product_id') == line.product_id.id:
                                is_product = True
-                               l.update({'quantity': l.get('quantity') + line.reserved_availability})
+                               l.update({'quantity': l.get('quantity') + line.quantity})
                        if not is_product:
-                           if line.reserved_availability > 0:
+                           if line.quantity > 0:
                               line_vals.append({'product_id':line.product_id.id,
                                                 'name':line.product_id.partner_ref,
                                                 'price_unit':line.product_id.lst_price,
-                                                'pesoenkg':line.product_id.weight * line.reserved_availability,
-                                                'quantity':line.reserved_availability})
+                                                'pesoenkg':line.product_id.weight * line.quantity,
+                                                'quantity':line.quantity})
                        is_product = False
-                       origin += data.name + ' '
+                       origin += data.name + ' ' if not data.name in origin else ''
                else:
                    raise UserError(_('Debe tener productos en las líneas.'))
             if data.state == 'done':
@@ -36,16 +38,16 @@ class StockPicking(models.Model):
                        for l in line_vals:
                            if l.get('product_id') == line.product_id.id:
                                is_product = True
-                               l.update({'quantity': l.get('quantity') + line.quantity_done})
+                               l.update({'quantity': l.get('quantity') + line.quantity})
                        if not is_product:
-                           if line.quantity_done > 0:
+                           if line.quantity > 0:
                               line_vals.append({'product_id':line.product_id.id,
                                                 'name':line.product_id.partner_ref,
                                                 'price_unit':line.product_id.lst_price,
-                                                'pesoenkg':line.product_id.weight * line.quantity_done,
-                                                'quantity':line.quantity_done})
+                                                'pesoenkg':line.product_id.weight * line.quantity,
+                                                'quantity':line.quantity})
                        is_product = False
-                       origin += data.name + ' '
+                       origin += data.name + ' ' if not data.name in origin else ''
                else:
                    raise UserError(_('Debe tener productos en las líneas.'))
 
@@ -56,7 +58,8 @@ class StockPicking(models.Model):
                    'invoice_date': datetime.today(),
                    'currency_id': self.company_id.currency_id.id, # data.company_id.currency_id.id,
                    'factura_line_ids':line_vals and [(0,0,i) for i in line_vals] or [(0,0,{})],
-                   'company_id': self.company_id.id
+                   'company_id': self.company_id.id,
+                   'journal_id': self.env['account.journal'].search([('type','=','sale'),('company_id', '=', self.company_id.id)],limit=1).id,
                    }
                cfdi_id = cfdi_traslado_obj.create(val)
         else:

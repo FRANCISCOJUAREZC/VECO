@@ -35,6 +35,7 @@
             name="Altas y Bajas"
             action="action_wizard_altas_y_bajas"
             parent="menu_main_reportes"
+            groups="nomina_cfdi_ee.group_nomina_mx"
             sequence="10"/>
 
 </odoo>

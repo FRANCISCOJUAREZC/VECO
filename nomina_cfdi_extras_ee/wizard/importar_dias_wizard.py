@@ -3,7 +3,7 @@
 from odoo import models, fields, api, _
 from datetime import datetime
 from odoo.tools.mimetypes import guess_mimetype
-from odoo.exceptions import Warning, UserError
+from odoo.exceptions import UserError
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, pycompat
 from collections.abc import MutableMapping
 
@@ -41,7 +41,7 @@ class ImportarDiasWizard(models.TransientModel):
     
     import_file = fields.Binary("Importar",required=True)
     file_name = fields.Char("Nombre de file")
-    contract_id = fields.Many2one('hr.contract', string='Contract', help="The contract for which applied this input")
+    contract_id = fields.Many2one('hr.version', string='Contract', help="The contract for which applied this input")
     
     
     def import_xls_file(self):
@@ -113,9 +113,9 @@ class ImportarDiasWizard(models.TransientModel):
                 if payslip not in worked_days_lines_by_payslip:
                     worked_days_lines_by_payslip[payslip] = []
                 if other_inputs:
-                    worked_lines = payslip.input_line_ids.code.filtered(lambda x:x.input_type_id.code==code)
+                    worked_lines = payslip.input_line_ids.filtered(lambda x:x.code==code)
                 else:    
-                    worked_lines = payslip.worked_days_line_ids.code.filtered(lambda x:x.work_entry_type_id.code==code)
+                    worked_lines = payslip.worked_days_line_ids.filtered(lambda x:x.code==code)
                     
                 if worked_lines:
                     worked_days_lines_by_payslip[payslip] += [(1, l.id, vals) for l in worked_lines]
@@ -125,7 +125,7 @@ class ImportarDiasWizard(models.TransientModel):
                         raise UserError("Please select Contract. No valid contract found for employee %s."%(payslip.employee_id.name))
                     vals.update({'name':description,'code':code,'contract_id':contract_id})
                     worked_days_lines_by_payslip[payslip].append((0,0, vals))
-                        
+
         for payslip, worked_day_lines in worked_days_lines_by_payslip.items():
             if not worked_day_lines:
                 continue

@@ -7,15 +7,16 @@
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form" />
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='category_id']" position="after">
-                       <field name="l10n_mx_edi_colony_code" placeholder="Colony Code"/>
-                </xpath>
                <xpath expr="//notebook" position="inside">
                      <page name="info_ccp" string="Carta Porte">
                             <group cols="4">
                                 <group>
                                     <field name="cce_licencia"/>
                                     <field name="codigotransportista"/>
+                                </group>
+                                <group>
+                                    <field name="cce_latitud"/>
+                                    <field name="cce_longitud"/>
                                 </group>
                             </group>
                      </page>

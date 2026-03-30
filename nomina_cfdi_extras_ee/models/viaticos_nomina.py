@@ -7,24 +7,21 @@ class ViaticosNomina(models.Model):
     _name = 'viaticos.nomina'
     _description = 'ViaticosNomina'
 
-    
     @api.depends('entregas_ids.importe')
     def _compute_entregas(self):
         for record in self:
             record.entregas = sum([entregas.importe for entregas in record.entregas_ids])
-    
-    
+
     @api.depends('comprobaciones_ids.importe')
     def _compute_comprobaciones(self):
         for record in self:
             record.comprobaciones = sum([comprobaciones.importe for comprobaciones in record.comprobaciones_ids])
-    
-    
+
     @api.depends('comprobaciones', 'entregas')
     def _compute_por_comprobar(self):
         for record in self:
             record.por_comprobar = record.entregas - record.comprobaciones
-                    
+
     name = fields.Char("Name", default=lambda self: _('New')) 
     fecha = fields.Date("Fecha")
     employee_id = fields.Many2one("hr.employee", 'Empleado')
@@ -34,11 +31,11 @@ class ViaticosNomina(models.Model):
     por_comprobar = fields.Float("Por comprobar",compute="_compute_por_comprobar", store=True)
     observaciones = fields.Text("Observaciones")
     state = fields.Selection([('draft','Generar entregas'), ('open','Generar comprobaciones'), ('closed','Cerrado')],string='Estado',default='draft')
-    
+
     entregas_ids = fields.One2many('entregas.viaticos.nomina', 'viaticos_id', 'Entregas')
     comprobaciones_ids = fields.One2many('comprobaciones.viaticos.nomina', 'viaticos_id', 'Comprobaciones')
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
-    
+
     @api.model
     def init(self):
         company_id = self.env['res.company'].search([])
@@ -51,18 +48,18 @@ class ViaticosNomina(models.Model):
                         'padding': 4,
                         'company_id': company.id,
                     })
-    
-    @api.model
-    def create(self, vals):
-        if vals.get('name', _('New')) == _('New'):
-            if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code(
-                    'viaticos.nomina') or _('New')
-            else:
-                vals['name'] = self.env['ir.sequence'].next_by_code('viaticos.nomina') or _('New')
-        return super(ViaticosNomina, self).create(vals)
-    
-    
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+           if vals.get('name', _('New')) == _('New'):
+               if 'company_id' in vals:
+                   vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code(
+                       'viaticos.nomina') or _('New')
+               else:
+                   vals['name'] = self.env['ir.sequence'].next_by_code('viaticos.nomina') or _('New')
+        return super(ViaticosNomina, self).create(vals_list)
+
     def action_validar(self):
         payslip_obj = self.env['hr.payslip']
         
@@ -77,16 +74,16 @@ class ViaticosNomina(models.Model):
                'name' : self.description,
                'struct_id' : structure_rec and structure_rec.id,
                'tipo_nomina' : 'E',
-               'contract_id': employee.contract_id.id,
+               'contract_id': employee.version_id.id,
                'dias_pagar': 1,
                }
-           if employee.contract_id:
+           if employee.version_id:
                vals.update({
                    'input_line_ids' : [(0, 0, {
                                     'name': 'Viaticos',
                                     'code': 'VIAT',
                                     'amount' : amount,
-                                    'contract_id': employee.contract_id.id 
+                                    'contract_id': employee.version_id.id 
                                 })],
                 })
            payslip_obj.create(vals)
@@ -107,22 +104,22 @@ class ViaticosNomina(models.Model):
                     'name' : self.description,
                     'struct_id' : structure_rec and structure_rec.id,
                     'tipo_nomina' : 'E',
-                    'contract_id' : employee.contract_id.id,
+                    'contract_id' : employee.version_id.id,
                     'dias_pagar': 1,
                     }
-                if employee.contract_id:
+                if employee.version_id:
                     vals.update({
                         'input_line_ids' : [(0, 0, {
                                             'name': 'Viaticos',
                                             'code': 'PVIAT',
                                             'amount' : amount,
-                                            'contract_id': employee.contract_id.id
+                                            'contract_id': employee.version_id.id
                                             }),
                                             (0, 0, {
                                             'name': 'Ajuste en viáticos entregados al trabajador',
                                             'code': 'DVIAT',
                                             'amount' : amount,
-                                            'contract_id': employee.contract_id.id
+                                            'contract_id': employee.version_id.id
                                             }),
                                             ],
                         })

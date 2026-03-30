@@ -6,8 +6,9 @@ from odoo import models, fields, api
 #from dateutil import relativedelta
 from collections import defaultdict
 import io
-from odoo.tools.misc import xlwt
+#from odoo.tools.misc import xlwt
 import base64
+import xlwt
 
 class WizardReglasSalariales(models.TransientModel):
     _name = 'wizard.regalas.salarieles'
@@ -23,7 +24,7 @@ class WizardReglasSalariales(models.TransientModel):
     
    
     def print_reglas_salariales_report(self):
-        domain=[('state','in', ('done','paid'))]
+        domain=[('state','=', 'done')]
         if self.date_from:
             domain.append(('date_from','>=',self.date_from))
             

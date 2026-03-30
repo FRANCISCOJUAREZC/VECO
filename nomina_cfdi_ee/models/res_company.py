@@ -10,107 +10,57 @@ from dateutil import parser
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    curp = fields.Char(string=_('CURP'))
-    proveedor_timbrado= fields.Selection(
-        selection=[('servidor', _('Principal')),
-                   ('servidor2', _('Respaldo')),],
-        string=_('Servidor de timbrado'), default='servidor'
-    )
-    api_key = fields.Char(string=_('API Key'))
-    modo_prueba = fields.Boolean(string=_('Modo prueba'))
-    regimen_fiscal = fields.Selection(
-        selection=[('601', _('General de Ley Personas Morales')),
-                   ('603', _('Personas Morales con Fines no Lucrativos')),
-                   ('605', _('Sueldos y Salarios e Ingresos Asimilados a Salarios')),
-                   ('606', _('Arrendamiento')),
-                   ('608', _('Demás ingresos')),
-                   ('609', _('Consolidación')),
-                   ('610', _('Residentes en el Extranjero sin Establecimiento Permanente en México')),
-                   ('611', _('Ingresos por Dividendos (socios y accionistas)')),
-                   ('612', _('Personas Físicas con Actividades Empresariales y Profesionales')),
-                   ('614', _('Ingresos por intereses')),
-                   ('616', _('Sin obligaciones fiscales')),
-                   ('620', _('Sociedades Cooperativas de Producción que optan por diferir sus ingresos')),
-                   ('621', _('Incorporación Fiscal')),
-                   ('622', _('Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras')),
-                   ('623', _('Opcional para Grupos de Sociedades')),
-                   ('624', _('Coordinados')),
-                   ('628', _('Hidrocarburos')),
-                   ('607', _('Régimen de Enajenación o Adquisición de Bienes')),
-                   ('629', _('De los Regímenes Fiscales Preferentes y de las Empresas Multinacionales')),
-                   ('630', _('Enajenación de acciones en bolsa de valores')),
-                   ('615', _('Régimen de los ingresos por obtención de premios')),
-                   ('625', _('Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas')),
-                   ('626', _('Régimen Simplificado de Confianza')),],
-        string=_('Régimen Fiscal'), 
-    )
-    archivo_cer = fields.Binary(string=_('Archivo .cer'))
-    archivo_key = fields.Binary(string=_('Archivo .key'))
-    contrasena = fields.Char(string=_('Contraseña'))
-    nombre_fiscal = fields.Char(string=_('Razón social'))
-    saldo_timbres =  fields.Float(string=_('Saldo de timbres'), readonly=True)
-    saldo_alarma =  fields.Float(string=_('Alarma timbres'), default=10)
-    correo_alarma =  fields.Char(string=_('Correo de alarma'))
+    curp = fields.Char('CURP')
+    serie_nomina = fields.Char('Serie nomina')
+    nomina_mail = fields.Char('Nomina Mail')
+    company_cfdi = fields.Boolean(string="CFDI MX")
 
-    rfc_patron = fields.Char(string=_('RFC Patrón'))
-    serie_nomina = fields.Char(string=_('Serie nomina'))
-    registro_patronal = fields.Char(string=_('Registro patronal'))
-    nomina_mail = fields.Char('Nomina Mail',)
-    fecha_csd = fields.Datetime(string=_('Vigencia CSD'), readonly=True)
-    estado_csd =  fields.Char(string=_('Estado CSD'), readonly=True)
-    aviso_csd =  fields.Char(string=_('Aviso vencimiento (días antes)'), default=14)
+    @api.onchange('country_id')
+    def _get_company_cfdi(self):
+        if self.country_id:
+            if self.country_id.code == 'MX':
+               values = {'company_cfdi': True}
+            else:
+               values = {'company_cfdi': False}
+        else:
+            values = {'company_cfdi': False}
+        self.update(values)
 
     @api.model
     def contract_warning_mail_cron(self):
         companies = self.search([('nomina_mail','!=',False)])
-        cr = self._cr
-        dt = datetime.now()
-        start_week_day = (dt - timedelta(days=dt.weekday())).date()
-        end_week_day = start_week_day + timedelta(days=6)
-
-        where_clause = []
-        while start_week_day<=end_week_day:
-            where_clause.append("TO_CHAR(date_start,'MM-DD')='%s-%s'"%("{0:0=2d}".format(start_week_day.month),"{0:0=2d}".format(start_week_day.day)))
-            start_week_day = start_week_day + timedelta(days=1) #.date()
-        where_clause = " OR ".join(where_clause)
-        
         for company in companies:
-            cr.execute("select id from hr_contract where (%s) and company_id=%d"%(where_clause,company.id))
-            contract_ids = [r[0] for r in cr.fetchall()]
-            if not contract_ids:
-                continue
-            for contract in self.env['hr.contract'].browse(contract_ids):
-                if contract.state != 'open':
+            employees = self.env['hr.employee'].search([('company_id', '=', company.id), ('active', '=', True)])
+            for employee_id in employees:
+                first_date = employee_id._get_first_version_date()
+                if not first_date:
                    continue
-                if contract.date_start.year == datetime.today().date().year:
-                   continue
-                change_done =  False
-                for vacation_line in contract.tabla_vacaciones:
-                    if str(vacation_line.ano) == str(start_week_day.year):
-                       change_done =  True
-                if not change_done:
-                   if company.nomina_mail:
-                         mail_values = {
-                         'email_to': company.nomina_mail,
-                         'subject': 'Aniversario de un empleado',
-                         'body_html': 'Esta semana es el aniversario de ' +  contract.employee_id.name + ' en la empresa, revisar ajuste en sueldo creado en incidencias.',
-                         'auto_delete': True,
-                         }
-                         mail = self.env['mail.mail'].create(mail_values)
-                         mail.send()
-                   self.calculate_contract_vacaciones(contract)
-                   self.create_cambio_salario(contract)
+                mod_first_date = first_date.replace(year=datetime.today().date().year)
+                if mod_first_date != datetime.today().date():
+                    continue
+                if company.nomina_mail:
+                    mail_values = {
+                    'email_to': company.nomina_mail,
+                    'subject': 'Aniversario de un empleado',
+                    'body_html': 'Esta semana es el aniversario de ' +  employee_id.name + ' en la empresa, revisar ajuste en sueldo creado en incidencias.',
+                    'auto_delete': True,
+                    }
+                    mail = self.env['mail.mail'].create(mail_values)
+                    mail.send()
+                self.calculate_contract_vacaciones(employee_id)
+                self.create_cambio_salario(employee_id)
         return
 
     @api.model
-    def calculate_contract_vacaciones(self, contract):
-        tablas_cfdi = contract.tablas_cfdi_id
+    def calculate_contract_vacaciones(self, employee_id):
+        tablas_cfdi = employee_id.tablas_cfdi_id
         if not tablas_cfdi:
             tablas_cfdi = self.env['tablas.cfdi'].search([],limit=1)
         if not tablas_cfdi:
             return
-        if contract.date_start:
-            date_start = contract.date_start
+        first_date = employee_id._get_first_version_date()
+        if first_date:
+            date_start = first_date
             today = datetime.today().date()
             diff_date = today - date_start
             years = diff_date.days /365.0
@@ -126,16 +76,31 @@ class ResCompany(models.Model):
         tablas_cfdi_line = tablas_cfdi_lines[0]
         today = datetime.today()
         current_year = today.strftime('%Y')
-        contract.write({'tabla_vacaciones': [(0, 0, {'ano':current_year, 'dias': tablas_cfdi_line.vacaciones})]})
+        leave_type = self.env['hr.leave.type'].search([('code', '=', 'VAC'), ('company_id', '=', employee_id.company_id.id)], limit=1)
+        if not leave_type:
+            leave_type = self.env['hr.leave.type'].search([('code', '=', 'VAC')], limit=1)
+            if not leave_type:
+                return
+
+        asignacion_obj = self.env['hr.leave.allocation'].create(
+              {'name': 'Vacaciones del ' + current_year,
+               'holiday_status_id' : leave_type and leave_type.id,
+               'date_from' : today,
+               'employee_id' : employee_id.id,
+               'number_of_days' : tablas_cfdi_line.vacaciones,
+              })
+
+        asignacion_obj.action_approve()
         return True
 
     @api.model
-    def create_cambio_salario(self, contract):
-        if contract.date_start:
+    def create_cambio_salario(self, employee_id):
+        first_date = employee_id._get_first_version_date()
+        if first_date:
             today = datetime.today().date()
-            diff_date = (today - contract.date_start + timedelta(days=1)).days #today - date_start 
+            diff_date = (today - first_date + timedelta(days=1)).days #today - date_start 
             years = diff_date /365.0
-            tablas_cfdi = contract.tablas_cfdi_id
+            tablas_cfdi = employee_id.tablas_cfdi_id
             if not tablas_cfdi:
                 tablas_cfdi = self.env['tablas.cfdi'].search([],limit=1)
             if not tablas_cfdi:
@@ -147,20 +112,18 @@ class ResCompany(models.Model):
             if not tablas_cfdi_lines:
                 return
             tablas_cfdi_line = tablas_cfdi_lines[0]
-            sueldo_diario_integrado = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100) ) / 365) * contract.wage/tablas_cfdi.dias_mes
+            sueldo_diario_integrado = ((365 + tablas_cfdi_line.aguinaldo + (tablas_cfdi_line.vacaciones)* (tablas_cfdi_line.prima_vac/100) ) / 365) * employee_id.wage/tablas_cfdi.dias_mes
             if sueldo_diario_integrado > (tablas_cfdi.uma * 25):
                 sueldo_base_cotizacion = tablas_cfdi.uma * 25
             else:
                 sueldo_base_cotizacion = sueldo_diario_integrado
             incidencia = self.env['incidencias.nomina'].create({'tipo_de_incidencia':'Cambio salario', 
-                                                                'employee_id': contract.employee_id.id,
-                                                                'sueldo_mensual': contract.wage,
-                                                                'sueldo_diario': contract.sueldo_diario,
+                                                                'employee_id': employee_id.id,
+                                                                'sueldo_mensual': employee_id.wage,
+                                                                'sueldo_diario': employee_id.sueldo_diario,
                                                                 'sueldo_diario_integrado': sueldo_diario_integrado,
-                                                                'sueldo_por_horas' : contract.sueldo_hora,
+                                                                'sueldo_por_horas' : employee_id.sueldo_hora,
                                                                 'sueldo_cotizacion_base': sueldo_base_cotizacion,
                                                                 'fecha': today,
-                                                                'contract_id': contract.id
                                                                 })
         return
-

@@ -1,0 +1,21 @@
+id,clave,descripcion
+catalogos_forma_farma1,01,Tableta
+catalogos_forma_farma2,02,Tableta
+catalogos_forma_farma3,03,Comprimidos
+catalogos_forma_farma4,04,Grageas
+catalogos_forma_farma5,05,Suspensión
+catalogos_forma_farma6,06,Solución
+catalogos_forma_farma7,07,Emulsión
+catalogos_forma_farma8,08,Jarabe
+catalogos_forma_farma9,09,Inyectable
+catalogos_forma_farma10,10,Crema
+catalogos_forma_farma11,11,Ungüento
+catalogos_forma_farma12,12,Aerosol
+catalogos_forma_farma13,13,Gas medicinal
+catalogos_forma_farma14,14,Gel
+catalogos_forma_farma15,15,Implante
+catalogos_forma_farma16,16,Óvulo
+catalogos_forma_farma17,17,Parche
+catalogos_forma_farma18,18,Pasta
+catalogos_forma_farma19,19,Pasta
+catalogos_forma_farma20,20,Supositorio

@@ -1,0 +1,6 @@
+id,clave,descripcion
+catalogos_tipo_materia1,01,Materia prima
+catalogos_tipo_materia2,02,Materia procesada
+catalogos_tipo_materia3,03,Materia terminada(producto terminado)
+catalogos_tipo_materia4,04,Materia para la industria manufacturera
+catalogos_tipo_materia5,05,Otra

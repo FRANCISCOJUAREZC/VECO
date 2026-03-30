@@ -4,14 +4,13 @@ import pytz
 from odoo.exceptions import UserError
 from datetime import datetime, date
 from odoo import tools
-import logging
-_logger = logging.getLogger(__name__)
 
 class CajaAhorro(models.Model):
     _name = 'caja.nomina'
     _description = 'Caja de ahorro nomina'
 
-    name = fields.Char("Name", required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('New'))
+    name = fields.Char("Name", required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
+#states={'draft': [('readonly', False)]},
     employee_id = fields.Many2one('hr.employee', string='Empleado')
     fecha_solicitud = fields.Date('Fecha solicitud')
     fecha_aplicacion = fields.Date('Fecha aplicación')
@@ -37,29 +36,30 @@ class CajaAhorro(models.Model):
                         'company_id': company.id,
                     })
 
-    @api.model
-    def create(self, vals):
-        if vals.get('name', _('New')) == _('New'):
-            if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code('caja.nomina') or _('New')
-            else:
-                vals['name'] = self.env['ir.sequence'].next_by_code('caja.nomina') or _('New')
-        result = super(CajaAhorro, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+           if vals.get('name', _('New')) == _('New'):
+               if 'company_id' in vals:
+                   vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code('caja.nomina') or _('New')
+               else:
+                   vals['name'] = self.env['ir.sequence'].next_by_code('caja.nomina') or _('New')
+        result = super(CajaAhorro, self).create(vals_list)
         return result
 
     @api.onchange('employee_id')
     def _compute_saldo(self):
         for record in self:
-          if record.employee_id and len(record.employee_id.contract_ids) > 0:
-            contract = record.employee_id.contract_ids[0]
-            if contract and record.state == 'draft':
-               if contract.tablas_cfdi_id:
+          if record.employee_id and len(record.employee_id.version_ids) > 0:
+            #contract = record.employee_id.contract_ids[0]
+            if record.state == 'draft':
+               if record.employee_id.tablas_cfdi_id:
                    abono = 0
                    retiro = 0
                    domain=[('state','=', 'done')]
                    domain.append(('employee_id','=',record.employee_id.id))
-                   if contract.tablas_cfdi_id.caja_ahorro_abono:
-                        rules = record.env['hr.salary.rule'].search([('code', '=', contract.tablas_cfdi_id.caja_ahorro_abono.code)])
+                   if record.employee_id.tablas_cfdi_id.caja_ahorro_abono:
+                        rules = record.env['hr.salary.rule'].search([('code', '=', record.employee_id.tablas_cfdi_id.caja_ahorro_abono.code)])
                         payslips = record.env['hr.payslip'].search(domain)
                         payslip_lines = payslips.mapped('line_ids').filtered(lambda x: x.salary_rule_id.id in rules.ids)
                         employees = {}
@@ -73,8 +73,8 @@ class CajaAhorro(models.Model):
                             for payslip2,lines in payslips.items():
                                for line in lines:
                                   abono += line.total
-                   if contract.tablas_cfdi_id.caja_ahorro_retiro:
-                        rules = record.env['hr.salary.rule'].search([('code', '=', contract.tablas_cfdi_id.caja_ahorro_retiro.code)])
+                   if record.employee_id.tablas_cfdi_id.caja_ahorro_retiro:
+                        rules = record.env['hr.salary.rule'].search([('code', '=', record.employee_id.tablas_cfdi_id.caja_ahorro_retiro.code)])
                         payslips = record.env['hr.payslip'].search(domain)
                         payslip_lines = payslips.mapped('line_ids').filtered(lambda x: x.salary_rule_id.id in rules.ids)
                         employees = {}
@@ -99,7 +99,7 @@ class CajaAhorro(models.Model):
         if self.importe and self.saldo:
             if self.importe > self.saldo:
                 raise UserError(_("El importe a retirar debe ser menor o igual al saldo."))
-
+    
     def action_validar(self):
         self.write({'state':'done'})
         return

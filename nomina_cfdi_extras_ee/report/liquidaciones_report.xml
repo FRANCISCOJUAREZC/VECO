@@ -22,8 +22,7 @@
         		<div class="page" style="padding-top: 1px;">
         			<div class="row">
         				<div class="col-4">
-        					<img t-if="docs and docs[0].company_id.logo" t-att-src="'data:image/png;base64,%s' % to_text(docs[0].company_id.logo)"
-		                                style="max-height: 130px;max-width: 130px;" />
+        					<img t-if="docs and docs[0].company_id.logo" t-att-src="image_data_uri(docs[0].company_id.logo)" style="height: 130px;width: 130px;padding-left:10px;" />
 		                </div>
 		                
 		                <div class="col-4" style="font-size:12px;margin:0px;padding:0px;">
@@ -44,7 +43,7 @@
 		                <div class="col-4" style="font-size:12px;">
 		                	<div><strong>Folio:</strong>
 		                	<strong><span t-if="docs and not docs[0].company_id.serie_nomina=='false'" t-field="docs[0].company_id.serie_nomina" /></strong>
-		                	<span t-if="docs" t-field="docs[0].folio" />
+		                	<span t-if="docs" t-field="docs[0].number_folio" />
 		                </div>
 		                <div>
 		                	<strong>Fecha emisión: </strong>
@@ -108,13 +107,14 @@
 	            			<strong>Seguro social</strong>: <span t-if="docs" t-field="docs[0].employee_id.segurosocial" />
 	            		</div>
 	            		<div>
-	            			<strong>Salario integrado</strong>: <span t-if="docs" t-esc="round(docs[0].contract_id.sueldo_diario_integrado,2)" /> diario
+	            			<strong>Salario integrado</strong>: <span t-if="docs" t-esc="round(docs[0].employee_id.sueldo_diario_integrado,2)" /> diario
 	            		</div>
 	            		<div>
 	            			<strong>Jornada</strong>: <span t-if="docs" t-field="docs[0].employee_id.jornada" />
 	            		</div>
 	            		<div>
-	            			<strong>Fecha de ingreso</strong>: <span t-if="docs" t-field="docs[0].contract_id.date_start" />
+	            			<strong>Fecha de ingreso</strong>: <span t-if="docs" t-esc="docs[0].employee_id._get_first_version_date()" 
+	            			                                                    t-options='{"widget": "date", "format": "dd-MMM-yyyy"}'/>
 	            		</div>
 	            		<div>
 	            			<strong>Total de días laborados</strong>: <span t-esc="dias_trabajados" />
@@ -376,14 +376,17 @@
 			</t>
 		</template>
 
-        <report id="report_nomina_liquidaciones"
-                model="hr.payslip.run"
-                string="Liquidaciones"
-                report_type="qweb-pdf"
-                name="nomina_cfdi_extras_ee.report_liquidaciones_document"
-                file="nomina_cfdi_extras_ee.report_liquidaciones_document"
-                paperformat="nomina_cfdi_extras_ee.paperformat_liquidaciones"
-                menu="False"/>
+        <record id="report_nomina_liquidaciones" model="ir.actions.report">
+            <field name="name">Liquidaciones</field>
+            <field name="model">hr.payslip.run</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">nomina_cfdi_extras_ee.report_liquidaciones_document</field>
+            <field name="report_file">nomina_cfdi_extras_ee.report_liquidaciones_document</field>
+            <field name="binding_model_id" eval="False"/>
+            <field name="paperformat_id" ref="nomina_cfdi_extras_ee.paperformat_liquidaciones"/>
+            <!--<field name="binding_type">report</field>-->
+        </record>
+
 
      </data>
 </odoo>

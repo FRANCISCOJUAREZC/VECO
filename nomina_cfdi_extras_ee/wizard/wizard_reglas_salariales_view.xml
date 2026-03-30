@@ -34,15 +34,15 @@
 
 	<menuitem  name="Reportes"
                 id="menu_payroll_payslip_reportes" 
-                parent="hr_work_entry_contract_enterprise.menu_hr_payroll_root" 
-                sequence="85" 
-                groups="hr_payroll.group_hr_payroll_user"/>
+                parent="om_hr_payroll.menu_hr_payroll_root" 
+                sequence="15" 
+                groups="nomina_cfdi_ee.group_nomina_mx"/>
 
     <menuitem id="menu_action_wizard_reglas_salariales"
                 name="Reglas salariales"
                 action="action_wizard_reglas_salariales"
-                parent="menu_payroll_payslip_reportes" 
-                groups="hr_payroll.group_hr_payroll_user"
+                parent="nomina_cfdi_extras_ee.menu_payroll_payslip_reportes" 
+                groups="nomina_cfdi_ee.group_nomina_mx"
                 sequence="10"/>
 
 </odoo>

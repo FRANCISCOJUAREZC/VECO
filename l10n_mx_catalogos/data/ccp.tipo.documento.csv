@@ -1,0 +1,21 @@
+id,clave,descripcion
+catalogos_tipo_documento1,01,Pedimento
+catalogos_tipo_documento2,02,Autorización de importación temporal
+catalogos_tipo_documento3,03,Autorización de importación temporal de embarcaciones
+catalogos_tipo_documento4,04,Autorización de importación temporal de embarcaciones
+catalogos_tipo_documento5,05,Autorización para la importación de vehículos especialmente construidos o transformados, equipados con dispositivos o aparatos diversos para cumplir con contrato derivado de licitación pública
+catalogos_tipo_documento6,06,Aviso de exportación temporal
+catalogos_tipo_documento7,07,Aviso de traslado de mercancías de empresas con Programa IMMEX, RFE u Operador Económico Autorizado
+catalogos_tipo_documento8,08,Aviso para el traslado de autopartes ubicadas en la franja o región fronteriza a la industria terminal automotriz o manufacturera de vehículos de autotransporte en el resto del territorio nacional
+catalogos_tipo_documento9,09,Constancia de importación temporal, retorno o transferencia de contenedores
+catalogos_tipo_documento10,10,Constancia de transferencia de mercancías
+catalogos_tipo_documento11,11,Constancia de transferencia de mercancías
+catalogos_tipo_documento12,12,Cuaderno ATA
+catalogos_tipo_documento13,13,Listas de intercambio
+catalogos_tipo_documento14,14,Permiso de Importación Temporal
+catalogos_tipo_documento15,15,Permiso de importación temporal de casa rodante
+catalogos_tipo_documento16,16,Permiso de importación temporal de embarcaciones
+catalogos_tipo_documento17,17,Solicitud de donación de mercancías en casos de emergencias o desastres naturales
+catalogos_tipo_documento18,18,Aviso de consolidado
+catalogos_tipo_documento19,19,Aviso de cruce de mercancias
+catalogos_tipo_documento20,20,Otro

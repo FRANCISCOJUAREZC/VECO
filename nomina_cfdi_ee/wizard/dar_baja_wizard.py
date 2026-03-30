@@ -5,7 +5,7 @@ from odoo import models, fields, api
 class WizardDarBaja(models.TransientModel):
     _name = 'wizard.dar.baja'
     _description = 'WizardDarBaja'
-    
+
     fecha = fields.Date(string="Fecha")
     tipo_de_baja = fields.Selection([('1','Término de contrato'),
                                       ('2','Separación voluntaria'),

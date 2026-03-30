@@ -3,8 +3,6 @@
 from odoo import models, fields, api, _
 from datetime import datetime, date
 import base64
-import logging
-_logger = logging.getLogger(__name__)
 
 class GenerarReciboNomina(models.TransientModel):
     _name='generar.recibo.nomina'

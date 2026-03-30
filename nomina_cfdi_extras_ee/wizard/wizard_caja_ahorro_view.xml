@@ -35,6 +35,7 @@
             name="Caja de ahorro"
             action="action_wizard_caja_ahorro"
             parent="menu_main_reportes"
+            groups="nomina_cfdi_ee.group_nomina_mx"
             sequence="10"/>
 
 </odoo>
