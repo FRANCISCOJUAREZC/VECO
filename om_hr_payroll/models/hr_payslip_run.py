@@ -7,6 +7,7 @@ from odoo.exceptions import ValidationError
 
 class HrPayslipRun(models.Model):
     _name = 'hr.payslip.run'
+    _inherit = 'hr.payslip.run'
     _description = 'Payslip Batches'
     _order = 'id desc'
 

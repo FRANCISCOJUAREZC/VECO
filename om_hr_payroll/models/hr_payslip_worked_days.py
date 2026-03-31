@@ -5,6 +5,7 @@ from odoo import fields, models
 
 class HrPayslipWorkedDays(models.Model):
     _name = 'hr.payslip.worked_days'
+    _inherit = 'hr.payslip.worked_days'
     _description = 'Payslip Worked Days'
     _order = 'payslip_id, sequence'
 
@@ -17,4 +18,3 @@ class HrPayslipWorkedDays(models.Model):
     number_of_hours = fields.Float(string='Number of Hours')
     contract_id = fields.Many2one(related='payslip_id.contract_id', string='Contract',
         help="The contract for which applied this input")
-    version_id = fields.Many2one('hr.version', related='payslip_id.contract_id', store=False, string='Contract Version')

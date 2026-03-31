@@ -7,6 +7,7 @@ from odoo import fields, models
 
 class HrPayslipInput(models.Model):
     _name = 'hr.payslip.input'
+    _inherit = 'hr.payslip.input'
     _description = 'Payslip Input'
     _order = 'payslip_id, sequence'
 
@@ -20,4 +21,3 @@ class HrPayslipInput(models.Model):
                                "like result = inputs.SALEURO.amount * contract.wage*0.01.")
     contract_id = fields.Many2one(related='payslip_id.contract_id', string='Contract', required=True,
         help="The contract for which applied this input")
-    version_id = fields.Many2one('hr.version', related='payslip_id.contract_id', store=False, string='Contract Version')

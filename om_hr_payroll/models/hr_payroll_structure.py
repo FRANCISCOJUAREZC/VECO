@@ -11,6 +11,7 @@ class HrPayrollStructure(models.Model):
     - Deductions
     """
     _name = 'hr.payroll.structure'
+    _inherit = 'hr.payroll.structure'
     _description = 'Salary Structure'
 
     @api.model

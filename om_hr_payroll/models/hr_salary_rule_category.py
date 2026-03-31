@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 
 class HrSalaryRuleCategory(models.Model):
     _name = 'hr.salary.rule.category'
+    _inherit = 'hr.salary.rule.category'
     _description = 'Salary Rule Category'
 
     name = fields.Char(required=True, translate=True)

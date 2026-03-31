@@ -6,14 +6,13 @@ from odoo.exceptions import UserError
 class HrPayslipLine(models.Model):
     _name = 'hr.payslip.line'
     _description = 'Payslip Line'
-    _inherit = 'hr.salary.rule'
+    _inherit = ['hr.payslip.line', 'hr.salary.rule']
     _order = 'contract_id, sequence'
 
     slip_id = fields.Many2one('hr.payslip', string='Pay Slip', required=True, ondelete='cascade')
     salary_rule_id = fields.Many2one('hr.salary.rule', string='Rule', required=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
     contract_id = fields.Many2one('hr.version', string='Contract', required=True, index=True)
-    version_id = fields.Many2one('hr.version', related='contract_id', store=False, string='Contract Version')
     rate = fields.Float(string='Rate (%)', default=100.0)
     amount = fields.Float()
     quantity = fields.Float(default=1.0)
