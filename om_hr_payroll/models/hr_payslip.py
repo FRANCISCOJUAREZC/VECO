@@ -13,6 +13,7 @@ class HrPayslip(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
 
+    version_id = fields.Many2one('hr.version', related='contract_id', store=False, string='Contract')
     struct_id = fields.Many2one('hr.payroll.structure', string='Structure',
         help='Defines the rules that have to be applied to this payslip, accordingly '
              'to the contract chosen. If you let empty the field contract, this field isn\'t '

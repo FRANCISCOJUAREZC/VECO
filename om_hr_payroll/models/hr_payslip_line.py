@@ -13,6 +13,7 @@ class HrPayslipLine(models.Model):
     salary_rule_id = fields.Many2one('hr.salary.rule', string='Rule', required=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
     contract_id = fields.Many2one('hr.version', string='Contract', required=True, index=True)
+    version_id = fields.Many2one('hr.version', related='contract_id', store=False, string='Contract Version')
     rate = fields.Float(string='Rate (%)', default=100.0)
     amount = fields.Float()
     quantity = fields.Float(default=1.0)
