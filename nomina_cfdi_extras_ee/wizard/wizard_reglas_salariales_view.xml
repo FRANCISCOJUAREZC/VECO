@@ -34,8 +34,8 @@
 
 	<menuitem  name="Reportes"
                 id="menu_payroll_payslip_reportes" 
-                parent="om_hr_payroll.menu_hr_payroll_root" 
-                sequence="15" 
+                parent="hr_work_entry_enterprise.menu_hr_payroll_root" 
+                sequence="80" 
                 groups="nomina_cfdi_ee.group_nomina_mx"/>
 
     <menuitem id="menu_action_wizard_reglas_salariales"

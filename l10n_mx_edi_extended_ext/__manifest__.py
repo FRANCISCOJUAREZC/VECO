@@ -2,16 +2,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Descripciones especifica CE',
-    'version': '15.01',
+    'version': '19.1.0',
     'category': 'Accounting/Localizations/EDI',
     'summary': 'Agrega campos para descripciones especificas en los productos',
     'depends': [
         'l10n_mx_edi',
-        'l10n_mx_edi_extended',
     ],
     'data': [
+        'data/cfdi.xml',
         'security/ir.model.access.csv',
-#        'data/4.0/cfdi.xml',
         'views/account_move_view.xml',
     ],
     'installable': True,

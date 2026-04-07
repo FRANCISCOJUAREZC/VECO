@@ -29,7 +29,7 @@ class TotalPorDepartamento(models.TransientModel):
         worksheet.write(0, 2, 'Dias Pag', header_style)
         col_nm = 3
         if self.hr_payslip_run_ids:
-            #hr_payslip_line_ids=self.hr_payslip_run_ids.slip_ids.details_by_salary_rule_category
+            #hr_payslip_line_ids=self.hr_payslip_run_ids.slip_ids.line_ids
             result = {}
             all_col_list_seq = []
             for line in self.hr_payslip_run_ids.slip_ids.mapped('line_ids').sorted(lambda x:x.sequence):
@@ -86,7 +86,7 @@ class TotalPorDepartamento(models.TransientModel):
                     for code in all_col_list_seq:
                         amt = 0  
                         if code in total.keys():
-                            for line in slip.details_by_salary_rule_category:
+                            for line in slip.line_ids:
                                 if line.code == code:
                                     amt = line.total
     #                        amt = slip.get_amount_from_rule_code(code)
@@ -95,7 +95,7 @@ class TotalPorDepartamento(models.TransientModel):
                                     total[code] = total.get(code) + amt
                         else:
                             #amt = slip.get_amount_from_rule_code(code)
-                            for line in slip.details_by_salary_rule_category:
+                            for line in slip.line_ids:
                                 if line.code == code:
                                     amt = line.total
                                     total[code] = amt or 0

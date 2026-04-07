@@ -18,3 +18,4 @@ from . import incidencias
 from . import prima_dominical
 from . import retardo
 from . import tablas_vacaciones # ya no se usa
+from . import hr_leave_type

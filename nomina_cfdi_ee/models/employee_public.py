@@ -75,7 +75,7 @@ class HrEmployeePublic(models.Model):
     empleado_materno = fields.Char("Apellido Materno")
     sindicalizado = fields.Boolean('Sindicalizado', default=False)
     domicilio_receptor = fields.Char("Código postal (SAT)")
-    company_cfdi = fields.Boolean(related="company_id.company_cfdi",store=True)
+    #company_cfdi = fields.Boolean(related="company_id.company_cfdi",store=True)
 
     periodicidad_pago = fields.Selection(
         selection=[('01', 'Diario'), 

@@ -60,11 +60,11 @@ class TotalPorEmpleado(models.TransientModel):
                         rule.update({code:0.0,'puesto':slip.employee_id.job_title,'no_empleado':slip.employee_id.no_empleado,'employee_name':slip.employee_id.name,'depto':slip.employee_id.department_id.name,})
                     else:
                         rule.update({code:0.0,'puesto':slip.employee_id.job_title,'no_empleado':slip.employee_id.no_empleado,'employee_name':'','depto':slip.employee_id.department_id.name,})
-                if not slip.details_by_salary_rule_category:
+                if not slip.line_ids:
                     if not slip.employee_id.id in employee:
                         employee.update({slip.employee_id.id:{}})
                         employee[slip.employee_id.id] = dict(rule)
-                for line in slip.details_by_salary_rule_category:
+                for line in slip.line_ids:
                     if not slip.employee_id.id in employee:
                         employee.update({slip.employee_id.id:{}})
                         employee[slip.employee_id.id] = dict(rule)

@@ -113,9 +113,9 @@ class ImportarDiasWizard(models.TransientModel):
                 if payslip not in worked_days_lines_by_payslip:
                     worked_days_lines_by_payslip[payslip] = []
                 if other_inputs:
-                    worked_lines = payslip.input_line_ids.filtered(lambda x:x.code==code)
+                    worked_lines = payslip.input_line_ids.filtered(lambda x:x.input_type_id.code==code)
                 else:    
-                    worked_lines = payslip.worked_days_line_ids.filtered(lambda x:x.code==code)
+                    worked_lines = payslip.worked_days_line_ids.filtered(lambda x:x.work_entry_type_id.code==code)
                     
                 if worked_lines:
                     worked_days_lines_by_payslip[payslip] += [(1, l.id, vals) for l in worked_lines]
@@ -123,7 +123,13 @@ class ImportarDiasWizard(models.TransientModel):
                 else:
                     if not contract_id:
                         raise UserError("Please select Contract. No valid contract found for employee %s."%(payslip.employee_id.name))
-                    vals.update({'name':description,'code':code,'contract_id':contract_id})
+                    inputs_type = self.env['hr.payslip.input.type'].sudo().search([('code','=',code)])
+                    if not inputs_type:
+                        raise UserError("No se encontró el código a importar para el empleado %s."%(payslip.employee_id.name))
+                    if other_inputs:
+                        vals.update({'input_type_id':inputs_type.id})
+                    else:
+                        vals.update({'work_entry_type_id':inputs_type.id})
                     worked_days_lines_by_payslip[payslip].append((0,0, vals))
 
         for payslip, worked_day_lines in worked_days_lines_by_payslip.items():

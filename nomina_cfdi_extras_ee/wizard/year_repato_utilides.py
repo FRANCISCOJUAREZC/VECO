@@ -37,32 +37,8 @@ class XLSUploadWizard(models.TransientModel):
         domain.append(('tipo_nomina','=','O'))
         payslips2 = self.env['hr.payslip'].search(domain)
 
-        payslip_lines_all = payslips.mapped('line_ids').filtered(lambda x: x.code == 'P001')
-        work_lines_all = payslips2.mapped('worked_days_line_ids').filtered(lambda x: x.code in ['WORK100', 'VAC', 'FJC', 'SEPT'])
-        payslip_lines = []
-        work_lines = []
-
-        for slip in payslip_lines_all:
-            if slip.contract_id.date_end:
-                first_day_date = date(datetime.today().date().year - 1, 1, 1)
-                if slip.contract_id.date_start > first_day_date:
-                    first_day_date = slip.contract_id.date_start
-                if (slip.contract_id.date_end - first_day_date).days < 60:
-                    continue
-            if slip.employee_id.regimen != '02':
-                continue
-            payslip_lines += slip
-
-        for work in work_lines_all:
-            if work.contract_id.date_end:
-                first_day_date = date(datetime.today().date().year - 1, 1, 1)
-                if work.contract_id.date_start > first_day_date:
-                    first_day_date = work.contract_id.date_start
-                if (work.contract_id.date_end - first_day_date).days < 60:
-                    continue
-            if slip.employee_id.regimen != '02':
-                continue
-            work_lines += work
+        payslip_lines = payslips.mapped('line_ids').filtered(lambda x: x.code == 'NET')
+        work_lines = payslips2.mapped('worked_days_line_ids').filtered(lambda x: x.code in ['WORK100', 'VAC', 'FJC', 'SEPT'])
 
         for slip in payslip_lines:
            monto_total += slip.total
@@ -187,32 +163,8 @@ class XLSUploadWizard(models.TransientModel):
         domain.append(('tipo_nomina','=','O'))
         payslips2 = self.env['hr.payslip'].search(domain)
 
-        payslip_lines_all = payslips.mapped('line_ids').filtered(lambda x: x.code == 'P001')
-        work_lines_all = payslips2.mapped('worked_days_line_ids').filtered(lambda x: x.code in ['WORK100', 'VAC', 'FJC', 'SEPT'])
-        payslip_lines = []
-        work_lines = []
-
-        for slip in payslip_lines_all:
-            if slip.contract_id.date_end:
-                first_day_date = date(datetime.today().date().year - 1, 1, 1)
-                if slip.contract_id.date_start > first_day_date:
-                    first_day_date = slip.contract_id.date_start
-                if (slip.contract_id.date_end - first_day_date).days < 60:
-                    continue
-            if slip.employee_id.regimen != '02':
-                continue
-            payslip_lines += slip
-
-        for work in work_lines_all:
-            if work.contract_id.date_end:
-                first_day_date = date(datetime.today().date().year - 1, 1, 1)
-                if work.contract_id.date_start > first_day_date:
-                    first_day_date = work.contract_id.date_start
-                if (work.contract_id.date_end - first_day_date).days < 60:
-                    continue
-            if slip.employee_id.regimen != '02':
-                continue
-            work_lines += work
+        payslip_lines = payslips.mapped('line_ids').filtered(lambda x: x.code == 'NET')
+        work_lines = payslips2.mapped('worked_days_line_ids').filtered(lambda x: x.code in ['WORK100', 'VAC', 'FJC', 'SEPT'])
 
         for slip in payslip_lines:
            monto_total += slip.total

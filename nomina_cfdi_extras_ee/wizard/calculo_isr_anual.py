@@ -32,7 +32,7 @@ class CalculoISRAnual(models.TransientModel):
         date_from = self.ano+"-01-01"
         date_to = self.ano+"-12-31"
         domain = [('date_to','>=',date_from), ('date_to', '<=', date_to)]
-        domain.append(('state','=', 'done'))
+        domain.append(('state','in', ('done','paid')))
         if self.employee_id:
             domain.append(('employee_id','=',self.employee_id.id))
         elif self.department_id:

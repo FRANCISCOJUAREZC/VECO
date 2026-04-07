@@ -12,15 +12,15 @@ This new module will create 2 new models: incidencias and incapacidades, they wi
     'depends': [
         'web',
         'hr','nomina_cfdi_ee',
-        'report_xlsx', 'om_hr_payroll',
+        'report_xlsx', 'hr_payroll',
     ],
     'data': [
         'data/ir_sequence_data.xml',
-       # 'data/action_report_xls.xml',
+        #'data/action_report_xls.xml',
         'security/ir.model.access.csv',
         'views/res_config_settings_views.xml',
         'views/viaticos_nomina_view.xml',
-        'views/hr_payslip_view.xml',
+    #    'views/hr_payslip_view.xml', # cancelaciones no requerido
         'security/security.xml',
         'views/hr_employee_view.xml',
         'views/hr_loan_view.xml',
@@ -31,7 +31,7 @@ This new module will create 2 new models: incidencias and incapacidades, they wi
         'views/dev_skip_installment.xml',
         'report/report_paperformat.xml',
         'report/payslip_batches_report.xml',
-        'views/employee_view.xml',
+    #    'views/employee_view.xml', # tiene reporte excel colocar en accion
         'report/payslip_batches_pagos_report2.xml',
         'report/payslip_batches_pagos_report.xml',
         'report/payslip_batches_detail_report.xml',

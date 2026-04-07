@@ -3,9 +3,10 @@
         <record id="view_hr_payslip_form" model="ir.ui.view">
             <field name="name">hr.payslip.nomina</field>
             <field name="model">hr.payslip</field>
-            <field name="inherit_id" ref="om_hr_payroll.view_hr_payslip_form"/>
+            <field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
             <field name="arch" type="xml">
-              <field name="name" position="after">
+                
+              <field name="payment_report" position="after">
                     <field name="tipo_nomina" required="company_cfdi == True"/>
                     <field name="fecha_pago" required="company_cfdi == True"/>
                     <field name="mes" required="tipo_nomina == 'O' or company_cfdi == True" invisible="tipo_nomina != 'O' or company_cfdi != True"/>
@@ -97,16 +98,17 @@
                 </page>
               </xpath>
 
-              <button name="action_payslip_cancel" position="before">
+              <button name="action_payslip_cancel" position="before"><!--
                    <button name="action_cfdi_nomina_generate" type="object" string="Generar CFDI"
                             invisible="estado_factura in ('factura_correcta','factura_cancelada') or state != 'done'"
                             class="oe_highlight" groups="nomina_cfdi_ee.group_nomina_mx"/>
                    <button name="%(nomina_cfdi_ee.reason_cancelation_sat_wizard)d" type="action" string="Cancelar CFDI"
                             invisible="nomina_cfdi == False or estado_factura == 'factura_cancelada'"
-                            class="oe_highlight" groups="nomina_cfdi_ee.group_nomina_mx" />
+                            class="oe_highlight" groups="nomina_cfdi_ee.group_nomina_mx" /> -->
                    <button name="send_nomina" class="oe_highlight" invisible="estado_factura != 'factura_correcta'" string="Enviar por correo" 
                             groups="nomina_cfdi_ee.group_nomina_mx" type="object"/>
                 </button>
+
             </field>
         </record>
 
@@ -119,12 +121,12 @@
         <field name="binding_view_types">form</field>
     </record>
 
-
+<!--
        <record id="hr_payslip_run_form_nomina_cfdi" model="ir.ui.view">
             <field name="name">hr.payslip.run.form.nomina</field>
             <field name="model">hr.payslip.run</field>
             <field name="priority">50</field>
-            <field name="inherit_id" ref="om_hr_payroll.hr_payslip_run_form"/>
+            <field name="inherit_id" ref="hr_payroll.hr_payslip_run_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//sheet" position="replace">
                     <sheet>
@@ -199,7 +201,8 @@
                 </button>
             </field>
        </record>
-
+-->
+<!--
         <record id="hr_payslip_run_ext" model="ir.ui.view">
             <field name="name">hr.payslip.run.ext</field>
             <field name="model">hr.payslip.run</field>
@@ -210,11 +213,12 @@
                 </field>
             </field>
         </record>
-
+-->
+<!--
     <record id="view_hr_payslip_tree" model="ir.ui.view">
         <field name="name">hr.payslip.inherit.tree</field>
         <field name="model">hr.payslip</field>
-        <field name="inherit_id" ref="om_hr_payroll.view_hr_payslip_tree" />
+        <field name="inherit_id" ref="hr_payroll.view_hr_payslip_tree" />
         <field name="arch" type="xml">
             <field name="state" position="before">
                 <field name="company_cfdi" column_invisible="1"/>
@@ -223,7 +227,7 @@
             </field>
         </field>
     </record>
-
+-->
         <record id="view_configuracion_nomina_form" model="ir.ui.view">
             <field name="name">Configuracion nomina</field>
             <field name="model">configuracion.nomina</field>

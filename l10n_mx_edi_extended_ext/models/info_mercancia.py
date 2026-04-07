@@ -25,11 +25,10 @@ class AccountMoveLine(models.Model):
 
 # cfdiv40_extended
 #                            <cce20:Mercancias>
-#                                <t t-foreach="ext_trade_goods_details" t-as="good_details">
-#                                    <t t-set="product" t-value="good_details['product']"/>
-#                                    <cce20:Mercancia t-att-NoIdentificacion="format_string(product.default_code, 100)" t-att-FraccionArancelaria="product.l10n_mx_edi_tariff_fraction_id.code" t-att-CantidadAduana="format_float(good_details['quantity_aduana'], 3)" t-att-UnidadAduana="product.l10n_mx_edi_umt_aduana_id.l10n_mx_edi_code_aduana" t-att-ValorUnitarioAduana="format_float(good_details['price_unit_usd'], 6)" t-att-ValorDolares="format_float(good_details['line_total_usd'], 4)">
-#                                        <t t-if="good_details['desc_especifica']">
-#                                            <t t-foreach="good_details['desc_especifica']" t-as="info_merc">
+#                                <t t-foreach="comercio_exterior['mercancia_list']" t-as="mercancia">
+#                                    <cce20:Mercancia t-att-NoIdentificacion="format_string(mercancia['no_identificacion'], 100)" t-att-FraccionArancelaria="mercancia['fraccion_arancelaria']" t-att-CantidadAduana="format_float(mercancia['cantidad_aduana'], precision=3)" t-att-UnidadAduana="mercancia['unidad_aduana']" t-att-ValorUnitarioAduana="format_float(mercancia['valor_unitario_udana'], precision=6)" t-att-ValorDolares="format_float(mercancia['valor_dolares'], precision=4)">
+#                                        <t t-if="mercancia['desc_especifica']">
+#                                            <t t-foreach="mercancia['desc_especifica']" t-as="info_merc">
 #                                                <cce20:DescripcionesEspecificas
 #                                                    t-att-Marca="info_merc['Marca']"
 #                                                    t-att-Modelo="info_merc['Modelo']"

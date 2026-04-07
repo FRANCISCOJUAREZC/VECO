@@ -6,7 +6,7 @@
 
 {
     'name': 'Adenda OC',
-    'version': '19.0.15.02',
+    'version': '19.1.0',
     'description': ''' Agrega nodo de Adenda con la OC
     ''',
     'category': 'Accounting',
@@ -16,7 +16,6 @@
         'sale', 'l10n_mx_edi',
     ],
     'data': [
-        #'security/ir.model.access.csv',
         'views/account_invoice_view.xml',
 	],
     'application': False,

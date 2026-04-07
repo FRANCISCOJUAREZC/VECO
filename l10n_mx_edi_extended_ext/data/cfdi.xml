@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="cfdiv40_extended_ext" inherit_id="l10n_mx_edi_extended.cfdiv40_extended">
+
+            <!-- Custom numbers on invoice lines -->
+            <xpath expr="//*[name()='cce20:Mercancias']" position="replace">
+                            <cce20:Mercancias xmlns:cce20="http://www.sat.gob.mx/ComercioExterior20">
+                                <t t-foreach="comercio_exterior['mercancia_list']" t-as="mercancia">
+                                    <cce20:Mercancia
+                                        t-att-NoIdentificacion="format_string(mercancia['no_identificacion'], 100)"
+                                        t-att-FraccionArancelaria="mercancia['fraccion_arancelaria']"
+                                        t-att-CantidadAduana="format_float(mercancia['cantidad_aduana'], precision=3)"
+                                        t-att-UnidadAduana="mercancia['unidad_aduana']"
+                                        t-att-ValorUnitarioAduana="format_float(mercancia['valor_unitario_udana'], precision=6)"
+                                        t-att-ValorDolares="format_float(mercancia['valor_dolares'], precision=4)">
+                                        <t t-if="mercancia['desc_especifica']">
+                                            <t t-foreach="mercancia['desc_especifica']" t-as="info_merc">
+                                                <cce20:DescripcionesEspecificas
+                                                        t-att-Marca="info_merc['Marca']"
+                                                        t-att-Modelo="info_merc['Modelo']"
+                                                        t-att-SubModelo="info_merc['SubModelo']"
+                                                        t-att-NumeroSerie="info_merc['NumeroSerie']"/>
+                                            </t>
+                                        </t>
+                                    </cce20:Mercancia>
+                                </t>
+                            </cce20:Mercancias>
+
+            </xpath>
+
+        </template>
+
+    </data>
+</odoo>
