@@ -6,7 +6,7 @@ from . import contract_historial_salario # ya no se usa
 from . import hr_version
 from . import tablas_nomina
 from . import res_company
-from . import hr_payslip_run 
+from . import hr_payslip_run
 from . import res_bank
 from . import horas_extras
 from . import ctalogo_nomina
