@@ -10,3 +10,5 @@ from . import installment_line
 from . import hr_payslip
 from . import skip_installment
 from . import hr_leave_type
+from . import incapacidades_nomina
+from . import faltas_nomina
