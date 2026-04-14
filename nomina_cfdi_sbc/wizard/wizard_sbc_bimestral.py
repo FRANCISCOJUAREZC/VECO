@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, date
 import math
 from collections import defaultdict
 import io
-from odoo.tools.misc import xlwt
+import xlwt
 import base64
 #import logging
 #_logger = logging.getLogger(__name__)
