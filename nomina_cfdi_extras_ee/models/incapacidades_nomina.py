@@ -9,7 +9,6 @@ class IncapacidadesNomina(models.Model):
     name = fields.Char('Folio', required=True, copy=False, readonly=True,
                        index=True, default=lambda self: _('New'))
     employee_id = fields.Many2one('hr.employee', string='Empleado')
-    contract_id = fields.Many2one('hr.contract', string='Contrato')
     fecha = fields.Date('Fecha')
     ramo_de_seguro = fields.Selection(
         [('Riesgo de trabajo', 'Riesgo de trabajo'),
