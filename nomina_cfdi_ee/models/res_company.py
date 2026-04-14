@@ -14,6 +14,7 @@ class ResCompany(models.Model):
     serie_nomina = fields.Char('Serie nomina')
     nomina_mail = fields.Char('Nomina Mail')
     company_cfdi = fields.Boolean(string="CFDI MX")
+    nombre_fiscal = fields.Char('Nombre Fiscal')
 
     @api.onchange('country_id')
     def _get_company_cfdi(self):
