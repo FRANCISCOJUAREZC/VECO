@@ -14,7 +14,49 @@ class ResCompany(models.Model):
     serie_nomina = fields.Char('Serie nomina')
     nomina_mail = fields.Char('Nomina Mail')
     company_cfdi = fields.Boolean(string="CFDI MX")
+    # Campos CFDI compartidos con l10n_mx_traslado
     nombre_fiscal = fields.Char('Nombre Fiscal')
+    serie_timbrado = fields.Char('Serie Timbrado')
+    regimen_fiscal = fields.Selection(
+        selection=[('601', 'General de Ley Personas Morales'),
+                   ('603', 'Personas Morales con Fines no Lucrativos'),
+                   ('605', 'Sueldos y Salarios e Ingresos Asimilados a Salarios'),
+                   ('606', 'Arrendamiento'),
+                   ('607', 'Régimen de Enajenación o Adquisición de Bienes'),
+                   ('608', 'Demás ingresos'),
+                   ('609', 'Consolidación'),
+                   ('610', 'Residentes en el Extranjero sin Establecimiento Permanente en México'),
+                   ('611', 'Ingresos por Dividendos (socios y accionistas)'),
+                   ('612', 'Personas Físicas con Actividades Empresariales y Profesionales'),
+                   ('614', 'Ingresos por intereses'),
+                   ('615', 'Régimen de los ingresos por obtención de premios'),
+                   ('616', 'Sin obligaciones fiscales'),
+                   ('620', 'Sociedades Cooperativas de Producción que optan por diferir sus ingresos'),
+                   ('621', 'Incorporación Fiscal'),
+                   ('622', 'Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras'),
+                   ('623', 'Opcional para Grupos de Sociedades'),
+                   ('624', 'Coordinados'),
+                   ('625', 'Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas'),
+                   ('626', 'Régimen Simplificado de Confianza'),
+                   ('628', 'Hidrocarburos'),
+                   ('629', 'De los Regímenes Fiscales Preferentes y de las Empresas Multinacionales'),
+                   ('630', 'Enajenación de acciones en bolsa de valores')],
+        string='Régimen Fiscal',
+    )
+    proveedor_timbrado = fields.Selection(
+        selection=[('diverza', 'Diverza'), ('solucion_factible', 'Solución Factible')],
+        string='Proveedor Timbrado',
+    )
+    modo_prueba = fields.Boolean('Modo Prueba')
+    archivo_cer = fields.Binary('Archivo CER')
+    archivo_key = fields.Binary('Archivo KEY')
+    contrasena = fields.Char('Contraseña CSD')
+    estado_csd = fields.Char('Estado CSD', readonly=True)
+    fecha_csd = fields.Date('Fecha vencimiento CSD', readonly=True)
+    aviso_csd = fields.Char('Aviso CSD', readonly=True)
+    saldo_timbres = fields.Integer('Saldo Timbres', readonly=True)
+    saldo_alarma = fields.Integer('Saldo Alarma')
+    correo_alarma = fields.Char('Correo Alarma')
 
     @api.onchange('country_id')
     def _get_company_cfdi(self):
