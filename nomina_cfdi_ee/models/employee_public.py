@@ -7,6 +7,7 @@ class HrEmployeePublic(models.Model):
     _inherit = "hr.employee.public"
 
     no_empleado = fields.Char('Número de empleado')
+    no_employee = fields.Char('Employee Number')
     tipo_pago = fields.Selection(selection=[('transferencia', 'Transferencia'),('efectivo', 'Efectivo'),
                                          ('cheque', 'Cheque')],
         string='Tipo de Pago',
