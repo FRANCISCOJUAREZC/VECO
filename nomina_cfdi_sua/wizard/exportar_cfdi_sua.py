@@ -4,7 +4,7 @@ import base64
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
-from odoo.exceptions import UserError, Warning
+from odoo.exceptions import UserError
 import logging
 _logger = logging.getLogger(__name__)
 
