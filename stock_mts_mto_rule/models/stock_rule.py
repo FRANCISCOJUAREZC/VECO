@@ -76,9 +76,12 @@ class StockRule(models.Model):
             "Product Unit of Measure"
         )
         for procurement, rule in procurements:
-            domain = self.env["procurement.group"]._get_moves_to_assign_domain(
-                procurement.company_id.id
-            )
+            # procurement.group removed in Odoo 19; build the assignment domain directly
+            domain = [
+                ('state', 'in', ['confirmed', 'partially_available']),
+                ('product_uom_qty', '!=', 0.0),
+                ('company_id', '=', procurement.company_id.id),
+            ]
             # Determine the quantity to order as MTO
             needed_qty = rule.get_mto_qty_to_order(
                 procurement.product_id,
