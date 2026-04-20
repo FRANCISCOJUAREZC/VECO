@@ -3,6 +3,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
 from odoo import models
+from odoo.osv import expression
 
 
 class ProductProduct(models.Model):
@@ -58,10 +59,19 @@ class ProductProduct(models.Model):
                 wrong_locations.append(location.warehouse_id.pbm_loc_id.id)
 
         # Aplicamos los filtros a los dominios obtenidos del super
+        # In Odoo 17+, domains may be DomainCondition objects instead of lists
         if wrong_locations:
-            domain_quant_loc.append(('location_id', 'not in', wrong_locations))
-            domain_move_in_loc.append(('location_dest_id', 'not in', wrong_locations))
-            domain_move_out_loc.append(('location_id', 'not in', wrong_locations))
+            def to_list(dom):
+                if isinstance(dom, list):
+                    return dom
+                try:
+                    return list(dom)
+                except TypeError:
+                    return [dom]
+
+            domain_quant_loc = expression.AND([to_list(domain_quant_loc), [('location_id', 'not in', wrong_locations)]])
+            domain_move_in_loc = expression.AND([to_list(domain_move_in_loc), [('location_dest_id', 'not in', wrong_locations)]])
+            domain_move_out_loc = expression.AND([to_list(domain_move_out_loc), [('location_id', 'not in', wrong_locations)]])
 
         return (domain_quant_loc, domain_move_in_loc, domain_move_out_loc)
 
