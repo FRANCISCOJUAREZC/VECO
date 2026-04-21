@@ -9,7 +9,6 @@ from collections import Counter
 
 from odoo import api, fields, models
 from odoo.tools.float_utils import float_is_zero
-from odoo.tools.sql import SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -103,42 +102,15 @@ class MRPProduction(models.Model):
                 backorders = rec
             if backorders and rec.product_tracking in ['lot', 'serial']:
                 production_ids = backorders.ids
-            currency_table = self.env['res.currency']._get_simple_currency_table(
-                self.env.companies
-            )
-            # Use SQL composition API (Odoo 19): _get_simple_currency_table
-            # returns a SQL object with embedded %s, so str.format() breaks params.
-            query = SQL(
-                """SELECT
-                        abs(SUM(svl.quantity)),
-                        abs(SUM(svl.value)),
-                        currency_table.rate
-                   FROM stock_move AS sm
-                   INNER JOIN stock_valuation_layer
-                        AS svl ON svl.stock_move_id = sm.id
-                   LEFT JOIN mrp_production
-                        AS mo on sm.raw_material_production_id = mo.id
-                   LEFT JOIN %s ON
-                            currency_table.company_id = mo.company_id
-                   WHERE sm.raw_material_production_id in %s
-                        AND sm.state != 'cancel'
-                        AND sm.product_qty != 0
-                        AND scrapped != 't'
-                   GROUP BY currency_table.rate""",
-                currency_table,
-                tuple(production_ids),
-            )
-            if not production_ids:
-                rows = []
-            else:
-                self.env.cr.execute(query)
-                rows = self.env.cr.fetchall()
-            total_cost = 0
-            for qty, cost, currency_rate in rows:
-                if cost is None:
-                    cost = 0
-                cost *= currency_rate
-                to_write['components_amount'] += cost
+            # Use ORM instead of raw SQL to avoid hardcoded table names (Odoo 19)
+            if production_ids:
+                layers = self.env['stock.valuation.layer'].search([
+                    ('stock_move_id.raw_material_production_id', 'in', production_ids),
+                    ('stock_move_id.state', '!=', 'cancel'),
+                    ('stock_move_id.product_qty', '!=', 0),
+                    ('stock_move_id.scrapped', '=', False),
+                ])
+                to_write['components_amount'] = sum(abs(l.value) for l in layers)
 
             # Workforce & Indirects Amount
             Workorders = self.env['mrp.workorder'].search(
