@@ -103,7 +103,7 @@ class MRPProduction(models.Model):
             if backorders and rec.product_tracking in ['lot', 'serial']:
                 production_ids = backorders.ids
             currency_table = self.env['res.currency']._get_simple_currency_table(
-                self.env.companies.ids
+                self.env.companies
             )
             query_str = """SELECT
                                 abs(SUM(svl.quantity)),
