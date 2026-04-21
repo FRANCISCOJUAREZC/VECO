@@ -73,13 +73,11 @@ class MRPProduction(models.Model):
 
     @api.depends('state')
     def _compute_costs(self):
+        # Guard against recursive recompute triggered by auditlog intercepting write()
+        if self.env.context.get('_computing_mrp_costs'):
+            return
+        self = self.with_context(_computing_mrp_costs=True)
         counter = 0
-        self.write({
-            'components_amount': 0.0,
-            'workforce_amount': 0.0,
-            'indirects_amount': 0.0,
-            'hours': 0.0,
-        })
         for rec in self:
             counter += 1
             _logger.info(
@@ -103,7 +101,7 @@ class MRPProduction(models.Model):
             if backorders and rec.product_tracking in ['lot', 'serial']:
                 production_ids = backorders.ids
             if production_ids:
-                if 'stock.valuation.layer' in self.env:
+                if 'stock.valuation.layer' in self.env.registry:
                     layers = self.env['stock.valuation.layer'].search([
                         ('stock_move_id.raw_material_production_id', 'in', production_ids),
                         ('stock_move_id.state', '!=', 'cancel'),
