@@ -95,7 +95,11 @@ class MRPProduction(models.Model):
             # Components
             raw_material_moves = []
             production_ids = rec.ids
-            backorders = rec.procurement_group_id.mrp_production_ids
+            # procurement_group_id removed in Odoo 19; fall back to single record
+            if 'procurement_group_id' in rec._fields and rec.procurement_group_id:
+                backorders = rec.procurement_group_id.mrp_production_ids
+            else:
+                backorders = rec
             if backorders and rec.product_tracking in ['lot', 'serial']:
                 production_ids = backorders.ids
             currency_table = (
