@@ -102,15 +102,26 @@ class MRPProduction(models.Model):
                 backorders = rec
             if backorders and rec.product_tracking in ['lot', 'serial']:
                 production_ids = backorders.ids
-            # Use ORM instead of raw SQL to avoid hardcoded table names (Odoo 19)
             if production_ids:
-                layers = self.env['stock.valuation.layer'].search([
-                    ('stock_move_id.raw_material_production_id', 'in', production_ids),
-                    ('stock_move_id.state', '!=', 'cancel'),
-                    ('stock_move_id.product_qty', '!=', 0),
-                    ('stock_move_id.scrapped', '=', False),
-                ])
-                to_write['components_amount'] = sum(abs(l.value) for l in layers)
+                if 'stock.valuation.layer' in self.env:
+                    layers = self.env['stock.valuation.layer'].search([
+                        ('stock_move_id.raw_material_production_id', 'in', production_ids),
+                        ('stock_move_id.state', '!=', 'cancel'),
+                        ('stock_move_id.product_qty', '!=', 0),
+                        ('stock_move_id.scrapped', '=', False),
+                    ])
+                    to_write['components_amount'] = sum(abs(l.value) for l in layers)
+                else:
+                    # Odoo 19: stock.valuation.layer removed; use move price_unit
+                    moves = self.env['stock.move'].search([
+                        ('raw_material_production_id', 'in', production_ids),
+                        ('state', '!=', 'cancel'),
+                        ('product_qty', '!=', 0),
+                        ('scrapped', '=', False),
+                    ])
+                    to_write['components_amount'] = sum(
+                        abs(m.product_qty * m.price_unit) for m in moves
+                    )
 
             # Workforce & Indirects Amount
             Workorders = self.env['mrp.workorder'].search(
