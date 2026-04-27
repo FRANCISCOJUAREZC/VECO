@@ -101,22 +101,27 @@ class MRPProduction(models.Model):
             if backorders and rec.product_tracking in ['lot', 'serial']:
                 production_ids = backorders.ids
             if production_ids:
+                has_scrapped = 'scrapped' in self.env['stock.move']._fields
                 if 'stock.valuation.layer' in self.env.registry:
-                    layers = self.env['stock.valuation.layer'].search([
+                    svl_domain = [
                         ('stock_move_id.raw_material_production_id', 'in', production_ids),
                         ('stock_move_id.state', '!=', 'cancel'),
                         ('stock_move_id.product_qty', '!=', 0),
-                        ('stock_move_id.scrapped', '=', False),
-                    ])
+                    ]
+                    if has_scrapped:
+                        svl_domain.append(('stock_move_id.scrapped', '=', False))
+                    layers = self.env['stock.valuation.layer'].search(svl_domain)
                     to_write['components_amount'] = sum(abs(l.value) for l in layers)
                 else:
                     # Odoo 19: stock.valuation.layer removed; use move price_unit
-                    moves = self.env['stock.move'].search([
+                    move_domain = [
                         ('raw_material_production_id', 'in', production_ids),
                         ('state', '!=', 'cancel'),
                         ('product_qty', '!=', 0),
-                        ('scrapped', '=', False),
-                    ])
+                    ]
+                    if has_scrapped:
+                        move_domain.append(('scrapped', '=', False))
+                    moves = self.env['stock.move'].search(move_domain)
                     to_write['components_amount'] = sum(
                         abs(m.product_qty * m.price_unit) for m in moves
                     )
