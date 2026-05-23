@@ -207,7 +207,7 @@ class MRPProduction(models.Model):
     @api.depends('state', 'finished_move_line_ids')
     def _compute_qty_done(self):
         for rec in self:
-            rec.qty_done = sum(rec.finished_move_line_ids.mapped('qty_done'))
+            rec.qty_done = sum(rec.finished_move_line_ids.mapped('quantity'))
 
     def refresh_costs(self):
         init_date = fields.Datetime.now().replace(

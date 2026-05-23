@@ -81,7 +81,7 @@ class StockKardexReportWiz(models.TransientModel):
                     FROM
                     (
                         SELECT
-                        CASE WHEN sum(qty_done) is not null THEN sum(qty_done / u.factor * u2.factor) ELSE 0 END as done
+                        CASE WHEN sum(quantity) is not null THEN sum(quantity / u.factor * u2.factor) ELSE 0 END as done
                         FROM
                         stock_move_line l
                         left join product_product p on (l.product_id=p.id)
@@ -101,7 +101,7 @@ class StockKardexReportWiz(models.TransientModel):
                     CROSS JOIN
                     (
                         SELECT
-                        CASE WHEN sum(qty_done) is not null THEN sum(qty_done / u.factor * u2.factor) ELSE 0 END as done
+                        CASE WHEN sum(quantity) is not null THEN sum(quantity / u.factor * u2.factor) ELSE 0 END as done
                         FROM
                         stock_move_line l
                         left join product_product p on (l.product_id=p.id)
@@ -130,7 +130,7 @@ class StockKardexReportWiz(models.TransientModel):
                         SELECT
                         sml.product_id, sml.product_uom_id,
                         sml.lot_id, sml.owner_id, sml.package_id,
-                        sml.qty_done, sml.move_id, sml.location_id,
+                        sml.quantity, sml.move_id, sml.location_id,
                         sml.location_dest_id, sm.date, sm.origin,sm.reference as move_name,
                         sm.state
                         FROM stock_move_line sml
@@ -178,9 +178,9 @@ class StockKardexReportWiz(models.TransientModel):
                         unit_cost = sum(move_id.stock_valuation_layer_ids.mapped("unit_cost"))
                         total_cost = sum(move_id.stock_valuation_layer_ids.mapped("value"))              
                         product_uom = self.env['uom.uom'].sudo().search([("id", "=", rec['product_uom_id'])])
-                        done_qty = rec['qty_done'] / product_uom.factor * product.uom_id.factor
+                        done_qty = rec['quantity'] / product_uom.factor * product.uom_id.factor
                         if rec['location_id'] == location.id:
-                            done_qty = -rec['qty_done'] / product_uom.factor * product.uom_id.factor
+                            done_qty = -rec['quantity'] / product_uom.factor * product.uom_id.factor
                         initial_total = initial_balance
                         total += done_qty
                         initial_balance = total

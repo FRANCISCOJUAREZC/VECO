@@ -128,10 +128,10 @@ class MrpProduction(models.Model):
                 # move.move_line_ids.unlink()
                 # AccountMoveLine.create(shared_vals)
                 for sml in move.move_line_ids:
-                    sml.qty_done = sml.product_uom_qty
+                    sml.quantity = sml.product_uom_qty
         for move in self.move_raw_ids:
             for sml in move.move_line_ids:
-                sml.qty_done = sml.product_uom_qty
+                sml.quantity = sml.product_uom_qty
         # Prorate Times
         _logger.info("Order: %s prorating times", self.name)
         (self + backorders).prorate_workorder_times()
