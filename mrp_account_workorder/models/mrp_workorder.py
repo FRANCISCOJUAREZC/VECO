@@ -135,7 +135,7 @@ class MrpWorkcenterProductivity(models.Model):
                 'date': fields.Date.context_today(self),
                 'line_ids': lines,
             })
-            self.workforce_entry_id.post()
+            self.workforce_entry_id.action_post()
             return self.workforce_entry_id
 
         # Create the new move
@@ -148,7 +148,7 @@ class MrpWorkcenterProductivity(models.Model):
             'mrp_timeline_id': self.id,
         })
         self.workforce_entry_id = move.id
-        move.post()
+        move.action_post()
 
     @api.model
     def create(self, vals):
