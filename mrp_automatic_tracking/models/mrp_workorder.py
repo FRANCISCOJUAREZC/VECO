@@ -18,7 +18,6 @@ class MrpWorkOrder(models.Model):
         for rec in self:
             if not rec.production_id.set_manual_tracking:
                 rec.check_ids.unlink()
-                rec.write({'is_last_step': True})
         return res
 
     def _generate_lot_ids(self):
