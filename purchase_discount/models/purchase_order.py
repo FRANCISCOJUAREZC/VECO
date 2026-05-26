@@ -104,7 +104,6 @@ class PurchaseOrderLine(models.Model):
         res = super()._prepare_purchase_order_line(
             product_id, product_qty, product_uom, company_id, supplier, po
         )
-        import ipdb; ipdb.set_trace()
         partner = supplier.partner_id
         uom_po_qty = product_uom._compute_quantity(product_qty, product_id.uom_po_id)
         seller = product_id.with_company(company_id)._select_seller(
@@ -120,7 +119,6 @@ class PurchaseOrderLine(models.Model):
     def _prepare_purchase_order_line_from_seller(self, seller):
         """Overload this function to prepare other data from seller,
         like in purchase_triple_discount module"""
-        import ipdb; ipdb.set_trace()
         if not seller:
             return {}
         return {"discount": seller.discount}
