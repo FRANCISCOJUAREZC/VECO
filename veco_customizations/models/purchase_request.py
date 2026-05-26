@@ -15,22 +15,21 @@ class PurchaseRequest(models.Model):
         store=True,
     )
 
+
     @api.depends('state')
     def _compute_approval_date(self):
         MailTrackingValue = self.env['mail.tracking.value'].sudo()
-        Translation = self.env['ir.translation']
         for request in self:
-            approved_state = 'Aprobada'
-            field_stage = self.env['ir.model.fields']._get(
-                self._name, "state")
+            field_stage = self.env['ir.model.fields']._get(self._name, "state")
+            # v17+: el campo se llama field_id (Many2one), antes era field (id directo)
             tracking_value = MailTrackingValue.search([
                 ('mail_message_id', 'in', request.message_ids.ids),
-                ('field', '=', field_stage.id),
-                ('new_value_char', '=', approved_state)], order="id desc", limit=1)
+                ('field_id', '=', field_stage.id),
+                ('new_value_char', '=', 'Aprobada'),
+            ], order="id desc", limit=1)
             if tracking_value:
                 date = tracking_value.mail_message_id.date.astimezone(
-                    pytz.timezone('America/Mexico_City')).strftime(
-                    '%Y-%m-%d')
+                    pytz.timezone('America/Mexico_City')).strftime('%Y-%m-%d')
                 request.approval_date = fields.Date.from_string(date)
             else:
                 request.approval_date = False
