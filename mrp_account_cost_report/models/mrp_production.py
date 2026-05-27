@@ -4,8 +4,6 @@
 
 import logging
 
-from collections import Counter
-
 
 from odoo import api, fields, models
 from odoo.tools.float_utils import float_is_zero
@@ -164,13 +162,19 @@ class MRPProduction(models.Model):
     def _get_most_repeated_field_value(self, field):
         self.ensure_one()
         try:
-            values = self.search_read(
-                [('product_id', '=', self.product_id.id),
-                 ('state', '=', 'done'),
-                 (field, '>', 0)], [field])
-            occurence_count = Counter([val[field] for val in values])
-            return occurence_count.most_common(1)[0][0]
-        except Exception as e:
+            self.env.cr.execute("""
+                SELECT {field}, COUNT(*) AS cnt
+                FROM mrp_production
+                WHERE product_id = %s
+                  AND state = 'done'
+                  AND {field} > 0
+                GROUP BY {field}
+                ORDER BY cnt DESC
+                LIMIT 1
+            """.format(field=field), (self.product_id.id,))
+            row = self.env.cr.fetchone()
+            return row[0] if row else 0
+        except Exception:
             return 0
 
     @api.depends('state')
