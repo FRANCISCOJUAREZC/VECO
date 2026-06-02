@@ -51,8 +51,15 @@ class MrpProduction(models.Model):
                         'product_uom': move_finish.product_id.uom_id
                     })
             ###### OVERRIDE to ensure the PC creation ######
-            production.move_raw_ids.write({'procure_method': 'make_to_order'})
-            (production.move_raw_ids | production.move_finished_ids)._action_confirm(merge=False)
+            # Only force MTO on the top-level confirmation; sub-component MRPs
+            # created by _run_manufacture already carry their route's procure_method.
+            # Forcing MTO recursively causes an infinite procurement loop when
+            # stock_mts_mto_rule is active.
+            if not self.env.context.get('_mrp_confirming'):
+                production.move_raw_ids.write({'procure_method': 'make_to_order'})
+            (production.move_raw_ids | production.move_finished_ids).with_context(
+                _mrp_confirming=True,
+            )._action_confirm(merge=False)
             production.workorder_ids._action_confirm()
         # run scheduler for moves forecasted to not have enough in stock
         self.move_raw_ids._trigger_scheduler()
