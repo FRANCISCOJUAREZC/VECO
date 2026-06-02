@@ -177,24 +177,38 @@ class MRPProduction(models.Model):
         except Exception:
             return 0
 
-    @api.depends('state')
+    @api.depends('state', 'unit_cost', 'x_studio_sale_id')
     def _compute_sale_amount(self):
-        counter = 0
-        for rec in self:
-            counter += 1
-            _logger.info(
-                "MRP Manufacture computed method _compute_sale_amount"
-                " executing %s record of %s: ", counter, len(self))
-            lines = self.env['sale.order.line'].search(
-                [('product_id', '=', rec.product_id.id),
-                 ('order_id', '=', rec.x_studio_sale_id.id)])
-            rec.update({
-                'sale_price_unit': sum(lines.mapped('price_subtotal')) / (sum(
-                    lines.mapped('product_uom_qty')) or 1),
-                'sale_amount': sum(lines.mapped('price_subtotal')),
-                'factor': (sum(lines.mapped('price_subtotal')) / (sum(
-                    lines.mapped('product_uom_qty')) or 1)) / (rec.unit_cost or 1),
-            })
+        _logger.info(
+            "MRP _compute_sale_amount: computing %s records", len(self))
+        self.update({'sale_price_unit': 0.0, 'sale_amount': 0.0, 'factor': 0.0})
+        valid_recs = self.filtered(lambda r: r.product_id and r.x_studio_sale_id)
+        if not valid_recs:
+            return
+        product_ids = [r.product_id.id for r in valid_recs]
+        order_ids = [r.x_studio_sale_id.id for r in valid_recs]
+        self.env.cr.execute("""
+            SELECT
+                sol.product_id,
+                sol.order_id,
+                SUM(sol.price_subtotal)               AS total_subtotal,
+                COALESCE(SUM(sol.product_uom_qty), 0) AS total_qty
+            FROM sale_order_line sol
+            WHERE sol.product_id = ANY(%s)
+              AND sol.order_id   = ANY(%s)
+            GROUP BY sol.product_id, sol.order_id
+        """, [product_ids, order_ids])
+        data = {
+            (row[0], row[1]): (row[2], row[3])
+            for row in self.env.cr.fetchall()
+        }
+        for rec in valid_recs:
+            key = (rec.product_id.id, rec.x_studio_sale_id.id)
+            total_subtotal, total_qty = data.get(key, (0.0, 0.0))
+            sale_price_unit = total_subtotal / (total_qty or 1)
+            rec.sale_price_unit = sale_price_unit
+            rec.sale_amount = total_subtotal
+            rec.factor = sale_price_unit / (rec.unit_cost or 1)
 
     @api.depends('components_amount', 'workforce_amount', 'indirects_amount')
     def _compute_cost_percentages(self):
