@@ -111,12 +111,19 @@ class PurchaseOrderLine(models.Model):
             if supplier._name == 'product.supplierinfo'
             else supplier
         )
-        uom_po_qty = product_uom._compute_quantity(product_qty, product_id.uom_po_id)
+        # uom_po_id may not be delegated to product.product in all Odoo 19 builds;
+        # fall back to uom_id (standard UOM) when the field is absent.
+        uom_po_id = (
+            product_id.uom_po_id
+            if 'uom_po_id' in product_id._fields
+            else product_id.uom_id
+        )
+        uom_po_qty = product_uom._compute_quantity(product_qty, uom_po_id)
         seller = product_id.with_company(company_id)._select_seller(
             partner_id=partner,
             quantity=uom_po_qty,
             date=po.date_order and po.date_order.date(),
-            uom_id=product_id.uom_po_id,
+            uom_id=uom_po_id,
         )
         res.update(self._prepare_purchase_order_line_from_seller(seller))
         return res
