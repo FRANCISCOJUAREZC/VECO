@@ -2,7 +2,6 @@
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.osv import expression
 from odoo.tools import float_compare, float_is_zero
 
 
@@ -76,12 +75,6 @@ class StockRule(models.Model):
             "Product Unit of Measure"
         )
         for procurement, rule in procurements:
-            # procurement.group removed in Odoo 19; build the assignment domain directly
-            domain = [
-                ('state', 'in', ['confirmed', 'partially_available']),
-                ('product_uom_qty', '!=', 0.0),
-                ('company_id', '=', procurement.company_id.id),
-            ]
             # Determine the quantity to order as MTO
             needed_qty = rule.get_mto_qty_to_order(
                 procurement.product_id,
@@ -105,17 +98,9 @@ class StockRule(models.Model):
                 mts_qty = procurement.product_qty - needed_qty
                 mts_procurement = procurement._replace(product_qty=mts_qty)
                 rule._run_mts_action(mts_procurement)
-
-                # Search all confirmed stock_moves of mts_procurement and assign them
-                # to adjust the product's free qty
-                group_id = mts_procurement.values.get("group_id")
-                if group_id:
-                    domain = expression.AND([domain, [("group_id", "=", group_id.id)]])
-                moves_to_assign = self.env["stock.move"].search(
-                    domain, order="priority desc, date asc"
-                )
-                moves_to_assign._action_assign()
-
+                # _action_assign removed: calling it here searched ALL group moves and
+                # created stock.move.line records at every BOM level, causing OOM on
+                # large multi-level BOMs. Stock reservation is handled by the scheduler.
                 mto_procurement = procurement._replace(product_qty=needed_qty)
                 rule._run_mto_action(mto_procurement)
         return True
