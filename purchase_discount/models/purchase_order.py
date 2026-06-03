@@ -104,7 +104,13 @@ class PurchaseOrderLine(models.Model):
         res = super()._prepare_purchase_order_line(
             product_id, product_qty, product_uom, company_id, supplier, po
         )
-        partner = supplier.partner_id
+        # In Odoo 19, purchase_stock passes supplier.partner_id (res.partner) directly;
+        # older callers pass a product.supplierinfo record. Handle both.
+        partner = (
+            supplier.partner_id
+            if supplier._name == 'product.supplierinfo'
+            else supplier
+        )
         uom_po_qty = product_uom._compute_quantity(product_qty, product_id.uom_po_id)
         seller = product_id.with_company(company_id)._select_seller(
             partner_id=partner,
