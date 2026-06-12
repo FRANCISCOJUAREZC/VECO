@@ -189,11 +189,17 @@ class MrpWorkcenterProductivity(models.Model):
         self.workforce_entry_id = move.id
         move.action_post()
 
-    @api.model
-    def create(self, vals):
+    @api.model_create_multi
+    def create(self, vals_list):
         res = super(MrpWorkcenterProductivity, self).create(vals)
-        if vals.get('date_start') and vals.get('date_end'):
-            res.create_workforce_entry()
+        create_record = False
+        for vals in vals_list:
+            if vals.get('date_start') and vals.get('date_end'):
+                create_record = True
+                break
+        if create_record:
+            for record in res:
+                record.create_workforce_entry()
         return res
 
     def write(self, vals):
