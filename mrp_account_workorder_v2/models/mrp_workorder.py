@@ -191,7 +191,7 @@ class MrpWorkcenterProductivity(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        res = super(MrpWorkcenterProductivity, self).create(vals)
+        res = super(MrpWorkcenterProductivity, self).create(vals_list)
         create_record = False
         for vals in vals_list:
             if vals.get('date_start') and vals.get('date_end'):
