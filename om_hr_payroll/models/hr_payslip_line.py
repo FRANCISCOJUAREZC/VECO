@@ -16,7 +16,7 @@ class HrPayslipLine(models.Model):
     rate = fields.Float(string='Rate (%)', default=100.0)
     amount = fields.Float()
     quantity = fields.Float(default=1.0)
-    total = fields.Float(compute='_compute_total', string='Total')
+    total = fields.Float(compute='_compute_total', string='Total', store=True)
 
     @api.depends('quantity', 'amount', 'rate')
     def _compute_total(self):
