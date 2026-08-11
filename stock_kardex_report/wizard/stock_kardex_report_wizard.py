@@ -250,7 +250,7 @@ class StockKardexReportWiz(models.TransientModel):
             domain = [("unit_cost","!=", 0), ("total_cost","!=", 0) ]
         action = {
             'type': 'ir.actions.act_window',
-            'views': [(tree_view_id, 'tree'),(form_view_id, 'form')],
+            'views': [(tree_view_id, 'list'),(form_view_id, 'form')],
             'view_id': tree_view_id,
             'search_view_id': search_id,
             'view_mode': 'list,form',
