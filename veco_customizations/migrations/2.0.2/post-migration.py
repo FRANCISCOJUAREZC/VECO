@@ -31,6 +31,21 @@ removed/renamed by Odoo 19:
   which is never true for an invoice whose CFDI was already stamped
   (l10n_mx_edi overrides that method to return
   ``'l10n_mx_edi.report_invoice_document'`` instead).
+- ``account.move.line.display_type`` used to be ``False``/empty for a
+  regular product line; Odoo 19 now sets it to ``'product'``. All ten
+  documents guarded their line row with ``t-if="not line.display_type"``,
+  which is now always false, so every invoice printed with an empty product
+  table (subtotal/tax/total still computed fine since those come from
+  ``tax_totals``, not from the line loop).
+- the ``Odoo Studio: report_invoice_document copy(1) customization``
+  overlay (inherited view on top of ``account.report_invoice_document_copy_1``,
+  used by "Factura Nacional Veco copy(8)") references
+  ``line.internal_note``, a field that doesn't exist (removed, or a custom
+  field that was later deleted): the whole "Nota interna" column addition is
+  dropped. The same overlay also overwrote a header ``<span>``'s ``t-field``
+  attribute to ``line.name`` outside of the line loop, which would raise a
+  ``NameError`` (``line`` undefined there); reverted to the value the Studio
+  edit before it left in place (``o.line_ids``).
 
 The "Comercio Exterior" (customs) block in these reports reads
 ``cfdi_vals['ext_trade_*']`` keys that no current python code populates;
@@ -72,6 +87,10 @@ LITERAL_FIXES = [
     (
         "o.l10n_mx_edi_origin",
         "o.l10n_mx_edi_cfdi_origin",
+    ),
+    (
+        't-if="not line.display_type"',
+        "t-if=\"line.display_type == 'product' or not line.display_type\"",
     ),
 ]
 
@@ -255,3 +274,48 @@ def migrate(cr, version):
         view = _get_view(env, key)
         if view:
             view.write({"arch": TAX_TOTALS_TEMPLATE.format(name=key)})
+
+    _fix_internal_note_overlay(env)
+
+
+def _fix_internal_note_overlay(env):
+    """Drop the broken `line.internal_note` column and the stray
+    `t-field="line.name"` header attribute added by the Studio overlay on
+    top of `account.report_invoice_document_copy_1` (used by "Factura
+    Nacional Veco copy(8)")."""
+    parent = _get_view(env, "account.report_invoice_document_copy_1")
+    if not parent:
+        return
+    overlay = env["ir.ui.view"].search([
+        ("inherit_id", "=", parent.id),
+        ("name", "like", "Odoo Studio:"),
+    ], limit=1)
+    if not overlay:
+        return
+    arch = overlay.arch
+
+    remove_note_column = (
+        '  <xpath expr="/t/t/div/table/thead/tr/th[2]" position="after">\n'
+        "    <th>\n"
+        "      <span>Nota interna</span>\n"
+        "    </th>\n"
+        "  </xpath>\n"
+        '  <xpath expr="/t/t/div/table/tbody/t[3]/tr/t[1]/td[2]" position="after">\n'
+        "    <td>\n"
+        '      <span t-field="line.internal_note"/>\n'
+        "    </td>\n"
+        "  </xpath>\n"
+    )
+    if remove_note_column in arch:
+        arch = arch.replace(remove_note_column, "")
+
+    remove_bad_attribute = (
+        '  <xpath expr="/t[1]/t[1]/div[1]/div[7]/div[1]/span[1]" position="attributes">\n'
+        '    <attribute name="t-field">line.name</attribute>\n'
+        "  </xpath>\n"
+    )
+    if remove_bad_attribute in arch:
+        arch = arch.replace(remove_bad_attribute, "")
+
+    if arch != overlay.arch:
+        overlay.write({"arch": arch})
