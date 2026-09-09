@@ -171,24 +171,31 @@ def _apply_studio_views_fixup(cr, env):
                     inherit_xmlid, xmlid,
                 )
                 continue
-            new_view = ViewModel.create({
-                "name": entry["name"],
-                "model": entry["model"],
-                "type": entry["type"],
-                "mode": entry["mode"],
-                "priority": entry["priority"],
-                "active": entry["active"],
-                "inherit_id": inherit_view.id,
-                "arch_db": next(iter(entry["arch_db"].values()), "<data/>"),
-            })
-            _set_arch_db(cr, new_view.id, entry["arch_db"])
-            ImdModel.create({
-                "module": entry["module"],
-                "name": entry["xmlid"],
-                "model": "ir.ui.view",
-                "res_id": new_view.id,
-                "noupdate": True,
-            })
+            try:
+                with cr.savepoint():
+                    new_view = ViewModel.create({
+                        "name": entry["name"],
+                        "model": entry["model"],
+                        "type": entry["type"],
+                        "mode": entry["mode"],
+                        "priority": entry["priority"],
+                        "active": entry["active"],
+                        "inherit_id": inherit_view.id,
+                        "arch_db": next(iter(entry["arch_db"].values()), "<data/>"),
+                    })
+                    _set_arch_db(cr, new_view.id, entry["arch_db"])
+                    ImdModel.create({
+                        "module": entry["module"],
+                        "name": entry["xmlid"],
+                        "model": "ir.ui.view",
+                        "res_id": new_view.id,
+                        "noupdate": True,
+                    })
+            except Exception:
+                _logger.warning(
+                    "studio_views_fixup: failed to create %s, skipping", xmlid,
+                    exc_info=True,
+                )
 
 
 def _apply_relaxed_required_fields(env):
