@@ -62,7 +62,7 @@ class ResCompany(models.Model):
     fecha_csd = fields.Datetime(string=_('Vigencia CSD'), readonly=True)
     estado_csd =  fields.Char(string=_('Estado CSD'), readonly=True)
     aviso_csd =  fields.Char(string=_('Aviso vencimiento (días antes)'), default=14)
-
+    serie_timbrado = fields.Char(string=_('Serie traslado'))
     ################################################################################################################
 
     @api.onchange('country_id')
