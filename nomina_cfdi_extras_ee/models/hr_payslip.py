@@ -450,6 +450,12 @@ class HrPayslipRun(models.Model):
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
 
+    refunded_id = fields.Many2one(
+        'hr.payslip',
+        string='Refunded Payslip',
+        readonly=True
+    )
+
     def action_payslip_cancel(self):
         for payslip in self:
             module = self.env['ir.module.module'].sudo().search([('name','=','hr_payroll_account')])
