@@ -65,7 +65,7 @@
                                 <field name="fecha" />
                                 <field name="referencia" required="1"/>
                                 <field name="cfdi" />
-                                <field name="generado" attrs="{'readonly' : True}"/>
+                                <field name="generado" readonly="1"/>
                                 <field name="importe" sum="Importe Total"/>
                             </list>
                         </field>

@@ -29,7 +29,7 @@ class Contract(models.Model):
         ('hourly', 'Sueldo por hora')
     ], default='monthly')
 #    vacaciones_adelantadas = fields.Integer('Dias vacaciones adelantadas', default=0)
-#    tabla_vacaciones = fields.One2many('tablas.vacaciones.line', 'form_id')
+    tabla_vacaciones = fields.One2many('tablas.vacaciones.line', 'form_id')
 #    historial_salario_ids = fields.One2many('contract.historial.salario','contract_id', 'Historial Salario')
 
     #FUNCTION TO CREATE INCIDENTIA DAR ALTA
