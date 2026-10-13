@@ -74,8 +74,30 @@ class HrPayslip(models.Model):
         default='factura_no_generada',
         readonly=True,
     )
-    imss_dias = fields.Float('Cotizar en el IMSS',default='15') #, readonly=True) 
+    imss_dias = fields.Float('Cotizar en el IMSS',default='15') #, readonly=True)
     imss_mes = fields.Float('Dias a cotizar en el mes',default='30') #, readonly=True)
+    nomina_cfdi = fields.Boolean('Nomina CFDI')
+    qrcode_image = fields.Binary("QRCode")
+    qr_value = fields.Char(string='QR Code Value')
+    numero_cetificado = fields.Char(string='Numero de cetificado')
+    cetificaso_sat = fields.Char(string='Cetificao SAT')
+    folio_fiscal = fields.Char(string='Folio Fiscal', readonly=True)
+    fecha_certificacion = fields.Char(string='Fecha y Hora Certificación')
+    cadena_origenal = fields.Char(string='Cadena Origenal del Complemento digital de SAT')
+    selo_digital_cdfi = fields.Char(string='Selo Digital del CDFI')
+    selo_sat = fields.Char(string='Selo del SAT')
+    moneda = fields.Char(string='Moneda')
+    tipocambio = fields.Char(string='TipoCambio')
+    folio = fields.Char(string='Folio')
+    version = fields.Char(string='Version')
+    serie_emisor = fields.Char(string='Serie')
+    invoice_datetime = fields.Char(string='fecha factura')
+    rfc_emisor = fields.Char(string='RFC')
+    total_nomina = fields.Float('Total a pagar')
+    subtotal = fields.Float('Subtotal')
+    descuento = fields.Float('Descuento')
+    number_folio = fields.Char(string='No. Folio', compute='_get_number_folio')
+    fecha_factura = fields.Datetime(string='Fecha Factura')
 
     subsidio_periodo = fields.Float('subsidio_periodo')
     isr_periodo = fields.Float('isr_periodo')
@@ -105,6 +127,27 @@ class HrPayslip(models.Model):
     pat_cesantia_vejez = fields.Float(string='Cesantia y vejez.')
     pat_infonavit = fields.Float(string='INFONAVIT')
     pat_total = fields.Float(string='IMSS patron')
+    forma_pago = fields.Selection(
+        selection=[('99', '99 - Por definir'),],
+        string='Forma de pago', default='99',
+    )
+    tipo_comprobante = fields.Selection(
+        selection=[('N', 'Nómina'),],
+        string='Tipo de comprobante', default='N',
+    )
+    tipo_relacion = fields.Selection(
+        selection=[('04', 'Sustitución de los CFDI previos'),],
+        string='Tipo relación',
+    )
+    uuid_relacionado = fields.Char(string='CFDI Relacionado')
+    methodo_pago = fields.Selection(
+        selection=[('PUE', 'Pago en una sola exhibición'),],
+        string='Método de pago', default='PUE',
+    )
+    uso_cfdi = fields.Selection(
+        selection=[('P01', 'Por definir'),('CN01', 'Nomina'),],
+        string='Uso CFDI (cliente)', default='CN01',
+    )
     fecha_pago = fields.Date('Fecha de pago')
     dias_pagar = fields.Float('Pagar en la nomina')
     ultima_nomina = fields.Boolean(string='Última nómina del mes')

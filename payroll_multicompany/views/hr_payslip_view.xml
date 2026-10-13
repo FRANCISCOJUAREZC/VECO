@@ -4,7 +4,7 @@
     <record id="hr_payslip_run_form_multi_company_itadmin" model="ir.ui.view">
            <field name="name">hr.payslip.run.form.itadmin.multi.company</field>
            <field name="model">hr.payslip.run</field>
-           <field name="inherit_id" ref="nomina_cfdi_ee.hr_payslip_run_form_nomina_cfdi"/>
+           <field name="inherit_id" ref="nomina_cfdi_ee.hr_payslip_run_ext"/>
            <field name="arch" type="xml">
            	 <xpath expr="//field[@name='mes']" position="after">
            			<field name="company_id" groups="base.group_multi_company" readonly="0"/>

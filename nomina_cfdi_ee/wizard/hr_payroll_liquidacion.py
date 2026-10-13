@@ -57,7 +57,7 @@ class GeneraLiquidaciones(models.TransientModel):
     @api.onchange('contract_id')
     def _change_salary_structure(self):
         if self.contract_id:
-           self.write({'estructura': self.contract_id.struct_id.id})
+           self.write({'estructura': self.contract_id.structure_id.id})
 
     def calculo_create(self):
         employee = self.employee_id
@@ -118,7 +118,7 @@ class GeneraLiquidaciones(models.TransientModel):
         payslip_vals.append({
             'name': 'Payslip - %s' % (employee.name),
             'struct_id' : self.estructura.id,
-            'contract_id' : contract_id,
+            'version_id' : contract_id,
             'employee_id' : employee.id,
             'worked_days_line_ids' : worked_days,
             'input_line_ids' : other_inputs,
@@ -126,7 +126,7 @@ class GeneraLiquidaciones(models.TransientModel):
             'payslip_run_id' : batch.id,
             'date_from': date_from,
             'date_to': date_to,
-            'contract_id' : contract_id,
+            'version_id' : contract_id,
             'fecha_pago' : date_to,
             'mes': str(date_to.month).zfill(2),
             'dias_pagar': dias_pagar,
@@ -136,7 +136,7 @@ class GeneraLiquidaciones(models.TransientModel):
         if module and module.state == 'installed':
             if not self.journal_id:
                 raise UserError("Falta a agregar un diario")
-            payslip_vals.update({'journal_id': self.journal_id.id})
+            payslip_vals[0].update({'journal_id': self.journal_id.id})
         payslip_obj.create(payslip_vals)
         
         #Creación de nomina extraordinaria
@@ -171,7 +171,7 @@ class GeneraLiquidaciones(models.TransientModel):
                'payslip_run_id' : batch.id,
                'date_from': date_from,
                'date_to': date_to,
-               'contract_id' : contract_id,
+               'version_id' : contract_id,
                'dias_pagar': 1,
                'fecha_pago' : date_to,
                'nom_liquidacion': True,
@@ -180,7 +180,7 @@ class GeneraLiquidaciones(models.TransientModel):
             if module and module.state == 'installed':
                 if not self.journal_id:
                    raise UserError("Falta a agregar un diario")
-                payslip_vals2.update({'journal_id': self.journal_id.id})
+                payslip_vals2[0].update({'journal_id': self.journal_id.id})
             payslip_obj.create(payslip_vals2)
             
         return True
@@ -248,6 +248,7 @@ class GeneraLiquidaciones(models.TransientModel):
                 line = self.env['tablas.antiguedades.line'].sudo().search([('form_id','=',self.contract_id.tablas_cfdi_id.id),('antiguedad','<=',self.antiguedad_anos+1)],order='antiguedad desc',limit=1)
                 if line:
                     dias_aguinaldo2 = line.aguinaldo
+                    dias_faltas = 0
                     self.dias_aguinaldo = (dias_aguinaldo2* (self.dias_aguinaldo - dias_faltas))/365.0
                     #_logger.info('dias %s, dias aguinaldo %s,', self.dias_aguinaldo, dias_aguinaldo2)
 
@@ -285,7 +286,7 @@ class GeneraLiquidaciones(models.TransientModel):
 
 
             #dias de vacaciones adicionales entregados y no pagados
-            if self.contract_id.tipo_prima_vacacional == '02':
+            if self.employee_id.tipo_prima_vacacional == '02':
                 ano_buscar = 0
                 if last_day <= date_start:
                     ano_buscar = last_day.year -1

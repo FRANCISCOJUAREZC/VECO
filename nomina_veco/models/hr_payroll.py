@@ -102,11 +102,11 @@ class HrPayslip(models.Model):
         date_start_1 = self.employee_id.contract_date_start
         d_from_1 = fields.Date.from_string(self.date_from)
         d_to_1 = fields.Date.from_string(self.date_to)
-        if date_start_1 > d_from_1:
+        if date_start_1 and date_start_1 > d_from_1:
             work_data_days =  (self.date_to - date_start_1).days + 1
             nvo_ingreso = True
         if self.employee_id.contract_date_end:
-            if d_to_1 > date_start_1:
+            if date_start_1 and d_to_1 > date_start_1:
                work_data_days =  (self.employee_id.contract_date_end - self.date_from).days + 1
                nvo_ingreso = True
 
@@ -203,10 +203,9 @@ class HrPayslip(models.Model):
         else:
             if self.employee_id.work_entry_source != 'attendance':
                date_start = self.employee_id.contract_date_start
-               if date_start:
-                   d_from = fields.Date.from_string(date_from)
-                   d_to = fields.Date.from_string(date_to)
-               if date_start > self.date_from:
+               d_from = fields.Date.from_string(date_from)
+               d_to = fields.Date.from_string(date_to)
+               if date_start and date_start > self.date_from:
                    number_of_days = (d_to - date_start).days + 1 - leave_days
                else:
                    number_of_days = (d_to - d_from).days + 1 - leave_days
