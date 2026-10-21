@@ -230,5 +230,5 @@ def migrate(cr, version):
         _patch_view(cr, row[0], XPATH_FIXES)
 
     env = api.Environment(cr, SUPERUSER_ID, {})
-    _apply_studio_views_fixup(cr, env)
+    #_apply_studio_views_fixup(cr, env)
     _apply_relaxed_required_fields(env)
