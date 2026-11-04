@@ -104,9 +104,7 @@ class PurchaseRequestLine(models.Model):
     purchase_state = fields.Selection(
         compute="_compute_purchase_state",
         string="Purchase Status",
-        selection=lambda self: self.env["purchase.order"]
-        ._fields["state"]
-        ._description_selection(self.env),
+        selection="_selection_purchase_state",
         store=True,
     )
     move_dest_ids = fields.One2many(
@@ -307,6 +305,20 @@ class PurchaseRequestLine(models.Model):
                     rec.purchased_qty += line.product_qty
 
     @api.depends("purchase_lines.state", "purchase_lines.order_id.state")
+    @api.model
+    def _selection_purchase_state(self):
+        # Odoo 19 removed the "done" state from purchase.order (replaced by the
+        # `locked` flag), but this field still uses it to flag request lines
+        # whose purchase lines are fully received (see _compute_purchase_state
+        # and purchase.order._purchase_request_line_check). Without it, any
+        # stored "done" value crashes the web client's SelectionField.
+        selection = self.env["purchase.order"]._fields["state"]._description_selection(
+            self.env
+        )
+        if "done" not in dict(selection):
+            selection = selection + [("done", self.env._("Done"))]
+        return selection
+
     def _compute_purchase_state(self):
         for rec in self:
             temp_purchase_state = False
