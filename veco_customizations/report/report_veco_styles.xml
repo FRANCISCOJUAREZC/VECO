@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Morwi Encoders Consulting SA de CV / License LGPL-3.0 -->
+<odoo>
+    <!-- Shared styles of the VECO report templates (purchase, sale, manufacturing).
+         Every table uses o_ignore_layout_styling and borders are reset so the
+         company "boxed" layout does not draw its own grid over them. -->
+    <template id="report_veco_styles">
+                <style>
+                    .veco_doc { font-size: 11px; color: #222; }
+                    .veco_doc table { width: 100%; border-collapse: separate !important; border-spacing: 0; border: 0 !important; }
+                    .veco_doc table::before { display: none !important; }
+                    .veco_doc table td, .veco_doc table th, .veco_doc table tr { border: 0 none !important; }
+                    .veco_doc .v-title { font-size: 22px; font-weight: 700; letter-spacing: 1px; margin: 0; }
+                    .veco_doc .v-subtitle { font-size: 13px; font-weight: 600; }
+                    .veco_doc .v-number { font-size: 22px; font-weight: 700; }
+                    .veco_doc .v-label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #666; letter-spacing: .5px; }
+                    .veco_doc td.v-box { border: 1px solid #d5d9dd !important; border-radius: 4px; padding: 8px 10px; vertical-align: top; }
+                    .veco_doc .v-box-title { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #fff; padding: 3px 10px; }
+                    .veco_doc .v-gap { width: 10px; }
+                    .veco_doc .v-info td { padding: 2px 0; vertical-align: top; }
+                    .veco_doc .v-info td.v-k { width: 45%; color: #555; font-weight: 600; }
+                    .veco_doc .v-lines th { font-size: 10px; text-transform: uppercase; color: #fff; padding: 5px 6px; }
+                    .veco_doc .v-lines td { padding: 5px 6px; border-bottom: 1px solid #e3e6e8 !important; vertical-align: top; }
+                    .veco_doc .v-lines tr.v-section td { background: #eef1f3; font-weight: 700; }
+                    .veco_doc .v-lines tr.v-note td { font-style: italic; color: #555; }
+                    .veco_doc .v-totals td { padding: 4px 8px; border-bottom: 1px solid #e3e6e8 !important; }
+                    .veco_doc .v-totals tr.v-grand td { color: #fff; font-weight: 700; font-size: 12px; border-bottom: 0 !important; }
+                    .veco_doc .v-section-title { font-size: 12px; font-weight: 700; border-bottom: 2px solid; padding-bottom: 2px; margin: 14px 0 6px 0; }
+                    .veco_doc .v-notes { background: #f6f7f8; border-left: 3px solid; padding: 6px 10px; font-size: 10px; color: #444; }
+                    .veco_doc .v-notes p { margin: 0; }
+                    .veco_doc .v-sign td { text-align: center; padding: 0 12px; vertical-align: bottom; }
+                    .veco_doc .v-sign .v-line { border-top: 1px solid #333; padding-top: 3px; margin-top: 45px; font-weight: 600; }
+                    .veco_doc .v-avoid { page-break-inside: avoid; }
+                    .veco_doc .v-revision { font-size: 9px; color: #777; margin-top: 14px; }
+                    .veco_doc .v-info td.v-k.v-narrow { width: 28%; }
+                    .veco_doc .v-pre { white-space: pre-line; }
+                    .veco_doc .v-text { font-size: 10px; color: #333; }
+                    .veco_doc .v-text p { margin: 0 0 4px 0; }
+                    .veco_doc .v-banner { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .5px; margin-bottom: 8px; }
+                    .veco_doc .v-barcode { text-align: right; }
+                    .veco_doc .v-barcode img { height: 45px; width: 260px; }
+                    .veco_doc .v-grid td { border: 1px solid #c9ced3 !important; padding: 8px 6px; }
+                    .veco_doc .v-grid th { border: 1px solid #c9ced3 !important; background: #eef1f3; padding: 4px 6px; font-size: 10px; text-transform: uppercase; color: #333; text-align: center; }
+                    .veco_doc .v-seller { text-align: right; margin-top: 16px; }
+                    .veco_doc .v-seller img { max-width: 300px; max-height: 120px; }
+                </style>
+    </template>
+</odoo>

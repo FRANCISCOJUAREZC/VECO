@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Morwi Encoders Consulting SA de CV / License LGPL-3.0 -->
+<odoo>
+    <!--
+        Shared layout for the VECO manufacturing order / picking list reports.
+
+        The Studio report copies (mrp.report_mrporder_copy_*) only t-call this
+        template inside their docs loop, passing their own texts/flags with
+        t-set (see migrations/2.0.6). Header data is printed only when set.
+        Parameters:
+
+        title           Markup: document title (e.g. "LISTA DE EXPEDICIÓN")
+        show_details    Description, special data, notes and delivery requirements
+        show_workorders Planned / done operations table
+        show_labels     "Instructivos" and "Etiquetas" sections
+        show_data_log   "Registro de datos" grid to fill in by hand
+        revision        Form code printed at the bottom
+    -->
+    <template id="report_mrporder_veco_document">
+        <t t-call="web.internal_layout">
+            <t t-set="accent" t-value="o.company_id.primary_color or '#0085af'"/>
+            <t t-set="raw_moves" t-value="o.move_raw_ids.filtered(lambda m: m.state != 'cancel')"/>
+            <div class="page veco_doc">
+                <t t-call="veco_customizations.report_veco_styles"/>
+
+                <!-- Title + barcode -->
+                <table class="o_ignore_layout_styling v-avoid" style="margin-bottom: 10px;">
+                    <tr>
+                        <td style="width: 18%; vertical-align: middle;">
+                            <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 55px; max-width: 120px;" alt="Logo"/>
+                        </td>
+                        <td style="vertical-align: middle;">
+                            <div class="v-title" t-attf-style="color: {{ accent }}; font-size: 16px;"><t t-out="title"/></div>
+                            <div class="v-number"><span t-field="o.name"/></div>
+                        </td>
+                        <td class="v-barcode" style="width: 36%; vertical-align: middle;">
+                            <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 600, 100)" alt="Barcode"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Order data -->
+                <table class="o_ignore_layout_styling v-avoid" style="margin-bottom: 12px;">
+                    <tr>
+                        <td class="v-box" style="width: 50%;">
+                            <table class="o_ignore_layout_styling v-info">
+                                <tr>
+                                    <td class="v-k">Producto terminado</td>
+                                    <td class="fw-bold"><span t-field="o.product_id.display_name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="v-k">Cantidad a producir</td>
+                                    <td class="fw-bold"><span t-field="o.product_qty"/> <span t-field="o.product_uom_id.name"/></td>
+                                </tr>
+                                <tr t-if="o.x_studio_nmero_de_serie">
+                                    <td class="v-k">Serie / Lote</td>
+                                    <td class="fw-bold"><span t-field="o.x_studio_nmero_de_serie"/></td>
+                                </tr>
+                                <tr t-if="o.x_studio_cliente_p_1">
+                                    <td class="v-k">Cliente</td>
+                                    <td><span t-field="o.x_studio_cliente_p_1"/></td>
+                                </tr>
+                                <tr t-if="o.x_studio_tipo_de_cliente_2">
+                                    <td class="v-k">Tipo de cliente</td>
+                                    <td><span t-field="o.x_studio_tipo_de_cliente_2"/></td>
+                                </tr>
+                                <tr t-if="o.user_id">
+                                    <td class="v-k">Responsable</td>
+                                    <td><span t-field="o.user_id.name"/></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td class="v-gap"/>
+                        <td class="v-box" style="width: 50%;">
+                            <table class="o_ignore_layout_styling v-info">
+                                <tr t-if="o.origin">
+                                    <td class="v-k">Origen</td>
+                                    <td><span t-field="o.origin"/></td>
+                                </tr>
+                                <tr t-if="o.x_studio_documento_origen">
+                                    <td class="v-k">Documento de origen</td>
+                                    <td><span t-field="o.x_studio_documento_origen"/></td>
+                                </tr>
+                                <tr t-if="o.x_studio_sale_id">
+                                    <td class="v-k">Pedido de venta</td>
+                                    <td><span t-field="o.x_studio_sale_id.name"/></td>
+                                </tr>
+                                <tr t-if="o.x_studio_pedido_comp">
+                                    <td class="v-k">Orden de compra</td>
+                                    <td><span t-field="o.x_studio_pedido_comp.display_name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="v-k">Inicio planificado</td>
+                                    <td><span t-field="o.date_start"/></td>
+                                </tr>
+                                <tr t-if="o.date_finished">
+                                    <td class="v-k">Fin planificado</td>
+                                    <td><span t-field="o.date_finished"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="v-k">Fecha de impresión</td>
+                                    <td><t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Description -->
+                <div t-if="show_details and o.product_id.description_pickingin" class="v-avoid">
+                    <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Descripción</div>
+                    <div class="v-pre" style="font-size: 12px;"><t t-out="o.product_id.description_pickingin"/></div>
+                </div>
+
+                <!-- Work instructions / labels -->
+                <div t-if="show_labels" class="v-avoid">
+                    <table class="o_ignore_layout_styling" style="margin-top: 6px;">
+                        <tr>
+                            <td style="width: 50%; vertical-align: top; padding-right: 10px;">
+                                <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Instructivos</div>
+                                <div class="v-text v-pre"><t t-out="o.product_id.x_studio_text_field_yyRvc or '—'"/></div>
+                                <div t-if="o.bom_id.x_studio_text_field_XgiNm" class="v-text v-pre mt-1"><t t-out="o.bom_id.x_studio_text_field_XgiNm"/></div>
+                            </td>
+                            <td style="width: 50%; vertical-align: top;">
+                                <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Etiquetas</div>
+                                <div class="v-text v-pre"><t t-out="o.product_id.x_studio_etiquetas or '—'"/></div>
+                                <div class="v-text text-muted mt-1">De acuerdo FV-03-7-011 Lista Maestra de Etiquetas</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Components -->
+                <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Lista de materiales</div>
+                <table class="o_ignore_layout_styling v-lines">
+                    <thead style="display: table-row-group;">
+                        <tr t-attf-style="background: {{ accent }};">
+                            <th class="text-end" style="width: 12%;">Cantidad</th>
+                            <th class="text-start" style="width: 9%;">Unidad</th>
+                            <th class="text-start">Componente</th>
+                            <th class="text-start" style="width: 24%;">Ubicación</th>
+                            <th class="text-start" style="width: 14%;">Lote / Serie</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="raw_moves" t-as="move">
+                            <td class="text-end"><span t-field="move.product_uom_qty"/></td>
+                            <td><span t-field="move.product_uom.name"/></td>
+                            <td>
+                                <div><span t-field="move.product_id.display_name"/></div>
+                                <div t-if="move.product_id.description_pickingin" class="v-text text-muted v-pre"><t t-out="move.product_id.description_pickingin"/></div>
+                            </td>
+                            <td><t t-out="', '.join(move.move_line_ids.location_id.mapped('display_name')) or move.location_id.display_name"/></td>
+                            <td><t t-out="', '.join(move.move_line_ids.lot_id.mapped('name'))"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p t-if="o.state not in ('done', 'cancel') and any(m.state not in ('assigned', 'done') for m in raw_moves)" class="v-text text-warning mt-1">
+                    No se pudieron reservar todos los componentes.
+                </p>
+
+                <!-- Operations -->
+                <div t-if="show_workorders and o.workorder_ids" class="v-avoid">
+                    <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">
+                        <t t-if="o.state == 'done'">Operaciones realizadas</t><t t-else="">Operaciones planificadas</t>
+                    </div>
+                    <table class="o_ignore_layout_styling v-lines">
+                        <thead style="display: table-row-group;">
+                            <tr t-attf-style="background: {{ accent }};">
+                                <th class="text-start">Operación</th>
+                                <th class="text-start" style="width: 35%;">Centro de trabajo</th>
+                                <th class="text-end" style="width: 15%;">Minutos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="o.workorder_ids" t-as="wo">
+                                <td><span t-field="wo.name"/></td>
+                                <td><span t-field="wo.workcenter_id.name"/></td>
+                                <td class="text-end">
+                                    <span t-if="o.state == 'done'" t-field="wo.duration"/>
+                                    <span t-else="" t-field="wo.duration_expected"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Special data and notes -->
+                <div t-if="show_details" class="v-avoid">
+                    <div t-if="not is_html_empty(o.x_studio_datos_especiales)">
+                        <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Datos especiales</div>
+                        <div class="v-text"><span t-field="o.x_studio_datos_especiales"/></div>
+                    </div>
+                    <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Notas</div>
+                    <table class="o_ignore_layout_styling v-info">
+                        <tr>
+                            <td class="v-k v-narrow">Nota</td>
+                            <td><t t-out="o.x_studio_nota or '—'"/></td>
+                        </tr>
+                        <tr>
+                            <td class="v-k">Nota del pedido</td>
+                            <td><t t-out="o.sale_notes or '—'"/></td>
+                        </tr>
+                        <tr>
+                            <td class="v-k">Requerimientos de entrega</td>
+                            <td><t t-out="o.x_studio_requerimientos or '—'"/></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Hand-filled data log -->
+                <div t-if="show_data_log" class="v-avoid">
+                    <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Registro de datos</div>
+                    <table class="o_ignore_layout_styling v-grid">
+                        <tr>
+                            <th style="width: 8%;">Filtro</th>
+                            <th>Altura</th>
+                            <th>Frente</th>
+                            <th>Fondo</th>
+                            <th style="width: 24%;">Responsable</th>
+                            <th style="width: 14%;">Fecha</th>
+                        </tr>
+                        <tr t-foreach="range(1, 5)" t-as="row">
+                            <td class="text-center"><t t-out="row"/></td>
+                            <td/><td/><td/><td/><td/>
+                        </tr>
+                    </table>
+                </div>
+
+                <div t-if="revision" class="v-revision"><t t-out="revision"/></div>
+            </div>
+        </t>
+    </template>
+</odoo>

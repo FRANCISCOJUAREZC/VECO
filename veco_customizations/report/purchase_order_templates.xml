@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Morwi Encoders Consulting SA de CV / License LGPL-3.0 -->
+<odoo>
+    <!--
+        Shared layout for the VECO / DVI purchase order reports.
+
+        The Studio report copies (purchase.report_purchaseorder_document_copy_*)
+        only t-call this template, passing their own texts/flags with t-set
+        (see migrations/2.0.6). Parameters:
+
+        en                  English labels (international orders)
+        bill_to             Markup: "Facturar a / Invoice to" block
+        office              Markup: optional "Oficinas / almacén tráfico" block
+        veco_contact        Markup: VECO purchasing contact
+        revision            Form code printed at the bottom (e.g. REV.7; 07/26 FV-07-8-001)
+        show_line_date      "Fecha prevista" column on lines
+        show_delivery_date  Header "Fecha de entrega" (o.date_planned)
+        use_create_date     Header date is o.create_date instead of o.date_order
+        show_request_info   Header "Solicitado por" / "Fecha de requisición"
+        show_specs          "Especificaciones de compra requeridas" section
+        international       Shipping terms + "Documentation Required" sections
+        docs_address        Markup: address for original documents (international)
+        signatures          list of signature captions
+    -->
+    <template id="report_purchaseorder_veco_document">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
+            <t t-set="accent" t-value="o.company_id.primary_color or '#0085af'"/>
+            <t t-set="ship_partner" t-value="o.dest_address_id or o.picking_type_id.warehouse_id.partner_id"/>
+            <t t-set="requisition" t-value="o.x_studio_many2one_field_MoAkt.name or o.x_studio_requisicin"/>
+            <div class="page veco_doc">
+                <t t-call="veco_customizations.report_veco_styles"/>
+
+                <!-- Title + document info -->
+                <table class="o_ignore_layout_styling v-avoid" style="margin-bottom: 12px;">
+                    <tr>
+                        <td style="width: 55%; vertical-align: top;">
+                            <div class="v-title" t-attf-style="color: {{ accent }};">
+                                <t t-if="en">PURCHASE ORDER</t><t t-else="">ORDEN DE COMPRA</t>
+                            </div>
+                            <div class="v-number"><span t-field="o.name"/></div>
+                            <div t-if="o.state in ('draft', 'sent')" class="v-subtitle text-muted">
+                                <t t-if="en">Request for quotation</t><t t-else="">Solicitud de cotización</t>
+                            </div>
+                            <div t-if="o.state == 'cancel'" class="v-subtitle text-danger">
+                                <t t-if="en">CANCELLED</t><t t-else="">CANCELADA</t>
+                            </div>
+                        </td>
+                        <td class="v-box" style="width: 45%;">
+                            <table class="o_ignore_layout_styling v-info">
+                                <tr t-if="not use_create_date">
+                                    <td class="v-k"><t t-if="en">Order date</t><t t-else="">Fecha de pedido</t></td>
+                                    <td><span t-field="o.date_order" t-options="{'widget': 'date'}"/></td>
+                                </tr>
+                                <tr t-if="use_create_date">
+                                    <td class="v-k">Fecha de creación</td>
+                                    <td><span t-field="o.create_date" t-options="{'widget': 'date'}"/></td>
+                                </tr>
+                                <tr t-if="show_delivery_date and o.date_planned">
+                                    <td class="v-k"><t t-if="en">Date of delivery</t><t t-else="">Fecha de entrega</t></td>
+                                    <td><span t-field="o.date_planned" t-options="{'widget': 'date'}"/></td>
+                                </tr>
+                                <tr t-if="show_request_info and o.x_studio_solicitado_por">
+                                    <td class="v-k">Solicitado por</td>
+                                    <td><span t-field="o.x_studio_solicitado_por"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="v-k"><t t-if="en">Requisition</t><t t-else="">Requisición</t></td>
+                                    <td><t t-out="requisition or '—'"/></td>
+                                </tr>
+                                <tr t-if="show_request_info and o.x_studio_fecha_de_requisicin">
+                                    <td class="v-k">Fecha de requisición</td>
+                                    <td><span t-field="o.x_studio_fecha_de_requisicin"/></td>
+                                </tr>
+                                <tr t-if="o.partner_ref">
+                                    <td class="v-k"><t t-if="en">Supplier reference</t><t t-else="">Referencia del proveedor</t></td>
+                                    <td><span t-field="o.partner_ref"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="v-k"><t t-if="en">Currency</t><t t-else="">Moneda</t></td>
+                                    <td><span t-field="o.currency_id.name"/></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Parties -->
+                <table class="o_ignore_layout_styling v-avoid" style="margin-bottom: 14px;">
+                    <tr>
+                        <td style="width: 33%; padding: 0;" class="v-box-title" t-attf-style="background: {{ accent }};">
+                            <t t-if="en">Supplier</t><t t-else="">Proveedor</t>
+                        </td>
+                        <td class="v-gap"/>
+                        <td style="width: 33%; padding: 0;" class="v-box-title" t-attf-style="background: {{ accent }};">
+                            <t t-if="en">Ship to</t><t t-else="">Entregar en</t>
+                        </td>
+                        <td class="v-gap"/>
+                        <td style="width: 33%; padding: 0;" class="v-box-title" t-attf-style="background: {{ accent }};">
+                            <t t-if="en">Invoice to</t><t t-else="">Facturar a</t>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="v-box" style="border-top: 0 !important;">
+                            <div t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'address', 'phone'], 'no_marker': True, 'phone_icons': True}"/>
+                            <div t-if="o.partner_id.vat"><strong><t t-if="en">Tax ID</t><t t-else="">RFC</t>:</strong> <span t-field="o.partner_id.vat"/></div>
+                            <div t-if="o.x_studio_vendor_contact_id and not international" class="mt-1">
+                                <strong>Contacto:</strong> <span t-field="o.x_studio_vendor_contact_id.name"/>
+                            </div>
+                        </td>
+                        <td class="v-gap"/>
+                        <td class="v-box" style="border-top: 0 !important;">
+                            <div t-if="not o.dest_address_id and o.picking_type_id.warehouse_id" class="fw-bold">
+                                <span t-field="o.picking_type_id.warehouse_id.name"/>
+                            </div>
+                            <div t-if="ship_partner" t-field="ship_partner.self"
+                                 t-options="{'widget': 'contact', 'fields': ['name', 'address', 'phone', 'email'], 'no_marker': True, 'phone_icons': True}"/>
+                        </td>
+                        <td class="v-gap"/>
+                        <td class="v-box" style="border-top: 0 !important;">
+                            <div class="fw-bold"><t t-out="bill_to"/></div>
+                            <div class="mt-1">
+                                <strong><t t-if="en">Import number</t><t t-else="">RFC</t>:</strong>
+                                <span t-field="o.company_id.vat"/>
+                            </div>
+                            <div t-if="office" class="mt-2" style="font-size: 9px; color: #555;">
+                                <t t-out="office"/>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Lines -->
+                <table class="o_ignore_layout_styling v-lines">
+                    <thead style="display: table-row-group;">
+                        <tr t-attf-style="background: {{ accent }};">
+                            <th class="text-end" style="width: 9%;"><t t-if="en">Qty</t><t t-else="">Cantidad</t></th>
+                            <th class="text-start" style="width: 12%;"><t t-if="en">Unit</t><t t-else="">Unidad</t></th>
+                            <th class="text-start"><t t-if="en">Description</t><t t-else="">Descripción</t></th>
+                            <th t-if="show_line_date" class="text-center" style="width: 12%;">Fecha prevista</th>
+                            <th class="text-end" style="width: 13%;"><t t-if="en">Unit price</t><t t-else="">Precio unit.</t></th>
+                            <th class="text-end" style="width: 14%;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="o.order_line" t-as="line">
+                            <tr t-if="line.display_type == 'line_section'" class="v-section">
+                                <td t-att-colspan="6 if show_line_date else 5"><span t-field="line.name"/></td>
+                            </tr>
+                            <tr t-elif="line.display_type == 'line_note'" class="v-note">
+                                <td t-att-colspan="6 if show_line_date else 5"><span t-field="line.name"/></td>
+                            </tr>
+                            <tr t-else="">
+                                <td class="text-end"><span t-field="line.product_qty"/></td>
+                                <td><span t-field="line.product_uom_id.name"/></td>
+                                <td><span t-field="line.name"/></td>
+                                <td t-if="show_line_date" class="text-center"><span t-field="line.date_planned" t-options="{'widget': 'date'}"/></td>
+                                <td class="text-end"><span t-field="line.price_unit"/></td>
+                                <td class="text-end"><span t-field="line.price_subtotal" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <!-- Totals -->
+                <table class="o_ignore_layout_styling v-avoid" style="margin-top: 8px;">
+                    <tr>
+                        <td style="width: 60%;"/>
+                        <td style="width: 40%;">
+                            <table class="o_ignore_layout_styling v-totals">
+                                <tr>
+                                    <td>Subtotal</td>
+                                    <td class="text-end"><span t-field="o.amount_untaxed" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                </tr>
+                                <tr>
+                                    <td><t t-if="en">Taxes</t><t t-else="">Impuestos</t></td>
+                                    <td class="text-end"><span t-field="o.amount_tax" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                </tr>
+                                <tr class="v-grand" t-attf-style="background: {{ accent }};">
+                                    <td><t t-if="en">Total order</t><t t-else="">Total del pedido</t></td>
+                                    <td class="text-end"><span t-field="o.amount_total" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Commercial conditions (national) -->
+                <div t-if="not international" class="v-avoid">
+                    <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Condiciones</div>
+                    <table class="o_ignore_layout_styling">
+                        <tr>
+                            <td style="width: 50%; vertical-align: top; padding-right: 10px;">
+                                <table class="o_ignore_layout_styling v-info">
+                                    <tr>
+                                        <td class="v-k">Condiciones de pago</td>
+                                        <td><t t-out="o.payment_term_id.name or '—'"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="v-k">Método de entrega</td>
+                                        <td><t t-out="o.x_studio_deliv_methods.name or '—'"/></td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td style="width: 50%; vertical-align: top;">
+                                <div t-if="veco_contact">
+                                    <div class="v-label">Contacto compras</div>
+                                    <t t-out="veco_contact"/>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Shipping terms (international) -->
+                <div t-if="international" class="v-avoid">
+                    <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Shipping terms</div>
+                    <table class="o_ignore_layout_styling">
+                        <tr>
+                            <td style="width: 50%; vertical-align: top; padding-right: 10px;">
+                                <table class="o_ignore_layout_styling v-info">
+                                    <tr><td class="v-k">Terms of payment</td><td><t t-out="o.payment_term_id.display_name or '—'"/></td></tr>
+                                    <tr><td class="v-k">Ship to</td><td><t t-out="o.picking_type_id.display_name or '—'"/></td></tr>
+                                    <tr>
+                                        <td class="v-k">Via</td>
+                                        <td><t t-out="' / '.join(v for v in [o.x_studio_deliv_methods.display_name, o.x_studio_metodo_de_entrega] if v) or '—'"/></td>
+                                    </tr>
+                                    <tr><td class="v-k">Lead time</td><td><t t-out="o.x_studio_lead_time_1 or '—'"/></td></tr>
+                                </table>
+                            </td>
+                            <td style="width: 50%; vertical-align: top;">
+                                <table class="o_ignore_layout_styling v-info">
+                                    <tr><td class="v-k">Notify to</td><td><t t-out="o.x_studio_notify_to or '—'"/></td></tr>
+                                    <tr><td class="v-k">Final destination</td><td><t t-out="o.x_studio_final_destination or '—'"/></td></tr>
+                                    <tr><td class="v-k">Special remarks</td><td><t t-out="o.x_studio_special_remarks or '—'"/></td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Documentation required</div>
+                    <table class="o_ignore_layout_styling">
+                        <tr>
+                            <td style="width: 50%; vertical-align: top; padding-right: 10px;">
+                                Please issue and send the original required documents to the following address:
+                                <div class="mt-1 fw-bold"><t t-out="docs_address"/></div>
+                            </td>
+                            <td style="width: 50%; vertical-align: top;">
+                                <table class="o_ignore_layout_styling v-info">
+                                    <t t-foreach="[('Commercial invoice', o.x_studio_commercial_invoice), ('Packing list', o.x_studio_packing_list), ('Certificate of origin', o.x_studio_certificate_of_origin), ('Bill of lading', o.x_studio_bill_of_lading), ('Air freight', o.x_studio_air_freight)]" t-as="doc">
+                                        <tr>
+                                            <td class="v-k"><t t-out="doc[0]"/></td>
+                                            <td><t t-if="doc[1]">&#9746; Yes</t><t t-else="">&#9744; No</t></td>
+                                        </tr>
+                                    </t>
+                                    <tr><td class="v-k">Others</td><td><t t-out="o.x_studio_others or '—'"/></td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Purchase specifications -->
+                <div t-if="show_specs" class="v-avoid">
+                    <div class="v-section-title" t-attf-style="border-color: {{ accent }}; color: {{ accent }};">Especificaciones de compra requeridas</div>
+                    <table class="o_ignore_layout_styling">
+                        <tr>
+                            <td style="width: 50%; vertical-align: top; padding-right: 10px;">
+                                <table class="o_ignore_layout_styling v-info">
+                                    <tr><td class="v-k">Certificado de calidad</td><td><t t-out="o.x_studio_especificaciones or '—'"/></td></tr>
+                                    <tr><td class="v-k">Empaque y embalaje</td><td><t t-out="o.x_studio_especificaciones_1 or '—'"/></td></tr>
+                                    <tr><td class="v-k">Etiquetado</td><td><t t-out="o.x_studio_especificaciones_2 or '—'"/></td></tr>
+                                </table>
+                            </td>
+                            <td style="width: 50%; vertical-align: top;">
+                                <table class="o_ignore_layout_styling v-info">
+                                    <tr><td class="v-k">Fecha máxima de entrega</td><td><span t-if="o.x_studio_fecha" t-field="o.x_studio_fecha"/><t t-else="">—</t></td></tr>
+                                    <tr><td class="v-k">Condición estética</td><td><t t-out="o.x_studio_condicin or '—'"/></td></tr>
+                                    <tr><td class="v-k">Otros</td><td><t t-out="o.x_studio_char_field_kaquf or '—'"/></td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Supplier instructions / notes -->
+                <div t-if="not is_html_empty(o.note)" class="v-notes mt-3" t-attf-style="border-color: {{ accent }};">
+                    <span t-field="o.note"/>
+                </div>
+
+                <!-- Signatures -->
+                <table t-if="signatures" class="o_ignore_layout_styling v-sign v-avoid" style="margin-top: 20px;">
+                    <tr>
+                        <td t-foreach="signatures" t-as="caption">
+                            <div class="v-line"><t t-out="caption"/></div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div t-if="revision" class="v-revision"><t t-out="revision"/></div>
+            </div>
+        </t>
+    </template>
+</odoo>
