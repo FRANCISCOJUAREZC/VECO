@@ -307,6 +307,18 @@
             <td name="td_veco_product"><span t-field="line.product_id"/></td>
         </xpath>
 
+        <!-- Lines: item number (partida) as first column, counting product lines only -->
+        <xpath expr="//table[@name='invoice_line_table']//t[@t-foreach='lines_to_report']" position="before">
+            <t t-set="veco_line_no" t-value="0"/>
+        </xpath>
+        <xpath expr="//table[@name='invoice_line_table']//th[@name='th_product_unspsc_code']" position="before">
+            <th name="th_veco_line_no" class="text-center"><span>Partida</span></th>
+        </xpath>
+        <xpath expr="//table[@name='invoice_line_table']//td[@name='td_product_unspsc_code']" position="before">
+            <t t-set="veco_line_no" t-value="veco_line_no + 1"/>
+            <td name="td_veco_line_no" class="text-center"><span t-out="veco_line_no"/></td>
+        </xpath>
+
         <!-- Lines: VAT amount, "Subtotal" and "Total" columns -->
         <xpath expr="//table[@name='invoice_line_table']//th[@name='th_subtotal']" position="before">
             <th name="th_veco_tax_amount" class="text-end"><span>Monto del IVA</span></th>
@@ -338,9 +350,9 @@
         <xpath expr="//table[@name='invoice_line_table']//td[@name='td_subtotal_grouped']" position="after">
             <td name="td_veco_total_grouped"/>
         </xpath>
-        <!-- Section rows span the extra columns Producto and Monto del IVA (section subtotal stays under "Subtotal") -->
+        <!-- Section rows span the extra columns Partida, Producto and Monto del IVA (section subtotal stays under "Subtotal") -->
         <xpath expr="//t/tr/t[@t-set='line_colspan']" position="after">
-            <t t-set="line_colspan" t-value="line_colspan + 2"/>
+            <t t-set="line_colspan" t-value="line_colspan + 3"/>
         </xpath>
 
         <!-- Totals: "Importe sin impuestos" and discount -->
