@@ -13,7 +13,7 @@
                 ('Emisión de Certificado:', cfdi_values.get('certificate_number')),
                 ('Certificado SAT:', cfdi_values.get('certificate_sat_number')),
                 ('Lugar de Expedición:', cfdi_values.get('expedition')),
-                ('Régimen Fiscal:', cfdi_values.get('fiscal_regime')),
+                ('Régimen Fiscal:', cfdi_values.get('fiscal_regime') and '%s - %s' % (cfdi_values['fiscal_regime'], dict(o.company_id._fields['l10n_mx_edi_fiscal_regime']._description_selection(o.env)).get(cfdi_values['fiscal_regime'], ''))),
                 ('Fecha de Emisión:', cfdi_values.get('emission_date_str')),
                 ('Fecha de Certificación:', cfdi_values.get('stamp_date')),
                 ('Folio Fiscal:', cfdi_values.get('uuid')),
@@ -263,11 +263,20 @@
     -->
     <template id="report_invoice_document_veco" inherit_id="l10n_mx_edi.report_invoice_document">
         <!-- CFDI stamp data next to the customer address -->
+        <!-- Customer: name, zip code (CFDI 4.0 fiscal address), RFC and regime; no shipping address -->
         <xpath expr="//div[hasclass('row')]" position="after">
             <t t-set="cfdi_values" t-value="o._l10n_mx_edi_get_extra_invoice_report_values() if o.l10n_mx_edi_cfdi_attachment_id else {}"/>
             <t t-set="information_block">
                 <t t-call="veco_customizations.report_invoice_veco_cfdi_info"/>
-                <t t-out="information_block"/>
+            </t>
+            <t t-set="address">
+                <t t-set="veco_invoice_partner" t-value="o.partner_id if o.partner_id.type == 'invoice' else o.partner_id.commercial_partner_id"/>
+                <address class="mb-0">
+                    <div t-out="o.partner_id.commercial_partner_id.name"/>
+                    <div t-if="veco_invoice_partner.zip">C.P. <span t-out="veco_invoice_partner.zip"/></div>
+                </address>
+                <div t-if="o.l10n_mx_edi_cfdi_customer_rfc or o.partner_id.vat" class="mt-2">RFC: <span t-out="o.l10n_mx_edi_cfdi_customer_rfc or o.partner_id.vat"/></div>
+                <t t-call="l10n_mx_edi.l10n_mx_fiscal_regime_receptor"/>
             </t>
         </xpath>
 
@@ -283,6 +292,19 @@
         </xpath>
         <xpath expr="//div[@id='informations']" position="attributes">
             <attribute name="t-if">True</attribute>
+        </xpath>
+
+        <!-- Related CFDI is printed in the footer info (report_invoice_veco_footer_info) -->
+        <xpath expr="//div[@id='cfdi_relation_data']" position="replace"/>
+
+        <!-- Lines: product code and product first -->
+        <xpath expr="//table[@name='invoice_line_table']//th[@name='th_description']" position="before">
+            <xpath expr="//table[@name='invoice_line_table']//th[@name='th_product_unspsc_code']" position="move"/>
+            <th name="th_veco_product" class="text-start"><span>Producto</span></th>
+        </xpath>
+        <xpath expr="//table[@name='invoice_line_table']//td[@name='account_invoice_line_name']" position="before">
+            <xpath expr="//table[@name='invoice_line_table']//td[@name='td_product_unspsc_code']" position="move"/>
+            <td name="td_veco_product"><span t-field="line.product_id"/></td>
         </xpath>
 
         <!-- Lines: VAT amount, "Subtotal" and "Total" columns -->
@@ -316,14 +338,25 @@
         <xpath expr="//table[@name='invoice_line_table']//td[@name='td_subtotal_grouped']" position="after">
             <td name="td_veco_total_grouped"/>
         </xpath>
-        <!-- Section rows span the two extra columns (section subtotal stays under "Subtotal") -->
+        <!-- Section rows span the extra columns Producto and Monto del IVA (section subtotal stays under "Subtotal") -->
         <xpath expr="//t/tr/t[@t-set='line_colspan']" position="after">
-            <t t-set="line_colspan" t-value="line_colspan + 1"/>
+            <t t-set="line_colspan" t-value="line_colspan + 2"/>
         </xpath>
 
         <!-- Totals: "Importe sin impuestos" and discount -->
         <xpath expr="//t[@t-call='account.document_tax_totals']" position="replace">
             <t t-if="o.tax_totals" t-call="veco_customizations.report_invoice_veco_totals"/>
+        </xpath>
+
+        <!-- Bank account by invoice currency (foreign currency: the bank journal in that currency), with CLABE -->
+        <xpath expr="//p[@name='payment_communication']/t[@t-if='o.partner_bank_id']" position="replace">
+            <t t-set="veco_bank" t-value="o.partner_bank_id if o.currency_id == o.company_currency_id else (o.env['account.journal'].search([('type', '=', 'bank'), ('company_id', '=', o.company_id.id), ('currency_id', '=', o.currency_id.id), ('bank_account_id', '!=', False)], order='sequence, id', limit=1).bank_account_id or o.partner_bank_id)"/>
+            <t t-if="veco_bank">
+                <br/> en esta cuenta: <span t-out="veco_bank.display_name" class="fw-bold"/>
+                <t t-if="veco_bank.l10n_mx_edi_clabe">
+                    <br/> CLABE: <span t-field="veco_bank.l10n_mx_edi_clabe" class="fw-bold"/>
+                </t>
+            </t>
         </xpath>
 
         <!-- Currency, origin, related CFDI and delivery address with phone/email -->
