@@ -123,11 +123,11 @@
                             </t>
                             <t t-else="">
                                 <th class="text-start">Descripción</th>
-                                <th class="text-end" style="width: 11%;">Cantidad</th>
-                                <th class="text-end" style="width: 10%;">Precio unit.</th>
-                                <th class="text-end" style="width: 9%;">Descuento (%)</th>
-                                <th class="text-end" style="width: 8%;">Impuestos</th>
-                                <th class="text-end" style="width: 12%;">Importe</th>
+                                <th class="text-end" style="width: 12%;">Cantidad</th>
+                                <th class="text-end" style="width: 13%;">Precio unit.</th>
+                                <th class="text-end" style="width: 11%;">Descuento (%)</th>
+                                <th class="text-end" style="width: 9%;">Impuestos</th>
+                                <th class="text-end" style="width: 14%;">Importe</th>
                             </t>
                         </tr>
                     </thead>
