@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Morwi Encoders Consulting SA de CV / License LGPL-3.0 -->
+<odoo>
+    <!--
+        CFDI stamp data printed at the top of the VECO invoices, read from the
+        CFDI XML attachment (l10n_mx_edi_cfdi_uuid is not reliable on invoices
+        migrated from Odoo 15). Expects ``cfdi_values`` =
+        o._l10n_mx_edi_get_extra_invoice_report_values().
+    -->
+    <template id="report_invoice_veco_cfdi_info">
+        <table t-if="cfdi_values" class="o_ignore_layout_styling small" style="border: 0;">
+            <t t-foreach="[
+                ('Emisión de Certificado:', cfdi_values.get('certificate_number')),
+                ('Certificado SAT:', cfdi_values.get('certificate_sat_number')),
+                ('Lugar de Expedición:', cfdi_values.get('expedition')),
+                ('Régimen Fiscal:', cfdi_values.get('fiscal_regime')),
+                ('Fecha de Emisión:', cfdi_values.get('emission_date_str')),
+                ('Fecha de Certificación:', cfdi_values.get('stamp_date')),
+                ('Folio Fiscal:', cfdi_values.get('uuid')),
+            ]" t-as="row">
+                <tr>
+                    <th class="text-start text-nowrap" style="border: 0; padding: 0 8px 0 0;"><t t-out="row[0]"/></th>
+                    <td style="border: 0; padding: 0;"><t t-out="row[1]"/></td>
+                </tr>
+            </t>
+        </table>
+    </template>
+
+    <!--
+        "Factura Dolares VECO" (account.report_invoice_with_payments_copy_6_copy_2).
+        Rewrite of the Odoo 15 Studio document
+        account.report_invoice_document_with_payments_copy_3_copy_2_copy_2 and its
+        overlay; the Studio view only t-calls this template (migrations/2.0.8).
+    -->
+    <template id="report_invoice_veco_usd_document">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="o.with_context(lang=lang)"/>
+            <t t-set="cfdi_values" t-value="o._l10n_mx_edi_get_extra_invoice_report_values() if o.l10n_mx_edi_cfdi_attachment_id else {}"/>
+            <t t-set="address">
+                <address class="mb-0" t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address', 'name'], 'no_marker': True}"/>
+                <div t-if="o.partner_id.vat" class="mt-2">RFC: <span t-field="o.partner_id.vat"/></div>
+            </t>
+            <t t-set="information_block">
+                <t t-call="veco_customizations.report_invoice_veco_cfdi_info"/>
+            </t>
+            <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
+            <t t-set="ncols" t-value="9 + (1 if display_discount else 0)"/>
+            <div class="page" style="color: #000000;">
+                <h2>
+                    <span>Comercial Invoice</span><br/>
+                    <span t-field="o.name"/>
+                </h2>
+
+                <t t-set="infos" t-value="[(label, value) for label, value in [
+                    ('Fecha de Facturación:', o.invoice_date and o.invoice_date.strftime('%d/%m/%Y')),
+                    ('No. de OC:', o.x_studio_no_de_oc),
+                    ('Pedido:', o.invoice_origin),
+                    ('Incoterm:', o.invoice_incoterm_id.display_name),
+                    ('Uso:', cfdi_values.get('usage') and '%s - %s' % (cfdi_values['usage'], cfdi_values.get('usage_desc') or '')),
+                    ('Forma de Pago:', cfdi_values.get('payment_way')),
+                    ('Método de Pago:', cfdi_values.get('payment_method')),
+                    ('Cuenta bancaria:', cfdi_values.get('bank_account')),
+                ] if value]"/>
+                <table id="informations" class="o_ignore_layout_styling mt-3 mb-3" style="width: 100%; border: 0;">
+                    <tr>
+                        <td t-foreach="infos" t-as="info" style="border: 0; padding: 0 12px 0 0; vertical-align: top;">
+                            <strong t-out="info[0]"/>
+                            <div t-out="info[1]"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <t t-set="notes" t-value="[n for n in (o.x_studio_notas, o.x_studio_notas_1) if n]"/>
+                <div t-if="notes or not is_html_empty(o.narration)" class="mb-3">
+                    <strong>Observaciones:</strong>
+                    <div t-foreach="notes" t-as="note" t-out="note"/>
+                    <div t-if="not is_html_empty(o.narration)" t-field="o.narration"/>
+                </div>
+
+                <table class="table table-sm o_main_table" name="invoice_line_table">
+                    <thead class="small">
+                        <tr>
+                            <th><span>Código del Producto</span></th>
+                            <th><span>Producto</span></th>
+                            <th><span>Descripción</span></th>
+                            <th class="text-end"><span>Cantidad</span></th>
+                            <th><span>Unidad</span></th>
+                            <th class="text-end"><span>Precio Unitario</span></th>
+                            <th class="text-end"><span>Importe</span></th>
+                            <th class="text-end"><span>Monto de IVA</span></th>
+                            <th t-if="display_discount" class="text-end"><span>Descuento</span></th>
+                            <th class="text-end"><span>Importe Neto</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="invoice_tbody">
+                        <t t-foreach="o.invoice_line_ids" t-as="line">
+                            <tr t-if="line.display_type == 'product'" class="small">
+                                <td>
+                                    <span t-out="line._get_product_unspsc_code()"/>
+                                    <t t-if="line.l10n_mx_edi_customs_number">
+                                        <br/>Pedimento:
+                                        <div t-foreach="line.l10n_mx_edi_customs_number.split(',')" t-as="pedimento" t-out="pedimento"/>
+                                    </t>
+                                </td>
+                                <td><span t-field="line.product_id"/></td>
+                                <td><span t-field="line.name"/></td>
+                                <td class="text-end text-nowrap"><span t-field="line.quantity"/></td>
+                                <td><span t-field="line.product_uom_id"/> <span t-out="line._get_uom_unspsc_code()"/></td>
+                                <td class="text-end"><span t-field="line.price_unit"/></td>
+                                <td class="text-end text-nowrap"><span t-field="line.price_subtotal"/></td>
+                                <td class="text-end text-nowrap"><span t-out="line.price_total - line.price_subtotal" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                <td t-if="display_discount" class="text-end"><span t-field="line.discount"/></td>
+                                <td class="text-end text-nowrap o_price_total"><span t-field="line.price_subtotal"/></td>
+                            </tr>
+                            <tr t-elif="line.display_type == 'line_section'" class="small bg-200 fw-bold o_line_section">
+                                <td t-att-colspan="ncols"><span t-field="line.name"/></td>
+                            </tr>
+                            <tr t-elif="line.display_type == 'line_note'" class="small fst-italic o_line_note">
+                                <td t-att-colspan="ncols"><span t-field="line.name"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <div class="clearfix" style="color: #000000;">
+                    <div id="total" class="row small">
+                        <div class="col-6 ms-auto">
+                            <table class="table table-sm" style="page-break-inside: avoid;">
+                                <t t-call="veco_customizations.report_invoice_veco_totals"/>
+                                <t t-if="print_with_payments and o.payment_state != 'invoicing_legacy'">
+                                    <t t-set="payments_vals" t-value="o.sudo().invoice_payments_widget and o.sudo().invoice_payments_widget['content'] or []"/>
+                                    <tr t-foreach="payments_vals" t-as="payment_vals">
+                                        <td><i>Pagado el <t t-out="payment_vals['date']" t-options="{'widget': 'date'}"/></i></td>
+                                        <td class="text-end"><span t-out="payment_vals['amount']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                    </tr>
+                                    <tr t-if="payments_vals" class="border-black">
+                                        <td><strong>Cantidad por pagar</strong></td>
+                                        <td class="text-end"><span t-field="o.amount_residual"/></td>
+                                    </tr>
+                                </t>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <t t-call="veco_customizations.report_invoice_veco_footer_info"/>
+
+                <div class="mt-2 mb-2">
+                    <span style="background-color: #000000; color: #f7f7f7;">Abono en cuenta BBVA Bancomer Num. 0445863228 CLABE 012180004458632280 DOLARES</span>
+                </div>
+
+                <p t-if="o.amount_total">
+                    <strong>Importe con letra:</strong>
+                    <t t-out="o._l10n_mx_edi_cfdi_amount_to_text()"/>
+                </p>
+                <p t-if="not is_html_empty(o.fiscal_position_id.note)" name="note">
+                    <span t-field="o.fiscal_position_id.note"/>
+                </p>
+
+                <t t-call="veco_customizations.report_invoice_veco_complement"/>
+            </div>
+        </t>
+    </template>
+
+    <!--
+        Totals with the VECO labels: "Importe sin impuestos" and the total
+        line discount. Expects ``o``.
+    -->
+    <template id="report_invoice_veco_totals">
+        <t t-set="tax_totals" t-value="o.tax_totals"/>
+        <t t-set="total_discount" t-value="sum(l.quantity * l.price_unit * l.discount / 100.0 for l in o.invoice_line_ids if l.display_type == 'product')"/>
+        <t t-foreach="tax_totals['subtotals']" t-as="subtotal">
+            <tr class="border-black o_subtotal">
+                <td><strong t-out="'Importe sin impuestos' if subtotal_first else subtotal['name']"/></td>
+                <td class="text-end"><span t-out="subtotal['base_amount_currency']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+            </tr>
+            <tr t-if="subtotal_first and o.currency_id.round(total_discount)" class="o_subtotal">
+                <td><strong>Descuento</strong></td>
+                <td class="text-end"><span t-out="total_discount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+            </tr>
+            <tr t-foreach="subtotal['tax_groups']" t-as="tax_group" class="o_taxes">
+                <td><span t-out="tax_group['group_name']"/></td>
+                <td class="text-end o_price_total"><span class="text-nowrap" t-out="tax_group['tax_amount_currency']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+            </tr>
+        </t>
+        <tr class="border-black o_total">
+            <td><strong>Total</strong></td>
+            <td class="text-end"><span t-out="tax_totals['total_amount_currency']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+        </tr>
+    </template>
+
+    <!--
+        Moneda / plazos de pago / documento origen / CFDI relacionado and the
+        delivery address with phone and email. Expects ``o`` and ``cfdi_values``.
+    -->
+    <template id="report_invoice_veco_footer_info">
+        <div class="row small mt-2" name="veco_footer_info">
+            <div class="col-2">
+                <strong>Moneda:</strong><br/>
+                <span t-field="o.currency_id.name"/>
+            </div>
+            <div class="col-3">
+                <strong>Plazos de pago:</strong><br/>
+                <span t-field="o.invoice_payment_term_id.name"/>
+            </div>
+            <div class="col-3">
+                <strong>Documento origen:</strong><br/>
+                <span t-field="o.invoice_origin"/>
+            </div>
+            <div class="col-4">
+                <strong>CFDI Relacionado:</strong><br/>
+                <t t-foreach="cfdi_values.get('cfdi_relation_data') or []" t-as="rel">
+                    <div><t t-out="rel['relation_type']"/> | <t t-out="rel['uuid']"/></div>
+                </t>
+                <span t-if="not cfdi_values.get('cfdi_relation_data')" t-field="o.l10n_mx_edi_cfdi_origin"/>
+            </div>
+        </div>
+        <div class="row small mt-2" name="veco_shipping_address">
+            <div class="col-7">
+                <strong>Dirección de Entrega:</strong>
+                <div t-field="o.partner_shipping_id" t-options="{'widget': 'contact', 'fields': ['address', 'phone', 'email'], 'phone_icons': True}"/>
+            </div>
+        </div>
+    </template>
+
+    <!-- QR and digital stamps of the CFDI. Expects ``o`` and ``cfdi_values``. -->
+    <template id="report_invoice_veco_complement">
+        <div t-if="cfdi_values" class="row" id="complement">
+            <div class="barcode col-3">
+                <img alt="Barcode" t-att-src="cfdi_values.get('barcode_src')"/>
+            </div>
+            <div class="complement-details col-9">
+                <div class="digital-stamp"><span>Sello digital del emisor</span></div>
+                <div class="digital-stamp-content"><span t-out="cfdi_values.get('sello')"/></div>
+                <div class="digital-stamp"><span>Sello digital del SAT</span></div>
+                <div class="digital-stamp-content"><span t-out="cfdi_values.get('sello_sat')"/></div>
+                <div class="digital-stamp"><span>Cadena original del complemento del certificado digital del SAT</span></div>
+                <div class="digital-stamp-content"><span class="nowrap" t-out="cfdi_values.get('cadena')"/></div>
+                <div class="digital-stamp"><span>Información adicional</span></div>
+                <div class="digital-stamp-content">
+                    <span>Certificado del emisor:</span> <span t-out="cfdi_values.get('certificate_number')"/>
+                    <span> | Certificado SAT:</span> <span t-out="cfdi_values.get('certificate_sat_number')"/>
+                    <span> | Lugar de expedición:</span> <span t-out="cfdi_values.get('expedition')"/>
+                    <span> | Régimen fiscal:</span> <span t-out="cfdi_values.get('fiscal_regime')"/>
+                    <span> | Fecha de emisión:</span> <span t-out="cfdi_values.get('emission_date_str')"/>
+                    <span> | Fecha de certificación:</span> <span t-out="cfdi_values.get('stamp_date')"/>
+                    <span> | Folio Fiscal:</span> <span t-out="cfdi_values.get('uuid')"/>
+                </div>
+                <div class="digital-stamp-content text-center">
+                    <strong>Este documento es una representación impresa de un CFDI</strong>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!--
+        "Factura Nacional Veco" (standard account.report_invoice_with_payments,
+        rendered with l10n_mx_edi.report_invoice_document for MX companies).
+        Restores what the Odoo 15 Studio customization showed: CFDI stamp data,
+        PO number instead of the due date, fiscal regime code, VAT amount and
+        total per line, discount, currency, origin, related CFDI and delivery
+        address.
+    -->
+    <template id="report_invoice_document_veco" inherit_id="l10n_mx_edi.report_invoice_document">
+        <!-- CFDI stamp data next to the customer address -->
+        <xpath expr="//div[hasclass('row')]" position="after">
+            <t t-set="cfdi_values" t-value="o._l10n_mx_edi_get_extra_invoice_report_values() if o.l10n_mx_edi_cfdi_attachment_id else {}"/>
+            <t t-set="information_block">
+                <t t-call="veco_customizations.report_invoice_veco_cfdi_info"/>
+                <t t-out="information_block"/>
+            </t>
+        </xpath>
+
+        <!-- PO number instead of the due date -->
+        <xpath expr="//div[@name='due_date']" position="attributes">
+            <attribute name="t-if">o.x_studio_no_de_oc</attribute>
+        </xpath>
+        <xpath expr="//div[@name='due_date']/strong" position="replace">
+            <strong>No. de OC</strong>
+        </xpath>
+        <xpath expr="//div[@name='due_date']/div" position="attributes">
+            <attribute name="t-field">o.x_studio_no_de_oc</attribute>
+        </xpath>
+        <xpath expr="//div[@id='informations']" position="attributes">
+            <attribute name="t-if">True</attribute>
+        </xpath>
+
+        <!-- Lines: VAT amount, "Subtotal" and "Total" columns -->
+        <xpath expr="//table[@name='invoice_line_table']//th[@name='th_subtotal']" position="before">
+            <th name="th_veco_tax_amount" class="text-end"><span>Monto del IVA</span></th>
+        </xpath>
+        <xpath expr="//table[@name='invoice_line_table']//th[@name='th_subtotal']/span" position="replace">
+            <span>Subtotal</span>
+        </xpath>
+        <xpath expr="//table[@name='invoice_line_table']//th[@name='th_subtotal']" position="after">
+            <th name="th_veco_total" class="text-end"><span>Total</span></th>
+        </xpath>
+        <xpath expr="//table[@name='invoice_line_table']//td[@name='td_subtotal']" position="before">
+            <td name="td_veco_tax_amount" class="text-end">
+                <span t-if="not hide_prices" class="text-nowrap" t-out="line.price_total - line.price_subtotal" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+            </td>
+        </xpath>
+        <xpath expr="//table[@name='invoice_line_table']//td[@name='td_subtotal']/span[1]" position="attributes">
+            <attribute name="t-if">not hide_prices</attribute>
+            <attribute name="t-field">line.price_subtotal</attribute>
+        </xpath>
+        <xpath expr="//table[@name='invoice_line_table']//td[@name='td_subtotal']/span[2]" position="replace"/>
+        <xpath expr="//table[@name='invoice_line_table']//td[@name='td_subtotal']" position="after">
+            <td name="td_veco_total" class="text-end">
+                <span t-if="not hide_prices" class="text-nowrap" t-field="line.price_total"/>
+            </td>
+        </xpath>
+        <xpath expr="//table[@name='invoice_line_table']//td[@name='td_subtotal_grouped']" position="before">
+            <td name="td_veco_tax_amount_grouped"/>
+        </xpath>
+        <xpath expr="//table[@name='invoice_line_table']//td[@name='td_subtotal_grouped']" position="after">
+            <td name="td_veco_total_grouped"/>
+        </xpath>
+        <!-- Section rows span the two extra columns (section subtotal stays under "Subtotal") -->
+        <xpath expr="//t/tr/t[@t-set='line_colspan']" position="after">
+            <t t-set="line_colspan" t-value="line_colspan + 1"/>
+        </xpath>
+
+        <!-- Totals: "Importe sin impuestos" and discount -->
+        <xpath expr="//t[@t-call='account.document_tax_totals']" position="replace">
+            <t t-if="o.tax_totals" t-call="veco_customizations.report_invoice_veco_totals"/>
+        </xpath>
+
+        <!-- Currency, origin, related CFDI and delivery address with phone/email -->
+        <xpath expr="//div[@id='payment_term']" position="before">
+            <t t-call="veco_customizations.report_invoice_veco_footer_info"/>
+        </xpath>
+    </template>
+
+    <!-- Customer fiscal regime printed with its SAT code: "601 - General de Ley Personas Morales" -->
+    <template id="l10n_mx_fiscal_regime_receptor_veco" inherit_id="l10n_mx_edi.l10n_mx_fiscal_regime_receptor">
+        <xpath expr="//span[@t-field='invoice_partner.l10n_mx_edi_fiscal_regime']" position="before">
+            <span t-if="not o.l10n_mx_edi_cfdi_to_public" t-out="invoice_partner.l10n_mx_edi_fiscal_regime + ' - '"/>
+        </xpath>
+    </template>
+</odoo>
