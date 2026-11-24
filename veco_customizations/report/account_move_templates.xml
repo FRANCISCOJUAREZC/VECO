@@ -38,6 +38,7 @@
             <t t-set="cfdi_values" t-value="o._l10n_mx_edi_get_extra_invoice_report_values() if o.l10n_mx_edi_cfdi_attachment_id else {}"/>
             <t t-set="address">
                 <address class="mb-0" t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address', 'name'], 'no_marker': True}"/>
+                <div t-if="o.partner_id.x_studio_nit" class="mt-2">NIT: <span t-field="o.partner_id.x_studio_nit"/></div>
                 <div t-if="o.partner_id.vat" class="mt-2">RFC: <span t-field="o.partner_id.vat"/></div>
             </t>
             <t t-set="information_block">
@@ -51,16 +52,7 @@
                     <span t-field="o.name"/>
                 </h2>
 
-                <t t-set="infos" t-value="[(label, value) for label, value in [
-                    ('Fecha de Facturación:', o.invoice_date and o.invoice_date.strftime('%d/%m/%Y')),
-                    ('No. de OC:', o.x_studio_no_de_oc),
-                    ('Pedido:', o.invoice_origin),
-                    ('Incoterm:', o.invoice_incoterm_id.display_name),
-                    ('Uso:', cfdi_values.get('usage') and '%s - %s' % (cfdi_values['usage'], cfdi_values.get('usage_desc') or '')),
-                    ('Forma de Pago:', cfdi_values.get('payment_way')),
-                    ('Método de Pago:', cfdi_values.get('payment_method')),
-                    ('Cuenta bancaria:', cfdi_values.get('bank_account')),
-                ] if value]"/>
+                <t t-set="infos" t-value="[(label, value) for label, value in [                     ('Fecha de Facturación:', o.invoice_date and o.invoice_date.strftime('%d/%m/%Y')),                     ('No. de OC:', o.x_studio_no_de_oc),                     ('Pedido:', o.invoice_origin),                     ('Incoterm:', o.invoice_incoterm_id.display_name),                     ('Uso:', cfdi_values.get('usage') and '%s - %s' % (cfdi_values['usage'], cfdi_values.get('usage_desc') or '')),                     ('Forma de Pago:', cfdi_values.get('payment_way')),                     ('Método de Pago:', cfdi_values.get('payment_method')),                     ('Cuenta bancaria:', cfdi_values.get('bank_account')),                 ] if value]"/>
                 <table id="informations" class="o_ignore_layout_styling mt-3 mb-3" style="width: 100%; border: 0;">
                     <tr>
                         <td t-foreach="infos" t-as="info" style="border: 0; padding: 0 12px 0 0; vertical-align: top;">
@@ -175,7 +167,7 @@
                 <td class="text-end"><span t-out="subtotal['base_amount_currency']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
             </tr>
             <tr t-if="subtotal_first and o.currency_id.round(total_discount)" class="o_subtotal">
-                <td><strong>Descuento</strong></td>
+                <td><strong>Anticipo</strong></td>
                 <td class="text-end"><span t-out="total_discount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
             </tr>
             <tr t-foreach="subtotal['tax_groups']" t-as="tax_group" class="o_taxes">
@@ -200,14 +192,14 @@
                 <span t-field="o.currency_id.name"/>
             </div>
             <div class="col-3">
-                <strong>Plazos de pago:</strong><br/>
-                <span t-field="o.invoice_payment_term_id.name"/>
+                <!--strong>Plazos de pago:</strong><br/-->
+                <!--span t-field="o.invoice_payment_term_id.name"/-->
             </div>
-            <div class="col-3">
-                <strong>Documento origen:</strong><br/>
-                <span t-field="o.invoice_origin"/>
+            <div class="col-1">
+                <!--strong>Documento origen:</strong><br/-->
+                <!--span t-field="o.invoice_origin"/-->
             </div>
-            <div class="col-4">
+            <div class="col-6">
                 <strong>CFDI Relacionado:</strong><br/>
                 <t t-foreach="cfdi_values.get('cfdi_relation_data') or []" t-as="rel">
                     <div><t t-out="rel['relation_type']"/> | <t t-out="rel['uuid']"/></div>
@@ -216,9 +208,10 @@
             </div>
         </div>
         <div class="row small mt-2" name="veco_shipping_address">
-            <div class="col-7">
+            <div class="col-8">
                 <strong>Dirección de Entrega:</strong>
-                <div t-field="o.partner_shipping_id" t-options="{'widget': 'contact', 'fields': ['address', 'phone', 'email'], 'phone_icons': True}"/>
+                <div t-field="o.partner_shipping_id" t-options="{'widget': 'contact', 'fields': ['address', 'phone',], 'phone_icons': True}"/>
+                <!--div t-field="o.partner_shipping_id" t-options="{'widget': 'contact', 'fields': ['address', 'phone', 'email'], 'phone_icons': True}"/-->
             </div>
         </div>
     </template>
@@ -364,7 +357,7 @@
         <xpath expr="//p[@name='payment_communication']/t[@t-if='o.partner_bank_id']" position="replace">
             <t t-set="veco_bank" t-value="o.partner_bank_id if o.currency_id == o.company_currency_id else (o.env['account.journal'].search([('type', '=', 'bank'), ('company_id', '=', o.company_id.id), ('currency_id', '=', o.currency_id.id), ('bank_account_id', '!=', False)], order='sequence, id', limit=1).bank_account_id or o.partner_bank_id)"/>
             <t t-if="veco_bank">
-                <br/> en esta cuenta: <span t-out="veco_bank.display_name" class="fw-bold"/>
+                <br/> En esta cuenta: <span t-out="veco_bank.display_name" class="fw-bold"/>
                 <t t-if="veco_bank.l10n_mx_edi_clabe">
                     <br/> CLABE: <span t-field="veco_bank.l10n_mx_edi_clabe" class="fw-bold"/>
                 </t>
