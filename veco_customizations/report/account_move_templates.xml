@@ -4,11 +4,11 @@
     <!--
         CFDI stamp data printed at the top of the VECO invoices, read from the
         CFDI XML attachment (l10n_mx_edi_cfdi_uuid is not reliable on invoices
-        migrated from Odoo 15). Expects ``cfdi_values`` =
-        o._l10n_mx_edi_get_extra_invoice_report_values().
+        migrated from Odoo 15). Expects ``cfdi_values`` (stamp data, or only
+        usage/payment data taken from the invoice while it is not stamped).
     -->
     <template id="report_invoice_veco_cfdi_info">
-        <table t-if="cfdi_values" class="o_ignore_layout_styling small" style="border: 0;">
+        <table t-if="cfdi_values.get('uuid')" class="o_ignore_layout_styling small" style="border: 0;">
             <t t-foreach="[
                 ('Emisión de Certificado:', cfdi_values.get('certificate_number')),
                 ('Certificado SAT:', cfdi_values.get('certificate_sat_number')),
@@ -35,7 +35,7 @@
     <template id="report_invoice_veco_usd_document">
         <t t-call="web.external_layout">
             <t t-set="o" t-value="o.with_context(lang=lang)"/>
-            <t t-set="cfdi_values" t-value="o._l10n_mx_edi_get_extra_invoice_report_values() if o.l10n_mx_edi_cfdi_attachment_id else {}"/>
+            <t t-set="cfdi_values" t-value="o._l10n_mx_edi_get_extra_invoice_report_values() if o.l10n_mx_edi_cfdi_attachment_id else {'usage': o.l10n_mx_edi_usage, 'usage_desc': dict(o._fields['l10n_mx_edi_usage']._description_selection(o.env)).get(o.l10n_mx_edi_usage), 'payment_way': o.l10n_mx_edi_payment_method_id and '%s - %s' % (o.l10n_mx_edi_payment_method_id.code, o.l10n_mx_edi_payment_method_id.name), 'payment_method': o.l10n_mx_edi_payment_policy, 'cfdi_relation_data': []}"/>
             <t t-set="address">
                 <address class="mb-0" t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address', 'name'], 'no_marker': True}"/>
                 <div t-if="o.partner_id.x_studio_nit" class="mt-2">NIT: <span t-field="o.partner_id.x_studio_nit"/></div>
@@ -218,7 +218,7 @@
 
     <!-- QR and digital stamps of the CFDI. Expects ``o`` and ``cfdi_values``. -->
     <template id="report_invoice_veco_complement">
-        <div t-if="cfdi_values" class="row" id="complement">
+        <div t-if="cfdi_values.get('uuid')" class="row" id="complement">
             <div class="barcode col-3">
                 <img alt="Barcode" t-att-src="cfdi_values.get('barcode_src')"/>
             </div>
@@ -258,7 +258,7 @@
         <!-- CFDI stamp data next to the customer address -->
         <!-- Customer: name, zip code (CFDI 4.0 fiscal address), RFC and regime; no shipping address -->
         <xpath expr="//div[hasclass('row')]" position="after">
-            <t t-set="cfdi_values" t-value="o._l10n_mx_edi_get_extra_invoice_report_values() if o.l10n_mx_edi_cfdi_attachment_id else {}"/>
+            <t t-set="cfdi_values" t-value="o._l10n_mx_edi_get_extra_invoice_report_values() if o.l10n_mx_edi_cfdi_attachment_id else {'usage': o.l10n_mx_edi_usage, 'usage_desc': dict(o._fields['l10n_mx_edi_usage']._description_selection(o.env)).get(o.l10n_mx_edi_usage), 'payment_way': o.l10n_mx_edi_payment_method_id and '%s - %s' % (o.l10n_mx_edi_payment_method_id.code, o.l10n_mx_edi_payment_method_id.name), 'payment_method': o.l10n_mx_edi_payment_policy, 'cfdi_relation_data': []}"/>
             <t t-set="information_block">
                 <t t-call="veco_customizations.report_invoice_veco_cfdi_info"/>
             </t>
@@ -285,6 +285,14 @@
         </xpath>
         <xpath expr="//div[@id='informations']" position="attributes">
             <attribute name="t-if">True</attribute>
+        </xpath>
+
+        <!-- Invoice not stamped yet: usage / payment way / payment policy from the invoice, no stamp block -->
+        <xpath expr="//t[@t-set='cfdi_values'][@t-value='o._l10n_mx_edi_get_extra_invoice_report_values()']" position="after">
+            <t t-set="cfdi_values" t-value="o._l10n_mx_edi_get_extra_invoice_report_values() if o.l10n_mx_edi_cfdi_attachment_id else {'usage': o.l10n_mx_edi_usage, 'usage_desc': dict(o._fields['l10n_mx_edi_usage']._description_selection(o.env)).get(o.l10n_mx_edi_usage), 'payment_way': o.l10n_mx_edi_payment_method_id and '%s - %s' % (o.l10n_mx_edi_payment_method_id.code, o.l10n_mx_edi_payment_method_id.name), 'payment_method': o.l10n_mx_edi_payment_policy, 'cfdi_relation_data': []}"/>
+        </xpath>
+        <xpath expr="//div[@id='complement']" position="attributes">
+            <attribute name="t-if">cfdi_values.get('uuid')</attribute>
         </xpath>
 
         <!-- Related CFDI is printed in the footer info (report_invoice_veco_footer_info) -->
@@ -374,6 +382,19 @@
     <template id="l10n_mx_fiscal_regime_receptor_veco" inherit_id="l10n_mx_edi.l10n_mx_fiscal_regime_receptor">
         <xpath expr="//span[@t-field='invoice_partner.l10n_mx_edi_fiscal_regime']" position="before">
             <span t-if="not o.l10n_mx_edi_cfdi_to_public" t-out="invoice_partner.l10n_mx_edi_fiscal_regime + ' - '"/>
+        </xpath>
+    </template>
+    <!--
+        VECO customer invoices always print with the Mexican document (and the VECO
+        changes above), also before being stamped; l10n_mx_edi only uses it once
+        the CFDI is sent, otherwise it falls back to the generic Odoo invoice.
+    -->
+    <template id="report_invoice_veco_mx_routing" inherit_id="l10n_mx_edi.report_invoice">
+        <xpath expr="//t[@t-call='account.report_invoice_document']" position="attributes">
+            <attribute name="t-if">o._get_name_invoice_report() == 'account.report_invoice_document' and not (o.company_id.account_fiscal_country_id.code == 'MX' and o.move_type in ('out_invoice', 'out_refund'))</attribute>
+        </xpath>
+        <xpath expr="//t[@t-call='l10n_mx_edi.report_invoice_document']" position="attributes">
+            <attribute name="t-elif">o._get_name_invoice_report() == 'l10n_mx_edi.report_invoice_document' or (o.company_id.account_fiscal_country_id.code == 'MX' and o.move_type in ('out_invoice', 'out_refund'))</attribute>
         </xpath>
     </template>
 </odoo>
