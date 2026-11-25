@@ -107,7 +107,7 @@
                             <tr t-elif="line.display_type == 'line_section'" class="small bg-200 fw-bold o_line_section">
                                 <td t-att-colspan="ncols"><span t-field="line.name"/></td>
                             </tr>
-                            <tr t-elif="line.display_type == 'line_note'" class="small fst-italic o_line_note">
+                            <tr t-elif="line.display_type == 'line_note' and not line.sale_line_ids" class="small fst-italic o_line_note">
                                 <td t-att-colspan="ncols"><span t-field="line.name"/></td>
                             </tr>
                         </t>
@@ -314,6 +314,11 @@
         </xpath>
         <xpath expr="//table[@name='invoice_line_table']//td[@name='td_price_unit']" position="before">
             <xpath expr="//table[@name='invoice_line_table']//td[@name='td_product_uom_unspsc_code']" position="move"/>
+        </xpath>
+
+        <!-- Notes copied from the sale order lines are not printed (notes written on the invoice are) -->
+        <xpath expr="//table[@name='invoice_line_table']//t[@t-foreach='lines_to_report']/t[@t-if='not hide_details and not hide_prices']/tr" position="attributes">
+            <attribute name="t-if">not (is_note and line.sale_line_ids)</attribute>
         </xpath>
 
         <!-- Lines: VAT amount, "Subtotal" and "Total" columns -->
